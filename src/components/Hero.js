@@ -49,13 +49,14 @@ export default function Hero() {
 
         </div>
         
-        {/* بخش چپ: مهار کامل ابعاد بزرگ آیفون و لایه مطلق زِد-اینفکس */}
-        <div className="hidden md:flex flex-1 justify-center items-end order-1 md:order-2 relative z-30 h-96 overflow-visible">
-          <div className="absolute bottom-0 transform translate-y-28 rotate-1 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-end justify-center w-[360px] h-[540px] overflow-visible">
+        {/* بخش چپ: مهار و هول دادن قطعی عکس به خارج از مرز پایین */}
+        <div className="hidden md:flex flex-1 justify-center items-center order-1 md:order-2 relative z-30 h-96">
+          {/* تغییر اصلی: حذف absolute bottom-0 و استفاده از translate-y برای شکستن مرز */}
+          <div className="relative w-[360px] h-[540px] transform translate-y-24 rotate-1 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-center justify-center">
             <img 
               src="/hero-phone.png" 
               alt="آیفون پرچمدار سیب شاپ"
-              className="w-full h-full object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.80)] block"
+              className="w-full h-full object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.80)]"
             />
           </div>
         </div>

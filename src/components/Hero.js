@@ -49,13 +49,13 @@ export default function Hero() {
 
         </div>
         
-        {/* بخش چپ: تصویر انتخابی تو با فیلتر تلفیق و حذف حاشیه استودیویی */}
+        {/* بخش چپ: کادربندی شیشه‌ای و مدرن استایلیش برای مهار کامل عکس */}
         <div className="hidden md:flex flex-1 justify-center items-center order-1 md:order-2 relative z-10 h-96">
-          <div className="relative w-80 h-full transform rotate-1 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-center justify-center">
+          <div className="relative w-56 h-80 transform rotate-2 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group rounded-3xl overflow-hidden border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-gradient-to-b from-white/10 to-transparent backdrop-blur-sm flex items-center justify-center p-2">
             <img 
               src="https://www.apple.com/v/iphone-air/g/images/overview/shared_features/hero_features_right__lecurdtm63mq_medium.jpg" 
               alt="پرچمدار لوکس سیب شاپ"
-              className="max-h-[90%] w-auto object-contain mix-blend-screen contrast-125 brightness-110 drop-shadow-[0_25px_30px_rgba(0,0,0,0.5)]"
+              className="w-full h-full object-cover rounded-2xl"
             />
           </div>
         </div>

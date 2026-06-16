@@ -5,7 +5,7 @@ export default function Hero() {
     <div className="w-full px-4 md:px-8 my-6">
       <div className="w-full bg-gradient-to-br from-slate-950 via-zinc-900 to-slate-900 text-white rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center justify-between shadow-2xl relative overflow-hidden border border-slate-800/50">
         
-        {/* افکت نور پس‌زمینه آمبیانس (مخصوص لوکس کردن تم تاریک) */}
+        {/* افکت نور پس‌زمینه آمبیانس */}
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -49,13 +49,13 @@ export default function Hero() {
 
         </div>
         
-        {/* بخش چپ: تصویر فوق‌العاده باکیفیت، واقعی و ۱۰۰٪ شفاف از نمای روبروی پرچمدار */}
+        {/* بخش چپ: تصویر اورجینال و باکیفیت و ۱۰۰٪ شفاف از سرور رسمی اپل */}
         <div className="hidden md:flex flex-1 justify-center items-center order-1 md:order-2 relative z-10 h-96">
-          <div className="relative w-72 h-full transform rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-center justify-center">
+          <div className="relative w-80 h-full transform rotate-2 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-center justify-center">
             <img 
-              src="https://i.postimg.co/7Ym4fPsh/iphone-front.png" 
-              alt="پرچمدار هوشمند سیب شاپ"
-              className="max-h-[90%] w-auto object-contain drop-shadow-[0_30px_50px_rgba(244,63,94,0.15)]"
+              src="https://www.apple.com/v/iphone/home/bu/images/overview/select/iphone_15_pro__f7g3w796o46a_xlarge_2x.png" 
+              alt="آیفون پرو تیتانیوم رسمی"
+              className="max-h-[90%] w-auto object-contain drop-shadow-[0_30px_50px_rgba(0,0,0,0.6)]"
             />
           </div>
         </div>

@@ -2,15 +2,17 @@ import { ShieldCheck, Truck, Percent, ArrowLeft } from 'lucide-react';
 
 export default function Hero() {
   return (
+    // بخش اصلی والد که overflow-visible دارد تا بیرون‌زدگی قطع نشود
     <div className="w-full px-4 md:px-8 my-6 relative overflow-visible">
       
+      {/* باکس تیره هیرو */}
       <div className="w-full bg-gradient-to-br from-slate-950 via-zinc-900 to-slate-900 text-white rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center justify-between shadow-2xl relative overflow-visible border border-slate-800/50">
         
         {/* افکت‌های آمبیانس نوری */}
         <div className="absolute -top-20 -left-20 w-[400px] h-[400px] bg-rose-500/10 rounded-full blur-[120px] pointer-events-none"></div>
         <div className="absolute -bottom-20 left-1/3 w-[300px] h-[300px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none"></div>
 
-        {/* بخش راست: متون و تایپوگرافی اصلی و پرانرژی */}
+        {/* بخش راست: متون و تایپوگرافی */}
         <div className="z-10 max-w-xl text-center md:text-right flex flex-col items-center md:items-start order-2 md:order-1 mt-8 md:mt-0">
           
           <div className="flex items-center gap-2 bg-gradient-to-r from-rose-500/10 to-transparent border border-rose-500/20 px-4 py-2 rounded-full mb-6 backdrop-blur-md">
@@ -48,9 +50,9 @@ export default function Hero() {
 
         </div>
         
-        {/* بخش چپ: بازگشت ابعاد غول‌پیکر قبلی با یک فاصله جزئی از لبه چپ (md:left-8) برای فیکس انحنا */}
-        <div className="hidden md:flex flex-1 justify-center items-end order-1 md:order-2 relative z-10 h-96">
-          <div className="absolute bottom-0 md:left-8 transform translate-y-28 rotate-1 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-end justify-center w-[360px] h-[540px]">
+        {/* بخش چپ: مهار کامل ابعاد بزرگ آیفون و تزریق پدینگ منفی برای خروج از کادر */}
+        <div className="hidden md:flex flex-1 justify-center items-end order-1 md:order-2 relative z-30 h-96">
+          <div className="absolute bottom-0 transform translate-y-28 rotate-1 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-end justify-center w-[360px] h-[540px]">
             <img 
               src="/hero-phone.png" 
               alt="آیفون پرچمدار سیب شاپ"

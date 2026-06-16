@@ -4,78 +4,67 @@ import { useState, useEffect } from 'react';
 import { Search, ShoppingBag, User, ChevronDown, Menu, Smartphone, Laptop, Headphones } from 'lucide-react';
 
 export default function Header() {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isMenuVisible, setIsMenuVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
-  // افکت هوشمند برای کنترل اسکرول بالا و پایین
   useEffect(() => {
-    const controlHeader = () => {
+    const controlNavbar = () => {
       if (typeof window !== 'undefined') {
-        if (window.scrollY > lastScrollY && window.scrollY > 100) {
-          // اسکرول به پایین -> هدر محو شود
-          setIsVisible(false);
+        if (window.scrollY > lastScrollY && window.scrollY > 50) {
+          setIsMenuVisible(false);
         } else {
-          // اسکرول به بالا -> هدر ظاهر شود
-          setIsVisible(true);
+          setIsMenuVisible(true);
         }
         setLastScrollY(window.scrollY);
       }
     };
 
-    window.addEventListener('scroll', controlHeader);
-    return () => window.removeEventListener('scroll', controlHeader);
+    window.addEventListener('scroll', controlNavbar);
+    return () => window.removeEventListener('scroll', controlNavbar);
   }, [lastScrollY]);
 
   return (
     <>
       {/* ۱. بنر اعلان بالایی */}
-      <div className="bg-gradient-to-r from-rose-500 to-pink-600 text-white text-center py-2 px-4 text-xs font-bold select-none">
+      <div className="bg-gradient-to-r from-rose-500 to-pink-600 text-white text-center py-2 px-4 text-xs font-bold shadow-inner select-none">
         جشنواره شگفت‌انگیز سیب‌شاپ؛ تا ۴۰٪ تخفیف روی لوازم جانبی موبایل ⚡
       </div>
 
-      {/* ۲. هدر اصلی با قابلیت انیمیشن چسبان هوشمند */}
-      <header 
-        className={`bg-white border-b border-slate-100 sticky top-0 z-50 w-full transition-transform duration-300 shadow-xs ${
-          isVisible ? 'translate-y-0' : '-translate-y-full'
-        }`}
-      >
+      {/* ۲. بدنه اصلی هدر چسبان */}
+      <header className="bg-transparent sticky top-0 z-50 w-full">
         
-        {/* ردیف اول: حذف max-w-7xl برای عریض شدن کامل (Full Width) مثل دیجی‌کالا */}
-        <div className="w-full px-4 md:px-8 h-20 flex items-center justify-between gap-8">
+        {/* ردیف اول: لوگو، سرچ‌بار و ورود (افکت شیشه‌ای قوی‌تر شد) */}
+        <div className="w-full px-4 md:px-8 h-20 flex items-center justify-between gap-8 bg-white/75 backdrop-blur-xl border-b border-slate-100/50 z-50 relative">
           
-          {/* راست: لوگو بزرگتر */}
+          {/* راست: لوگو */}
           <div className="flex items-center shrink-0">
             <span className="text-2xl font-black text-slate-800 tracking-tight cursor-pointer">
               سیب<span className="text-rose-500">‌شاپ</span>
             </span>
           </div>
 
-          {/* وسط: بار جستجوی عریض‌تر و خواناتر */}
+          {/* وسط: بار جستجو */}
           <div className="hidden md:flex items-center flex-1 max-w-2xl relative group">
             <Search className="absolute right-4 w-5 h-5 text-slate-400 group-focus-within:text-rose-500 transition duration-200" />
             <input
               type="text"
               placeholder="جستجو در سیب‌شاپ..."
-              className="w-full bg-slate-50 text-sm font-medium pr-12 pl-4 py-3 rounded-2xl border border-transparent focus:outline-none focus:border-slate-200 focus:bg-white focus:ring-4 focus:ring-slate-100 transition duration-200"
+              className="w-full bg-slate-100/60 text-sm font-medium pr-12 pl-4 py-3 rounded-2xl border border-transparent focus:outline-none focus:border-slate-200 focus:bg-white focus:ring-4 focus:ring-slate-100 transition duration-200"
             />
           </div>
 
-          {/* چپ: ابزارها با فونت بزرگتر و اصلاح سبد خرید */}
+          {/* چپ: ابزارها */}
           <div className="flex items-center gap-4 shrink-0">
-            
-            {/* دکمه ورود Outline شیک */}
-            <button className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-slate-900 border border-slate-200 hover:bg-slate-50 px-4 py-2.5 rounded-xl transition duration-200">
+            <button className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-slate-900 border border-slate-200 hover:bg-slate-50/80 px-4 py-2.5 rounded-xl transition duration-200">
               <User className="w-4 h-4 stroke-[2.5]" />
               <span>ورود | ثبت‌نام</span>
             </button>
 
-            <div className="hidden md:block h-6 w-[1px] bg-slate-200"></div>
+            <div className="hidden md:block h-6 w-[1px] bg-slate-200/60"></div>
 
-            {/* سبد خرید بازطراحی شده و واضح‌تر */}
-            <button className="hidden md:flex items-center justify-center p-2.5 text-slate-700 hover:bg-slate-50 rounded-xl transition duration-200 relative">
+            <button className="hidden md:flex items-center justify-center p-2.5 text-slate-700 hover:bg-slate-50/80 rounded-xl transition duration-200 relative">
               <ShoppingBag className="w-5 h-5 stroke-[2.5]" />
-              {/* شمارنده قرمز با دید بهتر */}
-              <span className="absolute -top-0.5 -left-0.5 bg-rose-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-xs">
+              <span className="absolute -top-0.5 -left-0.5 bg-rose-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
                 ۰
               </span>
             </button>
@@ -83,8 +72,14 @@ export default function Header() {
 
         </div>
 
-        {/* ردیف دوم: منوی ناوبری عریض با فونت بزرگتر (text-sm) */}
-        <div className="hidden md:block border-t border-slate-50 bg-white">
+        {/* ردیف دوم: منوی ناوبری و مگامنو (شیشه‌ای هماهنگ با ردیف اول) */}
+        <div 
+          className={`hidden md:block border-b border-slate-100/50 bg-white/70 backdrop-blur-xl transition-all duration-300 overflow-hidden ${
+            isMenuVisible 
+              ? 'h-12 opacity-100 pointer-events-auto' 
+              : 'h-0 opacity-0 pointer-events-none'
+          }`}
+        >
           <div className="w-full px-4 md:px-8 h-12 flex items-center">
             <nav className="flex items-center gap-8 text-sm font-semibold text-slate-600">
               
@@ -94,7 +89,7 @@ export default function Header() {
                 <span className="font-bold">دسته‌بندی محصولات</span>
                 <ChevronDown className="w-3 h-3 text-slate-400 group-hover/menu:rotate-180 transition duration-300" />
 
-                {/* پاپ‌آپ مگامنو */}
+                {/* پاپ‌آ‌پ مگامنو */}
                 <div className="absolute top-full right-0 w-[700px] bg-white border border-slate-100 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.08)] rounded-3xl p-6 grid grid-cols-3 gap-6 opacity-0 pointer-events-none group-hover/menu:opacity-100 group-hover/menu:pointer-events-auto transition-all duration-300 transform translate-y-2 group-hover/menu:translate-y-0 z-50">
                   
                   <div>

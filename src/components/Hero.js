@@ -2,16 +2,16 @@ import { ShieldCheck, Truck, Percent, ArrowLeft } from 'lucide-react';
 
 export default function Hero() {
   return (
-    <div className="w-full px-4 md:px-8 my-6 relative">
-      {/* اضافه کردن pb-0 به باکس اصلی برای اجازه دادن به عکس جهت بیرون‌زدگی از پایین */}
-      <div className="w-full bg-gradient-to-br from-slate-950 via-zinc-900 to-slate-900 text-white rounded-3xl p-8 md:p-16 md:pb-0 pb-0 flex flex-col md:flex-row items-center justify-between shadow-2xl relative overflow-visible border border-slate-800/50">
+    <div className="w-full px-4 md:px-8 my-6 relative overflow-visible">
+      
+      <div className="w-full bg-gradient-to-br from-slate-950 via-zinc-900 to-slate-900 text-white rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center justify-between shadow-2xl relative overflow-visible border border-slate-800/50">
         
-        {/* افکت‌های آمبیانس نوری پیشرفته */}
+        {/* افکت‌های آمبیانس نوری */}
         <div className="absolute -top-20 -left-20 w-[400px] h-[400px] bg-rose-500/10 rounded-full blur-[120px] pointer-events-none"></div>
         <div className="absolute -bottom-20 left-1/3 w-[300px] h-[300px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none"></div>
 
-        {/* بخش راست: متون و تایپوگرافی */}
-        <div className="z-10 max-w-xl text-center md:text-right flex flex-col items-center md:items-start order-2 md:order-1 mt-8 md:mt-16 md:mb-16">
+        {/* بخش راست: متون و تایپوگرافی با پدینگ اصلاح شده */}
+        <div className="z-10 max-w-lg text-center md:text-right flex flex-col items-center md:items-start order-2 md:order-1 mt-8 md:mt-0 md:pr-4">
           
           <div className="flex items-center gap-2 bg-gradient-to-r from-rose-500/10 to-transparent border border-rose-500/20 px-4 py-2 rounded-full mb-6 backdrop-blur-md">
             <Percent className="w-3.5 h-3.5 text-rose-400 animate-pulse" />
@@ -20,7 +20,7 @@ export default function Hero() {
             </span>
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400 leading-tight mb-6 tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400 leading-tight mb-6 tracking-tight">
             اتصال به دنیای <span className="text-rose-500">پرچمدارها</span>
           </h1>
           
@@ -28,35 +28,33 @@ export default function Hero() {
             برترین تکنولوژی‌های روز دنیا، لوازم جانبی اورجینال و خدمات تخصصی تعمیرات موبایل را در سیب‌شاپ با استانداردهای جهانی تجربه کنید.
           </p>
 
-          {/* دکمه اکشن لوکس */}
           <div className="flex items-center gap-4 mb-10">
-            <button className="group bg-gradient-to-r from-white to-zinc-200 text-slate-950 text-xs font-black px-8 py-4 rounded-2xl hover:from-rose-500 hover:to-pink-600 hover:text-white transition-all duration-300 shadow-[0_20px_40px_rgba(255,255,255,0.05)] hover:shadow-[0_20px_40px_rgba(244,63,94,0.2)] flex items-center gap-3">
+            <button className="group bg-gradient-to-r from-white to-zinc-200 text-slate-950 text-xs font-black px-8 py-4 rounded-2xl hover:from-rose-500 hover:to-pink-600 hover:text-white transition-all duration-300 shadow-[0_20px_40px_rgba(255,255,255,0.05)] flex items-center gap-3">
               <span>کاوش در محصولات</span>
               <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1.5 stroke-[2.5]" />
             </button>
           </div>
 
-          {/* مزایای خرید */}
           <div className="grid grid-cols-2 md:flex items-center gap-8 pt-8 border-t border-white/5 w-full justify-center md:justify-start">
             <div className="flex items-center gap-2.5 text-zinc-400 group cursor-pointer">
-              <ShieldCheck className="w-5 h-5 text-rose-400 shrink-0 transition-transform group-hover:scale-110" />
+              <ShieldCheck className="w-5 h-5 text-rose-400 shrink-0" />
               <span className="text-xs font-bold text-zinc-300">۱۸ ماه گارانتی معتبر</span>
             </div>
             <div className="flex items-center gap-2.5 text-zinc-400 group cursor-pointer">
-              <Truck className="w-5 h-5 text-blue-400 shrink-0 transition-transform group-hover:scale-110" />
-              <span className="text-[12px] font-bold text-zinc-300">ارسال سریع اکسپرس</span>
+              <Truck className="w-5 h-5 text-blue-400 shrink-0" />
+              <span className="text-xs font-bold text-zinc-300">ارسال سریع اکسپرس</span>
             </div>
           </div>
 
         </div>
         
-{/* بخش چپ: تصویر فوق‌العاده بزرگ با افکت بیرون‌زدگی شدید و واقعی از کف بنر */}
-        <div className="hidden md:flex flex-1 justify-center items-end order-1 md:order-2 relative z-20 h-[500px] self-end">
-          <div className="relative w-[400px] h-[580px] transform translate-y-24 rotate-1 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-end justify-center">
+        {/* بخش چپ: اصلاح ابعاد، فاصله از لبه چپ (md:pl-12) و میزان بیرون‌زدگی */}
+        <div className="hidden md:flex flex-1 justify-center items-end order-1 md:order-2 relative z-10 h-80 md:pl-12">
+          <div className="absolute bottom-0 transform translate-y-16 rotate-1 hover:rotate-0 hover:scale-102 transition-all duration-500 ease-out cursor-pointer group flex items-end justify-center w-[290px] h-[440px]">
             <img 
               src="/hero-phone.png" 
               alt="آیفون پرچمدار سیب شاپ"
-              className="w-full h-full object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.85)]"
+              className="w-full h-full object-contain drop-shadow-[0_25px_45px_rgba(0,0,0,0.75)]"
             />
           </div>
         </div>

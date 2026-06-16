@@ -10,10 +10,10 @@ export default function Header() {
   useEffect(() => {
     const controlNavbar = () => {
       if (typeof window !== 'undefined') {
-        if (window.scrollY > lastScrollY && window.scrollY > 50) {
-          setIsMenuVisible(false);
-        } else {
-          setIsMenuVisible(true);
+        if (window.scrollY > lastScrollY && window.scrollY > 80) {
+          setIsMenuVisible(false); // اسکرول به پایین -> جمع شدن منو
+        } else if (window.scrollY < lastScrollY) {
+          setIsMenuVisible(true); // اسکرول به بالا -> باز شدن منو
         }
         setLastScrollY(window.scrollY);
       }
@@ -25,16 +25,16 @@ export default function Header() {
 
   return (
     <>
-      {/* ۱. بنر اعلان بالایی */}
+      {/* ۱. بنر اعلان بالایی (ثابت بالای صفحه و همراه اسکرول رد می‌شود) */}
       <div className="bg-gradient-to-r from-rose-500 to-pink-600 text-white text-center py-2 px-4 text-xs font-bold shadow-inner select-none">
         جشنواره شگفت‌انگیز سیب‌شاپ؛ تا ۴۰٪ تخفیف روی لوازم جانبی موبایل ⚡
       </div>
 
       {/* ۲. بدنه اصلی هدر چسبان */}
-      <header className="bg-transparent sticky top-0 z-50 w-full">
+      <header className="bg-white/75 backdrop-blur-xl border-b border-slate-100 sticky top-0 z-50 w-full transition-all duration-300">
         
-        {/* ردیف اول: لوگو، سرچ‌بار و ورود (افکت شیشه‌ای قوی‌تر شد) */}
-        <div className="w-full px-4 md:px-8 h-20 flex items-center justify-between gap-8 bg-white/75 backdrop-blur-xl border-b border-slate-100/50 z-50 relative">
+        {/* ردیف اول: لوگو، سرچ‌بار و ورود */}
+        <div className="w-full px-4 md:px-8 h-20 flex items-center justify-between gap-8 relative z-50 bg-transparent">
           
           {/* راست: لوگو */}
           <div className="flex items-center shrink-0">
@@ -72,12 +72,12 @@ export default function Header() {
 
         </div>
 
-        {/* ردیف دوم: منوی ناوبری و مگامنو (شیشه‌ای هماهنگ با ردیف اول) */}
+        {/* ردیف دوم: منوی ناوبری با مکانیزم تبدیل ارتفاع نرم بدون پرش دسکتاپ */}
         <div 
-          className={`hidden md:block border-b border-slate-100/50 bg-white/70 backdrop-blur-xl transition-all duration-300 overflow-hidden ${
+          className={`hidden md:block border-t border-slate-100/40 transition-all duration-300 ease-in-out origin-top ${
             isMenuVisible 
-              ? 'h-12 opacity-100 pointer-events-auto' 
-              : 'h-0 opacity-0 pointer-events-none'
+              ? 'max-h-12 opacity-100 invisible-none scale-y-100' 
+              : 'max-h-0 opacity-0 pointer-events-none scale-y-0'
           }`}
         >
           <div className="w-full px-4 md:px-8 h-12 flex items-center">
@@ -91,7 +91,6 @@ export default function Header() {
 
                 {/* پاپ‌آ‌پ مگامنو */}
                 <div className="absolute top-full right-0 w-[700px] bg-white border border-slate-100 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.08)] rounded-3xl p-6 grid grid-cols-3 gap-6 opacity-0 pointer-events-none group-hover/menu:opacity-100 group-hover/menu:pointer-events-auto transition-all duration-300 transform translate-y-2 group-hover/menu:translate-y-0 z-50">
-                  
                   <div>
                     <div className="flex items-center gap-1.5 text-slate-900 font-bold mb-3 text-sm">
                       <Smartphone className="w-4 h-4 text-rose-500" />
@@ -126,7 +125,6 @@ export default function Header() {
                       <li className="hover:text-rose-500 transition">ساعت هوشمند</li>
                     </ul>
                   </div>
-
                 </div>
               </div>
 

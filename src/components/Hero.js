@@ -1,28 +1,65 @@
+import { ShieldCheck, Truck, Percent, ArrowLeft } from 'lucide-react';
+
 export default function Hero() {
   return (
-    <div className="max-w-7xl mx-auto px-4 my-6">
-      {/* اصلاح رنگ گرادینت برای تایلوند ۳ */}
-      <div className="bg-gradient-to-tr from-gray-900 via-zinc-900 to-black text-white rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between shadow-sm relative overflow-hidden">
+    <div className="w-full px-4 md:px-8 my-6">
+      <div className="w-full bg-gradient-to-br from-slate-950 via-zinc-900 to-slate-900 text-white rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center justify-between shadow-2xl relative overflow-hidden border border-slate-800/50">
         
-        <div className="z-10 max-w-md text-center md:text-right flex flex-col items-center md:items-start">
-          <span className="bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full tracking-wider">
-            پیشنهاد ویژه هفته
-          </span>
-          <h1 className="text-2xl md:text-4xl font-black mt-4 mb-3 leading-tight text-white">
-            نسل جدید پرچمدارها رسیده است
+        {/* افکت نور پس‌زمینه آمبیانس (مخصوص لوکس کردن تم تاریک) */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+        {/* بخش راست: متون، تایپوگرافی و دکمه‌ها */}
+        <div className="z-10 max-w-xl text-center md:text-right flex flex-col items-center md:items-start order-2 md:order-1 mt-8 md:mt-0">
+          
+          <div className="flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full mb-6">
+            <Percent className="w-3.5 h-3.5 text-rose-400" />
+            <span className="text-[11px] font-bold text-zinc-300 tracking-wide">
+              پیشنهاد ویژه: آیفون ۱۵ پرو سری متالیک با گارانتی شرکتی
+            </span>
+          </div>
+
+          <h1 className="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400 leading-tight mb-4">
+            اتصال به دنیای پرچمدارها
           </h1>
-          <p className="text-gray-400 text-xs md:text-sm mb-6 leading-6">
-            خرید نقدی و اقساطی انواع تلفن‌های هوشمند همراه با گارانتی معتبر ۱۸ ماهه شرکتی.
+          
+          <p className="text-zinc-400 text-xs md:text-sm mb-8 leading-7 max-w-md">
+            برترین تکونولوژی‌های روز دنیا، لوازم جانبی اورجینال و خدمات تخصصی تعمیرات موبایل را در سیب‌شاپ با تضمین بالاترین کیفیت تجربه کنید.
           </p>
-          <button className="bg-white text-gray-900 text-xs font-bold px-5 py-3 rounded-xl hover:bg-gray-100 transition shadow-md">
-            مشاهده و خرید محصولات
-          </button>
+
+          {/* دکمه اکشن لوکس و کپسولی */}
+          <div className="flex items-center gap-4 mb-8">
+            <button className="group bg-white text-slate-950 text-xs font-bold px-6 py-3.5 rounded-full hover:bg-rose-500 hover:text-white transition-all duration-300 shadow-xl flex items-center gap-2">
+              <span>مشاهده و خرید محصولات</span>
+              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+            </button>
+          </div>
+
+          {/* مزایای خرید سه گانه با آیکون‌های خطی Lucide */}
+          <div className="grid grid-cols-2 md:flex items-center gap-6 pt-6 border-t border-white/5 w-full justify-center md:justify-start">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <ShieldCheck className="w-4 h-4 text-rose-400 shrink-0" />
+              <span className="text-[11px] font-semibold">۱۸ ماه گارانتی معتبر</span>
+            </div>
+            <div className="flex items-center gap-2 text-zinc-400">
+              <Truck className="w-4 h-4 text-blue-400 shrink-0" />
+              <span className="text-[11px] font-semibold">ارسال سریع اکسپرس</span>
+            </div>
+          </div>
+
         </div>
         
-        {/* شبیه‌ساز تصویر موبایل */}
-        <div className="hidden md:flex mt-8 md:mt-0 w-44 h-72 bg-gradient-to-b from-zinc-800 to-zinc-700 rounded-[2rem] border-4 border-zinc-800 shadow-2xl relative items-center justify-center transform md:rotate-6 hover:rotate-0 transition duration-500">
-          <div className="absolute top-2 w-14 h-3.5 bg-black rounded-full"></div>
-          <span className="text-[10px] text-zinc-500">Minimal Mobile</span>
+        {/* بخش چپ: شبیه‌ساز سه‌بعدی بدنه تیتانیوم موبایل (فقط در دسکتاپ نشان داده می‌شود) */}
+        <div className="hidden md:flex flex-1 justify-center items-center order-1 md:order-2 relative z-10 h-80">
+          <div className="w-48 h-80 bg-gradient-to-b from-zinc-800 via-zinc-900 to-slate-950 rounded-[2.5rem] border-[5px] border-zinc-700/80 shadow-[0_25px_60px_rgba(0,0,0,0.8)] relative flex items-center justify-center transform rotate-6 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group">
+            {/* جزییات روی بدنه گوشی (Dynamic Island) */}
+            <div className="absolute top-3 w-16 h-4 bg-black rounded-full border border-zinc-800 flex items-center justify-center">
+              <div className="w-1.5 h-1.5 bg-zinc-900 rounded-full ml-auto mr-1"></div>
+            </div>
+            {/* رفلکت نور متالیک روی صفحه گوشی فرضی */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 rounded-[2.2rem] pointer-events-none group-hover:via-white/10 transition duration-500"></div>
+            <span className="text-[10px] font-black text-zinc-600 tracking-widest uppercase select-none group-hover:text-rose-400 transition">Titanium Pro</span>
+          </div>
         </div>
         
       </div>

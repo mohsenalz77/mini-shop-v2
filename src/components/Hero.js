@@ -50,13 +50,13 @@ export default function Hero() {
 
         </div>
         
-        {/* بخش چپ: تصویر اورجینال و باکیفیت تو از پوشه public با افکت بیرون‌زدگی */}
-        <div className="hidden md:flex flex-1 justify-center items-end order-1 md:order-2 relative z-10 h-[450px] self-end">
-          <div className="relative w-80 h-[520px] transform translate-y-16 rotate-1 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-end justify-center">
+{/* بخش چپ: تصویر فوق‌العاده بزرگ با افکت بیرون‌زدگی شدید و واقعی از کف بنر */}
+        <div className="hidden md:flex flex-1 justify-center items-end order-1 md:order-2 relative z-20 h-[500px] self-end">
+          <div className="relative w-[400px] h-[580px] transform translate-y-24 rotate-1 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-end justify-center">
             <img 
               src="/hero-phone.png" 
               alt="آیفون پرچمدار سیب شاپ"
-              className="w-full h-full object-contain drop-shadow-[0_35px_50px_rgba(0,0,0,0.70)]"
+              className="w-full h-full object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.85)]"
             />
           </div>
         </div>

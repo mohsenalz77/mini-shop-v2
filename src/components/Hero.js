@@ -50,11 +50,11 @@ export default function Hero() {
 
         </div>
         
-        {/* بخش چپ: عکس اورجینال اپل با سایز بزرگ و افکت بیرون‌زدگی از پایین باکس */}
-        <div className="hidden md:flex flex-1 justify-center items-end order-1 md:order-2 relative z-20 h-[450px] self-end">
+        {/* بخش چپ: تصویر اورجینال و باکیفیت تو از پوشه public با افکت بیرون‌زدگی */}
+        <div className="hidden md:flex flex-1 justify-center items-end order-1 md:order-2 relative z-10 h-[450px] self-end">
           <div className="relative w-80 h-[520px] transform translate-y-16 rotate-1 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-end justify-center">
             <img 
-              src="https://www.apple.com/v/iphone-air/g/images/site/localnav/nav_iphone_air__bpnby8iqsspe_large_2x.png" 
+              src="/hero-phone.png" 
               alt="آیفون پرچمدار سیب شاپ"
               className="w-full h-full object-contain drop-shadow-[0_35px_50px_rgba(0,0,0,0.70)]"
             />

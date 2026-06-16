@@ -49,13 +49,13 @@ export default function Hero() {
 
         </div>
         
-        {/* بخش چپ: تصویر واقعی، ۱۰۰٪ شفاف و بدون کشیدگی آیفون */}
+        {/* بخش چپ: تصویر فوق‌العاده لوکس و تیتانیومی از سرور قدرتمند Unsplash */}
         <div className="hidden md:flex flex-1 justify-center items-center order-1 md:order-2 relative z-10 h-96">
-          <div className="relative w-64 h-full transform rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-center justify-center">
+          <div className="relative w-72 h-full transform rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-center justify-center">
             <img 
-              src="https://www.pngmart.com/files/23/iPhone-14-Pro-PNG-Photo.png" 
-              alt="پرچمدار هوشمند سیب شاپ"
-              className="max-h-[85%] w-auto object-contain drop-shadow-[0_30px_35px_rgba(0,0,0,0.7)]"
+              src="https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=600&auto=format&fit=crop" 
+              alt="آیفون تیتانیوم سیب شاپ"
+              className="max-h-[90%] w-auto object-contain rounded-3xl drop-shadow-[0_30px_35px_rgba(0,0,0,0.8)]"
             />
           </div>
         </div>

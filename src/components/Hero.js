@@ -50,15 +50,13 @@ export default function Hero() {
 
         </div>
         
-        {/* بخش چپ: جایگزینی ماکاپ با عکس واقعی، لوکس و سه بعدی پرچمدار */}
+       {/* بخش چپ: جایگزینی با لینک مستقیم و تضمینی عکس پرچمدار */}
         <div className="hidden md:flex flex-1 justify-center items-center order-1 md:order-2 relative z-10 h-80">
-          <div className="relative w-64 h-80 transform rotate-2 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group">
-            <Image 
-              src="https://assets.aceternity.com/iphone-14-pro.png" 
+          <div className="relative w-72 h-80 transform rotate-2 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group">
+            <img 
+              src="https://dkstatics-public.digikala.com/digikala-products/c9f3769c0d481b4907936a28892f39c890e7195c_1697960105.jpg?x-oss-process=image/quality,q_80" 
               alt="پرچمدار هوشمند سیب شاپ"
-              fill
-              className="object-contain drop-shadow-[0_35px_35px_rgba(0,0,0,0.6)]"
-              priority
+              className="w-full h-full object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.6)] mix-blend-lighten"
             />
           </div>
         </div>

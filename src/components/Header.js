@@ -10,10 +10,10 @@ export default function Header() {
   useEffect(() => {
     const controlNavbar = () => {
       if (typeof window !== 'undefined') {
-        if (window.scrollY > lastScrollY && window.scrollY > 80) {
-          setIsMenuVisible(false); // اسکرول به پایین -> جمع شدن منو
+        if (window.scrollY > lastScrollY && window.scrollY > 50) {
+          setIsMenuVisible(false); // اسکرول به پایین -> منو برود زیر ردیف اول
         } else if (window.scrollY < lastScrollY) {
-          setIsMenuVisible(true); // اسکرول به بالا -> باز شدن منو
+          setIsMenuVisible(true); // اسکرول به بالا -> منو بیاید بیرون
         }
         setLastScrollY(window.scrollY);
       }
@@ -25,16 +25,16 @@ export default function Header() {
 
   return (
     <>
-      {/* ۱. بنر اعلان بالایی (ثابت بالای صفحه و همراه اسکرول رد می‌شود) */}
-      <div className="bg-gradient-to-r from-rose-500 to-pink-600 text-white text-center py-2 px-4 text-xs font-bold shadow-inner select-none">
+      {/* ۱. بنر اعلان بالایی */}
+      <div className="bg-gradient-to-r from-rose-500 to-pink-600 text-white text-center py-2 px-4 text-xs font-bold shadow-inner relative z-50 select-none">
         جشنواره شگفت‌انگیز سیب‌شاپ؛ تا ۴۰٪ تخفیف روی لوازم جانبی موبایل ⚡
       </div>
 
-      {/* ۲. بدنه اصلی هدر چسبان */}
-      <header className="bg-white/75 backdrop-blur-xl border-b border-slate-100 sticky top-0 z-50 w-full transition-all duration-300">
+      {/* ۲. شاسی اصلی هدر چسبان */}
+      <header className="sticky top-0 z-50 w-full bg-transparent">
         
-        {/* ردیف اول: لوگو، سرچ‌بار و ورود */}
-        <div className="w-full px-4 md:px-8 h-20 flex items-center justify-between gap-8 relative z-50 bg-transparent">
+        {/* ردیف اول: لوگو، سرچ‌بار و ورود (دارای z-50 بالاتر برای پوشاندن ردیف دوم) */}
+        <div className="w-full px-4 md:px-8 h-20 flex items-center justify-between gap-8 bg-white/80 backdrop-blur-xl border-b border-slate-100 relative z-50">
           
           {/* راست: لوگو */}
           <div className="flex items-center shrink-0">
@@ -72,12 +72,12 @@ export default function Header() {
 
         </div>
 
-        {/* ردیف دوم: منوی ناوبری با مکانیزم تبدیل ارتفاع نرم بدون پرش دسکتاپ */}
+        {/* ردیف دوم: منوی ناوبری با مکانیزم خزیدن سه‌بعدی (Transform Translate) پشتِ ردیف اول */}
         <div 
-          className={`hidden md:block border-t border-slate-100/40 transition-all duration-300 ease-in-out origin-top ${
+          className={`hidden md:block border-b border-slate-100/60 bg-white/75 backdrop-blur-xl absolute left-0 right-0 h-12 transition-all duration-300 ease-in-out z-40 ${
             isMenuVisible 
-              ? 'max-h-12 opacity-100 invisible-none scale-y-100' 
-              : 'max-h-0 opacity-0 pointer-events-none scale-y-0'
+              ? 'translate-y-0 opacity-100' 
+              : '-translate-y-12 opacity-0 pointer-events-none'
           }`}
         >
           <div className="w-full px-4 md:px-8 h-12 flex items-center">

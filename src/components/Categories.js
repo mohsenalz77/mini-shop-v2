@@ -10,14 +10,16 @@ const categories = [
 
 export default function Categories() {
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 md:px-8 my-12">
+    // تغییر اصلی اینجاست: px-4 md:px-8 برای هماهنگی عرض با هیرو + mt-24 برای فاصله گرفتن از آیفونِ هیرو
+    <div className="w-full px-4 md:px-8 mt-24 mb-16 relative z-10">
+      
       {/* تیتر بخش دسته‌بندی */}
       <div className="flex items-center gap-2 mb-8 justify-start">
         <span className="w-1.5 h-6 bg-rose-500 rounded-full"></span>
         <h2 className="text-lg md:text-xl font-black text-slate-900">دسته‌بندی محصولات سیب‌شاپ</h2>
       </div>
 
-      {/* ردیف دسته‌بندی‌ها (در موبایل اسکرول افقی و در دسکتاپ فیت) */}
+      {/* ردیف دسته‌بندی‌ها */}
       <div className="flex md:grid md:grid-cols-5 gap-4 md:gap-6 overflow-x-auto pb-4 md:pb-0 scrollbar-none snap-x">
         {categories.map((cat) => {
           const IconComponent = cat.icon;
@@ -26,7 +28,7 @@ export default function Categories() {
               key={cat.id} 
               className="flex-shrink-0 w-36 md:w-full snap-center bg-white border border-slate-100 rounded-2xl p-5 flex flex-col items-center text-center shadow-xs hover:shadow-md hover:border-slate-200/80 transition-all duration-300 group cursor-pointer"
             >
-              {/* باکس دایره‌ای آیکون با گرادینت نرم موقع هاور */}
+              {/* باکس دایره‌ای آیکون */}
               <div className={`w-14 h-14 rounded-full bg-slate-50 flex items-center justify-center text-slate-700 mb-4 transition-all duration-300 group-hover:bg-gradient-to-br ${cat.color} group-hover:text-white group-hover:scale-110 shadow-inner`}>
                 <IconComponent className="w-6 h-6 stroke-[1.8]" />
               </div>
@@ -36,7 +38,7 @@ export default function Categories() {
                 {cat.name}
               </span>
 
-              {/* تعداد موجودی ریز و کم‌رنگ */}
+              {/* تعداد موجودی */}
               <span className="text-[10px] font-medium text-slate-400 mt-1.5 bg-slate-50 px-2 py-0.5 rounded-full">
                 {cat.count}
               </span>

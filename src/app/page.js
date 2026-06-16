@@ -10,12 +10,15 @@ const products = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gray-50/40">
+    // فیکس اصلی: اضافه شدن overflow-x-hidden به لایه والد اصلی سایت
+    <div className="min-h-screen bg-gray-50/40 overflow-x-hidden">
       <Header />
+      
+      {/* هیرو را داخل ساختار معنایی قرار می‌دهیم تا مدیریت overflow یکپارچه شود */}
       <Hero />
 
-      {/* اضافه شدن pb-24 برای اینکه منوی پایین موبایل روی محصولات نیفتد */}
-      <main className="max-w-7xl mx-auto px-4 py-8 pb-24">
+      {/* بخش محصولات با پدینگ بالا (pt-12) برای جبران فضای بیرون‌زدگی آیفون */}
+      <main className="max-w-7xl mx-auto px-4 py-8 pt-16 pb-24 relative z-0">
         
         {/* تیتر بخش */}
         <div className="flex items-center justify-between mb-6">
@@ -28,7 +31,7 @@ export default function HomePage() {
           </span>
         </div>
 
-        {/* گرید ریسپانسیو: در موبایل ۲ ستونه (grid-cols-2)، در دسکتاپ ۴ ستونه (md:grid-cols-4) */}
+        {/* گرید محصولات */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
           {products.map((product) => (
             <div key={product.id} className="bg-white rounded-2xl p-3 md:p-4 border border-gray-100/80 hover:shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:border-gray-200/60 transition-all duration-300 flex flex-col justify-between group cursor-pointer">
@@ -59,7 +62,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 
-                {/* دکمه افزودن پلاس مدرن */}
+                {/* دکمه افزودن پلاس */}
                 <button className="bg-gray-50 text-gray-600 w-7 h-7 md:w-8 md:h-8 rounded-lg md:rounded-xl flex items-center justify-center font-bold text-xs md:text-sm hover:bg-red-500 hover:text-white transition duration-200">
                   ＋
                 </button>

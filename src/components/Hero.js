@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { ShieldCheck, Truck, Percent, ArrowLeft } from 'lucide-react';
 
 export default function Hero() {
@@ -50,13 +49,13 @@ export default function Hero() {
 
         </div>
         
-       {/* بخش چپ: جایگزینی با لینک مستقیم و تضمینی عکس پرچمدار */}
-        <div className="hidden md:flex flex-1 justify-center items-center order-1 md:order-2 relative z-10 h-80">
-          <div className="relative w-72 h-80 transform rotate-2 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group">
+        {/* بخش چپ: تصویر واقعی، ۱۰۰٪ شفاف و بدون کشیدگی آیفون */}
+        <div className="hidden md:flex flex-1 justify-center items-center order-1 md:order-2 relative z-10 h-96">
+          <div className="relative w-64 h-full transform rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-center justify-center">
             <img 
-              src="https://dkstatics-public.digikala.com/digikala-products/c9f3769c0d481b4907936a28892f39c890e7195c_1697960105.jpg?x-oss-process=image/quality,q_80" 
+              src="https://www.pngmart.com/files/23/iPhone-14-Pro-PNG-Photo.png" 
               alt="پرچمدار هوشمند سیب شاپ"
-              className="w-full h-full object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.6)] mix-blend-lighten"
+              className="max-h-[85%] w-auto object-contain drop-shadow-[0_30px_35px_rgba(0,0,0,0.7)]"
             />
           </div>
         </div>

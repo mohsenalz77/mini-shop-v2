@@ -2,10 +2,9 @@ import { ShieldCheck, Truck, Percent, ArrowLeft } from 'lucide-react';
 
 export default function Hero() {
   return (
-    // بخش اصلی والد که overflow-visible دارد تا بیرون‌زدگی قطع نشود
     <div className="w-full px-4 md:px-8 my-6 relative overflow-visible">
       
-      {/* باکس تیره هیرو */}
+      {/* باکس تیره هیرو - حتماً باید overflow-visible باشد */}
       <div className="w-full bg-gradient-to-br from-slate-950 via-zinc-900 to-slate-900 text-white rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center justify-between shadow-2xl relative overflow-visible border border-slate-800/50">
         
         {/* افکت‌های آمبیانس نوری */}
@@ -50,13 +49,13 @@ export default function Hero() {
 
         </div>
         
-        {/* بخش چپ: مهار کامل ابعاد بزرگ آیفون و تزریق پدینگ منفی برای خروج از کادر */}
-        <div className="hidden md:flex flex-1 justify-center items-end order-1 md:order-2 relative z-30 h-96">
-          <div className="absolute bottom-0 transform translate-y-28 rotate-1 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-end justify-center w-[360px] h-[540px]">
+        {/* بخش چپ: مهار کامل ابعاد بزرگ آیفون و لایه مطلق زِد-اینفکس */}
+        <div className="hidden md:flex flex-1 justify-center items-end order-1 md:order-2 relative z-30 h-96 overflow-visible">
+          <div className="absolute bottom-0 transform translate-y-28 rotate-1 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-end justify-center w-[360px] h-[540px] overflow-visible">
             <img 
               src="/hero-phone.png" 
               alt="آیفون پرچمدار سیب شاپ"
-              className="w-full h-full object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.80)]"
+              className="w-full h-full object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.80)] block"
             />
           </div>
         </div>

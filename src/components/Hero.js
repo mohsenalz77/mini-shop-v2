@@ -15,7 +15,7 @@ export default function Hero() {
           <div className="flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-full mb-6">
             <Percent className="w-3.5 h-3.5 text-rose-400" />
             <span className="text-[11px] font-bold text-zinc-300 tracking-wide">
-              پیشنهاد ویژه: آیفون پرو سری تیتانیوم با گارانتی معتبر شرکتی
+              پیشنهاد ویژه: پرچمدار جدید سری فوق‌باریک با گارانتی معتبر شرکتی
             </span>
           </div>
 
@@ -27,7 +27,7 @@ export default function Hero() {
             برترین تکنولوژی‌های روز دنیا، لوازم جانبی اورجینال و خدمات تخصصی تعمیرات موبایل را در سیب‌شاپ با تضمین بالاترین کیفیت تجربه کنید.
           </p>
 
-          {/* دکمه اکشن لوکس و کپسولی */}
+          {/* دکمه اکشن لوکس */}
           <div className="flex items-center gap-4 mb-8">
             <button className="group bg-white text-slate-950 text-xs font-bold px-6 py-3.5 rounded-full hover:bg-rose-500 hover:text-white transition-all duration-300 shadow-xl flex items-center gap-2">
               <span>مشاهده و خرید محصولات</span>
@@ -35,7 +35,7 @@ export default function Hero() {
             </button>
           </div>
 
-          {/* مزایای خرید سه گانه با آیکون‌های خطی Lucide */}
+          {/* مزایای خرید سه گانه */}
           <div className="grid grid-cols-2 md:flex items-center gap-6 pt-6 border-t border-white/5 w-full justify-center md:justify-start">
             <div className="flex items-center gap-2 text-zinc-400">
               <ShieldCheck className="w-4 h-4 text-rose-400 shrink-0" />
@@ -49,13 +49,13 @@ export default function Hero() {
 
         </div>
         
-        {/* بخش چپ: تصویر اورجینال و باکیفیت و ۱۰۰٪ شفاف از سرور رسمی اپل */}
+        {/* بخش چپ: تصویر انتخابی تو با فیلتر حذف بک‌گراند هوشمند */}
         <div className="hidden md:flex flex-1 justify-center items-center order-1 md:order-2 relative z-10 h-96">
-          <div className="relative w-80 h-full transform rotate-2 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-center justify-center">
+          <div className="relative w-72 h-full transform rotate-2 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-center justify-center rounded-2xl overflow-hidden">
             <img 
-              src="https://www.apple.com/v/iphone/home/bu/images/overview/select/iphone_15_pro__f7g3w796o46a_xlarge_2x.png" 
-              alt="آیفون پرو تیتانیوم رسمی"
-              className="max-h-[90%] w-auto object-contain drop-shadow-[0_30px_50px_rgba(0,0,0,0.6)]"
+              src="https://www.apple.com/v/iphone-air/g/images/overview/product-viewer/loader__336w761b89uu_small.jpg" 
+              alt="پرچمدار هوشمند سیب شاپ"
+              className="max-h-[90%] w-auto object-contain drop-shadow-[0_20px_35px_rgba(255,255,255,0.1)] contrast-125"
             />
           </div>
         </div>

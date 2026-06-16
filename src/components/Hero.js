@@ -5,7 +5,7 @@ export default function Hero() {
     <div className="w-full px-4 md:px-8 my-6">
       <div className="w-full bg-gradient-to-br from-slate-950 via-zinc-900 to-slate-900 text-white rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center justify-between shadow-2xl relative overflow-hidden border border-slate-800/50">
         
-        {/* افکت نور پس‌زمینه آمبیانس */}
+        {/* افکت نور پس‌زمینه آمبیانس (مخصوص لوکس کردن تم تاریک) */}
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
@@ -27,7 +27,7 @@ export default function Hero() {
             برترین تکنولوژی‌های روز دنیا، لوازم جانبی اورجینال و خدمات تخصصی تعمیرات موبایل را در سیب‌شاپ با تضمین بالاترین کیفیت تجربه کنید.
           </p>
 
-          {/* دکمه اکشن لوکس */}
+          {/* دکمه اکشن لوکس و کپسولی */}
           <div className="flex items-center gap-4 mb-8">
             <button className="group bg-white text-slate-950 text-xs font-bold px-6 py-3.5 rounded-full hover:bg-rose-500 hover:text-white transition-all duration-300 shadow-xl flex items-center gap-2">
               <span>مشاهده و خرید محصولات</span>
@@ -35,7 +35,7 @@ export default function Hero() {
             </button>
           </div>
 
-          {/* مزایای خرید سه گانه */}
+          {/* مزایای خرید سه گانه با آیکون‌های خطی Lucide */}
           <div className="grid grid-cols-2 md:flex items-center gap-6 pt-6 border-t border-white/5 w-full justify-center md:justify-start">
             <div className="flex items-center gap-2 text-zinc-400">
               <ShieldCheck className="w-4 h-4 text-rose-400 shrink-0" />
@@ -49,13 +49,13 @@ export default function Hero() {
 
         </div>
         
-        {/* بخش چپ: تصویر فوق‌العاده لوکس و تیتانیومی از سرور قدرتمند Unsplash */}
+        {/* بخش چپ: تصویر فوق‌العاده باکیفیت، واقعی و ۱۰۰٪ شفاف از نمای روبروی پرچمدار */}
         <div className="hidden md:flex flex-1 justify-center items-center order-1 md:order-2 relative z-10 h-96">
           <div className="relative w-72 h-full transform rotate-3 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-center justify-center">
             <img 
-              src="https://images.unsplash.com/photo-1695048133142-1a20484d2569?q=80&w=600&auto=format&fit=crop" 
-              alt="آیفون تیتانیوم سیب شاپ"
-              className="max-h-[90%] w-auto object-contain rounded-3xl drop-shadow-[0_30px_35px_rgba(0,0,0,0.8)]"
+              src="https://i.postimg.co/7Ym4fPsh/iphone-front.png" 
+              alt="پرچمدار هوشمند سیب شاپ"
+              className="max-h-[90%] w-auto object-contain drop-shadow-[0_30px_50px_rgba(244,63,94,0.15)]"
             />
           </div>
         </div>

@@ -1,3 +1,4 @@
+import './globals.css'; // این خط حتماً باید بالا باشد!
 export const metadata = {
   title: 'Minimal Shop',
   description: 'My clean next.js shop',

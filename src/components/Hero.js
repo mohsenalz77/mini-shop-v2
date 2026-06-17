@@ -2,9 +2,15 @@ import React from 'react';
 
 export default function Hero() {
   return (
-// به جای <div className="w-full bg-slate-900..."> این را بگذار:
-<div className="w-full px-4 md:px-8 mt-6">
-  <div className="max-w-7xl mx-auto bg-slate-900 text-white rounded-3xl relative overflow-visible shadow-xl">
+    <div className="w-full px-4 md:px-8 my-6 relative overflow-visible">
+      
+      {/* باکس تیره هیرو - حتماً باید overflow-visible باشد */}
+      <div className="w-full bg-gradient-to-br from-slate-950 via-zinc-900 to-slate-900 text-white rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center justify-between shadow-2xl relative overflow-visible border border-slate-800/50">
+        
+        {/* افکت‌های آمبیانس نوری */}
+        <div className="absolute -top-20 -left-20 w-[400px] h-[400px] bg-rose-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="absolute -bottom-20 left-1/3 w-[300px] h-[300px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+
 
         {/* بخش راست: متن‌ها و دکمه اکشن */}
         <div className="flex-1 flex flex-col items-start gap-4 text-right order-2 md:order-1">

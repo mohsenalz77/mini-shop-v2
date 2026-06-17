@@ -1,7 +1,7 @@
 import Header from '../components/Header';
 import Hero from '../components/Hero';
 import Categories from '../components/Categories';
-import AmazingOffers from '../components/AmazingOffers'; // ۱. ایمپورت کردن کامپوننت جدید شگفت‌انگیز
+import AmazingOffers from '../components/AmazingOffers';
 
 // دیتای موقت محصولات فروشگاه سیب‌شاپ
 const products = [
@@ -19,25 +19,27 @@ export default function HomePage() {
       {/* ۱. هدر سایت */}
       <Header />
       
-      {/* ۲. بنر اصلی (هیرو) با افکت بیرون‌زدگی آیفون از کف */}
+      {/* ۲. بنر اصلی (هیرو) با افکت بیرون‌زدگی آیفون از کف باکس تیره */}
       <Hero />
       
-      {/* ۳. بخش دسته‌بندی‌های سریع و دایره‌ای */}
+      {/* ۳. بخش دسته‌بندی‌های سریع و دایره‌ای با تیوتر جدید */}
       <Categories />
 
-      {/* ۴. باکس شگفت‌انگیز تایمردار (دقیقاً در بهترین نقطه بصری لندینگ قرار گرفت) */}
+      {/* ۴. باکس شگفت‌انگیز تایمردار سیب‌شاپ */}
       <AmazingOffers />
 
-      {/* ۵. ویترین محصولات (جدیدترین‌های دنیای فناوری) */}
+      {/* ۵. ویترین محصولات (جدیدترین‌های دنیای فناوری) - کاملاً ست شده با کد رنگ هدر */}
       <main className="max-w-7xl mx-auto px-4 py-8 pt-4 pb-24 relative z-0">
         
         {/* تیتر بخش محصولات */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-5 bg-red-500 rounded-full"></span>
+            {/* خط عمودی هماهنگ با کد رنگ رز هدر */}
+            <span className="w-1.5 h-5 bg-rose-500 rounded-full"></span>
             <h2 className="text-base md:text-lg font-black text-gray-900">جدیدترین‌های دنیای فناوری</h2>
           </div>
-          <span className="text-xs text-red-500 font-bold cursor-pointer hover:text-red-600 transition duration-200">
+          {/* دکمه مشاهده همه هماهنگ با کد رنگ رز هدر */}
+          <span className="text-xs text-rose-500 font-bold cursor-pointer hover:text-rose-600 transition duration-200">
             مشاهده همه ←
           </span>
         </div>
@@ -62,7 +64,7 @@ export default function HomePage() {
                   )}
                 </div>
                 
-                {/* عنوان کالا */}
+                {/* عنوان کالا با افکت لاین‌کلمپ برای هماهنگی ارتفاع کارت‌ها */}
                 <h3 className="text-[11px] md:text-xs font-bold text-gray-700 leading-5 md:leading-6 group-hover:text-gray-900 transition duration-200 line-clamp-2 h-10 md:h-12">
                   {product.name}
                 </h3>
@@ -78,8 +80,8 @@ export default function HomePage() {
                   </div>
                 </div>
                 
-                {/* دکمه افزودن پلاس مدرن */}
-                <button className="bg-gray-50 text-gray-600 w-7 h-7 md:w-8 md:h-8 rounded-lg md:rounded-xl flex items-center justify-center font-bold text-xs md:text-sm hover:bg-red-500 hover:text-white transition duration-200">
+                {/* دکمه افزودن پلاس مدرن - هماهنگ با کد رنگ رز هدر در حالت هوور */}
+                <button className="bg-gray-50 text-gray-600 w-7 h-7 md:w-8 md:h-8 rounded-lg md:rounded-xl flex items-center justify-center font-bold text-xs md:text-sm hover:bg-rose-500 hover:text-white transition duration-200">
                   ＋
                 </button>
               </div>

@@ -1,4 +1,4 @@
-import { Smartphone, Headphones, Watch, Plug, Shield } from 'lucide-react';
+import { Smartphone, Headphones, Watch, Plug, Shield, Sparkles } from 'lucide-react';
 
 const categories = [
   { id: 1, name: 'گوشی موبایل', icon: Smartphone, color: 'from-amber-500 to-orange-600', count: '۱۲۰ مدل' },
@@ -10,13 +10,21 @@ const categories = [
 
 export default function Categories() {
   return (
-    // تغییر اصلی اینجاست: px-4 md:px-8 برای هماهنگی عرض با هیرو + mt-24 برای فاصله گرفتن از آیفونِ هیرو
-    <div className="w-full px-4 md:px-8 mt-24 mb-16 relative z-10">
+    // mt-12 فاصله را کاملاً مهندسی‌شده و تراز با بیرون‌زدگی آیفون می‌کند
+    <div className="w-full px-4 md:px-8 mt-12 mb-16 relative z-10">
       
-      {/* تیتر بخش دسته‌بندی */}
-      <div className="flex items-center gap-2 mb-8 justify-start">
-        <span className="w-1.5 h-6 bg-rose-500 rounded-full"></span>
-        <h2 className="text-lg md:text-xl font-black text-slate-900">دسته‌بندی محصولات سیب‌شاپ</h2>
+      {/* تیتر بخش دسته‌بندی: بازطراحی شده برای فرار از بی‌روحی */}
+      <div className="flex flex-col gap-2 mb-8 items-start">
+        {/* یک تگ کوچک بالای تیتر برای ایجاد هویت بصری */}
+        <div className="flex items-center gap-1.5 bg-rose-50 text-rose-600 px-3 py-1 rounded-full border border-rose-100/70 animate-pulse">
+          <Sparkles className="w-3.5 h-3.5" />
+          <span className="text-[10px] font-black tracking-wide">دسترسی سریع</span>
+        </div>
+        
+        {/* عنوان اصلی به صورت دو رنگ و وزن فونت فوق ضخیم */}
+        <h2 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight">
+          چه چیزی در <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-600">سیب‌شاپ</span> جستجو می‌کنید؟
+        </h2>
       </div>
 
       {/* ردیف دسته‌بندی‌ها */}
@@ -28,17 +36,14 @@ export default function Categories() {
               key={cat.id} 
               className="flex-shrink-0 w-36 md:w-full snap-center bg-white border border-slate-100 rounded-2xl p-5 flex flex-col items-center text-center shadow-xs hover:shadow-md hover:border-slate-200/80 transition-all duration-300 group cursor-pointer"
             >
-              {/* باکس دایره‌ای آیکون */}
               <div className={`w-14 h-14 rounded-full bg-slate-50 flex items-center justify-center text-slate-700 mb-4 transition-all duration-300 group-hover:bg-gradient-to-br ${cat.color} group-hover:text-white group-hover:scale-110 shadow-inner`}>
                 <IconComponent className="w-6 h-6 stroke-[1.8]" />
               </div>
 
-              {/* نام دسته‌بندی */}
               <span className="text-xs md:text-sm font-bold text-slate-800 group-hover:text-rose-500 transition-colors duration-200">
                 {cat.name}
               </span>
 
-              {/* تعداد موجودی */}
               <span className="text-[10px] font-medium text-slate-400 mt-1.5 bg-slate-50 px-2 py-0.5 rounded-full">
                 {cat.count}
               </span>

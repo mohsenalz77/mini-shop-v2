@@ -3,9 +3,9 @@ import Hero from '../components/Hero';
 import QuickAccess from '../components/QuickAccess';
 import Categories from '../components/Categories';
 import AmazingOffers from '../components/AmazingOffers';
-import PromoTwoColumns from '../components/PromoTwoColumns'; // بنرهای دوقلوی موبایل
 import PromoBanners from '../components/PromoBanners';
 import ProductGrid from '../components/ProductGrid';
+import PromoTwoColumns from '../components/PromoTwoColumns'; // بنرهای دوقلوی موبایل
 import BrandCarousel from '../components/BrandCarousel'; // برندهای جدید با هاله نوری
 import Footer from '../components/Footer';
 

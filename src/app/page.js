@@ -1,6 +1,7 @@
 import Header from '../components/Header';
 import Hero from '../components/Hero';
 import Categories from '../components/Categories';
+import AmazingOffers from '../components/AmazingOffers'; // ۱. ایمپورت کردن کامپوننت جدید شگفت‌انگیز
 
 // دیتای موقت محصولات فروشگاه سیب‌شاپ
 const products = [
@@ -21,11 +22,13 @@ export default function HomePage() {
       {/* ۲. بنر اصلی (هیرو) با افکت بیرون‌زدگی آیفون از کف */}
       <Hero />
       
-      {/* ۳. بخش جدید: دسته‌بندی‌های سریع و دایره‌ای */}
+      {/* ۳. بخش دسته‌بندی‌های سریع و دایره‌ای */}
       <Categories />
 
-      {/* ۴. ویترین محصولات (جدیدترین‌های دنیای فناوری) */}
-      {/* pt-4 پدینگ بالا را تعدیل کرده تا فاصله منطقی با بخش دسته‌بندی حفظ شود */}
+      {/* ۴. باکس شگفت‌انگیز تایمردار (دقیقاً در بهترین نقطه بصری لندینگ قرار گرفت) */}
+      <AmazingOffers />
+
+      {/* ۵. ویترین محصولات (جدیدترین‌های دنیای فناوری) */}
       <main className="max-w-7xl mx-auto px-4 py-8 pt-4 pb-24 relative z-0">
         
         {/* تیتر بخش محصولات */}
@@ -59,7 +62,7 @@ export default function HomePage() {
                   )}
                 </div>
                 
-                {/* عنوان کالا با افکت لاین‌کلمپ برای هماهنگی ارتفاع کارت‌ها */}
+                {/* عنوان کالا */}
                 <h3 className="text-[11px] md:text-xs font-bold text-gray-700 leading-5 md:leading-6 group-hover:text-gray-900 transition duration-200 line-clamp-2 h-10 md:h-12">
                   {product.name}
                 </h3>

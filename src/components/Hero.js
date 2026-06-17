@@ -48,15 +48,16 @@ export default function Hero() {
           </div>
 
         </div>
+
         
-        {/* بخش چپ: مهار و هول دادن قطعی عکس به خارج از مرز پایین */}
+{/* بخش چپ: ملایم کردن فوق‌العاده سایه برای طبیعی شدن افکت سه‌بعدی */}
         <div className="hidden md:flex flex-1 justify-center items-center order-1 md:order-2 relative z-30 h-96">
-          {/* تغییر اصلی: حذف absolute bottom-0 و استفاده از translate-y برای شکستن مرز */}
           <div className="relative w-[360px] h-[540px] transform translate-y-24 rotate-1 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-center justify-center">
             <img 
               src="/hero-phone.png" 
               alt="آیفون پرچمدار سیب شاپ"
-              className="w-full h-full object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.80)]"
+              {/* تغییر اصلی: کاهش غلظت سایه از 0.80 به 0.25 و افزایش میزان پخش‌شدگی (Blur) به 50px */}
+              className="w-full h-full object-contain drop-shadow-[0_35px_50px_rgba(0,0,0,0.25)]"
             />
           </div>
         </div>

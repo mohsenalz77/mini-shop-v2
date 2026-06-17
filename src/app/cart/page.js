@@ -24,11 +24,10 @@ const initialCartItems = [
   }
 ];
 
-// دیتای محصولات مکمل برای بخش پیشنهادهای هوشمند پایین سبد خرید
 const crossSellProducts = [
   { id: 101, name: 'شارژر دیواری انکر مدل Nano ۲۰W آیفون', price: '۸۹۰,۰۰۰', image: '🔌' },
-  { id: 102, name: 'کابل تبدیل تایپ‌سی به لایتنینگ بیسوس', price: '۳۲۰,۰۰0', image: '🎗️' },
-  { id: 103, name: 'محافظ صفحه نمایش آنتی‌استاتیک آیفون ۱۵', price: '۴۵۰,۰۰۰', image: '🛡️' },
+  { id: 102, name: 'کابل تبدیل تایپ‌سی به لایتنینگ بیسوس', price: '۳۲۰,۰۰۰', image: '🎗️' },
+  { id: 103, name: 'محافظ صفحه نمایش آنتی‌استاتیک آیفون', price: '۴۵۰,۰۰۰', image: '🛡️' },
   { id: 104, name: 'پاوربانک ۱۰ هزار فست شارژ شیائومی', price: '۱,۲۰۰,۰۰۰', image: '🔋' }
 ];
 
@@ -55,14 +54,14 @@ export default function CartPage() {
   const formattedPrice = (num) => num.toLocaleString('fa-IR');
 
   return (
-    <div className="min-h-screen bg-slate-50 overflow-x-hidden antialiased direction-rtl pb-24 md:pb-0">
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden antialiased direction-rtl pb-32 md:pb-0">
       <Header />
 
-      {/* کانتینر اصلی تراز با شاسی هیرو صفحه اصلی */}
-      <main className="w-full px-4 md:px-8 mt-20 md:mt-32 pt-2 md:pt-4 pb-16 relative z-10">
+      {/* 🛠️ فیکس مارجین بالا (mt-4 md:mt-6) برای چسبیدن به هدر و رفع ۱۰۰٪ فضای خالی اسکرین‌شات */}
+      <main className="w-full px-4 md:px-8 mt-4 md:mt-6 pt-1 pb-16 relative z-10">
         
         {/* عنوان صفحه */}
-        <div className="flex items-center gap-2 mb-6 text-right">
+        <div className="flex items-center gap-2 mb-5 text-right">
           <div className="w-1.5 h-5 bg-rose-500 rounded-full animate-pulse"></div>
           <h1 className="text-base md:text-xl font-black text-slate-900">سبد خرید شما</h1>
           <span className="text-[10px] md:text-xs font-bold text-slate-400 bg-slate-200/60 border border-slate-200/20 px-2 py-0.5 rounded-md mr-1">
@@ -71,32 +70,29 @@ export default function CartPage() {
         </div>
 
         {cartItems.length === 0 ? (
-          /* وضعیت سبد خرید خالی */
           <div className="w-full bg-white border border-slate-100 rounded-3xl p-10 py-16 text-center flex flex-col items-center justify-center shadow-2xs">
             <div className="w-16 h-14 bg-rose-50 rounded-2xl flex items-center justify-center mb-4 text-rose-500">
               <ShoppingBag className="w-7 h-7" />
             </div>
-            <h2 className="text-sm md:text-base font-black text-slate-800 mb-1">سبد خرید شما فعلاً خالی است!</h2>
+            <h2 className="text-sm font-black text-slate-800 mb-1">سبد خرید شما فعلاً خالی است!</h2>
             <p className="text-[11px] md:text-xs text-slate-400 font-medium mb-6">می‌توانید برای مشاهده و انتخاب گجت‌ها به فروشگاه بازگردید.</p>
             <a href="/" className="bg-slate-900 hover:bg-rose-500 text-white font-black text-xs px-6 py-3 rounded-xl shadow-md transition duration-200">
               بازگشت به سیب‌شاپ
             </a>
           </div>
         ) : (
-          /* لایوت دو ستونه اصلی */
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 items-start">
             
-            {/* ستون راست: لیست کالاها و ریل محصولات مکمل (۸ ستون) */}
-            <div className="lg:col-span-8 flex flex-col gap-6">
+            {/* ستون راست: لیست کالاها و ریل محصولات مکمل */}
+            <div className="lg:col-span-8 flex flex-col gap-5">
               
-              {/* لیست کالاهای اصلی */}
               <div className="flex flex-col gap-3">
                 {cartItems.map((item) => (
                   <div 
                     key={item.id} 
-                    className="bg-white border border-slate-100 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-3xs transition duration-200"
+                    className="bg-white border border-slate-100 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-3xs transition duration-200"
                   >
-                    <div className="flex items-center gap-3.5 w-full md:w-auto">
+                    <div className="flex items-center gap-3.5 w-full sm:w-auto">
                       <div className="w-16 h-16 md:w-20 md:h-20 bg-slate-50 border border-slate-100/70 rounded-xl flex items-center justify-center text-3xl md:text-4xl shrink-0 select-none">
                         {item.image}
                       </div>
@@ -111,12 +107,12 @@ export default function CartPage() {
                       </div>
                     </div>
 
-                    {/* کپسول‌های کنترل و قیمت خرید */}
-                    <div className="flex items-center justify-between md:justify-end gap-4 md:gap-6 w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0 border-slate-50 mt-1 md:mt-0">
+                    {/* کپسول‌های کنترل قیمت */}
+                    <div className="flex items-center justify-between sm:justify-end gap-4 md:gap-6 w-full sm:w-auto border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-50 mt-1 sm:mt-0">
                       <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl px-2 py-1 gap-2.5">
-                        <button onClick={() => updateQuantity(item.id, 'plus')} className="text-slate-500 hover:text-rose-500 transition w-5 h-5 flex items-center justify-center font-bold text-xs"><Plus className="w-3.5 h-3.5 stroke-[2.5]" /></button>
+                        <button onClick={() => updateQuantity(item.id, 'plus')} className="text-slate-500 hover:text-rose-500 transition w-5 h-5 flex items-center justify-center font-bold text-xs"><Plus className="w-3.5 h-3.5 stroke-[2.2]" /></button>
                         <span className="text-xs font-black text-slate-900 w-4 text-center">{item.quantity.toLocaleString('fa-IR')}</span>
-                        <button onClick={() => updateQuantity(item.id, 'minus')} className="text-slate-500 hover:text-rose-500 transition w-5 h-5 flex items-center justify-center font-bold text-xs"><Minus className="w-3.5 h-3.5 stroke-[2.5]" /></button>
+                        <button onClick={() => updateQuantity(item.id, 'minus')} className="text-slate-500 hover:text-rose-500 transition w-5 h-5 flex items-center justify-center font-bold text-xs"><Minus className="w-3.5 h-3.5 stroke-[2.2]" /></button>
                       </div>
 
                       <div className="flex flex-col items-end shrink-0 min-w-[100px] md:min-w-[120px]">
@@ -134,10 +130,10 @@ export default function CartPage() {
                 ))}
               </div>
 
-              {/* 🌟 بخش جدید مکمل: ریل هوشمند کراس‌سلینگ (پیشنهاد خرید جانبی ارزان) */}
+              {/* محصولات مکمل */}
               <div className="w-full text-right mt-2">
                 <div className="flex items-center gap-1.5 mb-4">
-                  <Sparkles className="w-4 h-4 text-rose-500 animate-spin-slow" />
+                  <Sparkles className="w-4 h-4 text-rose-500" />
                   <h3 className="text-xs md:text-sm font-black text-slate-800">تکمیل خرید؟ پیشنهادهای ویژه برای شما</h3>
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-none snap-x px-0.5">
@@ -156,8 +152,8 @@ export default function CartPage() {
 
             </div>
 
-            {/* ستون چپ: خلاصه فاکتور + کادر جدید کد تخفیف (۴ ستون) */}
-            <div className="lg:col-span-4 lg:sticky lg:top-28 bg-slate-900 border border-slate-950 text-white rounded-3xl p-5 flex flex-col justify-between min-h-[360px] md:min-h-[420px] shadow-xl relative overflow-hidden">
+            {/* ستون چپ: خلاصه فاکتور */}
+            <div className="lg:col-span-4 lg:sticky lg:top-24 bg-slate-900 border border-slate-950 text-white rounded-3xl p-5 flex flex-col justify-between min-h-[360px] md:min-h-[420px] shadow-xl relative overflow-hidden">
               <div className="absolute -top-10 -left-10 w-32 h-32 bg-rose-500/10 blur-2xl rounded-full"></div>
               
               <div className="w-full flex flex-col gap-3.5 z-10">
@@ -171,7 +167,6 @@ export default function CartPage() {
                   </div>
                 </div>
 
-                {/* 🌟 بخش جدید: کادر مینی‌مال اعمال کد تخفیف داخل فاکتور دارک */}
                 <div className="w-full py-1 border-b border-white/5">
                   <div className="w-full flex items-center bg-white/[0.04] border border-white/5 rounded-xl p-1">
                     <Percent className="w-3.5 h-3.5 text-slate-500 mr-2 shrink-0" />
@@ -213,7 +208,7 @@ export default function CartPage() {
                 
                 <div className="flex items-center justify-center gap-1.5 text-[9px] md:text-[10px] text-slate-500 font-bold mt-1">
                   <ShieldCheck className="w-3.5 h-3.5 text-slate-500" />
-                  <span>پرداخت امن با ضمانت طلایی سیب‌<span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-600">شاپ</span></span>
+                  <span>پرداخت امن با ضمانت طلایی سیب‌شاپ</span>
                 </div>
               </div>
 
@@ -224,9 +219,9 @@ export default function CartPage() {
 
       </main>
 
-      {/* سیستم شیشه‌ای فیکس پایین صفحه موبایل */}
+      {/* 🌟 سیستم شیشه‌ای فیکس پایین صفحه موبایل (تغییر طلایی: با کلس bottom-[68px] دقیقاً بالای ناوبری شما قفل شد) */}
       {cartItems.length > 0 && (
-        <div className="md:hidden fixed bottom-14 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-100/80 p-3.5 flex items-center justify-between z-40 shadow-[0_-10px_30px_rgba(0,0,0,0.04)] rounded-t-2xl">
+        <div className="md:hidden fixed bottom-[68px] left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-200/60 p-3.5 flex items-center justify-between z-40 shadow-[0_-8px_24px_rgba(0,0,0,0.04)] rounded-t-2xl">
           <div className="flex flex-col text-right">
             <span className="text-[9px] text-slate-400 font-bold">مبلغ کل سبد:</span>
             <div className="text-sm font-black text-slate-950 flex items-center gap-0.5 mt-0.5">

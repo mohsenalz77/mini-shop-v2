@@ -2,9 +2,10 @@ import React from 'react';
 
 export default function Hero() {
   return (
-    <div className="w-full bg-slate-900 text-white relative overflow-visible">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20 flex flex-col md:flex-row items-center justify-between gap-12 relative z-10">
-        
+// به جای <div className="w-full bg-slate-900..."> این را بگذار:
+<div className="w-full px-4 md:px-8 mt-6">
+  <div className="max-w-7xl mx-auto bg-slate-900 text-white rounded-3xl relative overflow-visible shadow-xl">
+
         {/* بخش راست: متن‌ها و دکمه اکشن */}
         <div className="flex-1 flex flex-col items-start gap-4 text-right order-2 md:order-1">
           <div className="inline-flex items-center gap-1.5 bg-white/10 text-white/90 px-3 py-1 rounded-full text-xs font-medium border border-white/10">

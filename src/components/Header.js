@@ -11,9 +11,9 @@ export default function Header() {
     const controlNavbar = () => {
       if (typeof window !== 'undefined') {
         if (window.scrollY > lastScrollY && window.scrollY > 30) {
-          setIsMenuVisible(false);
+          setIsMenuVisible(false); // اسکرول به پایین -> منو و بنر جمع شوند
         } else if (window.scrollY < lastScrollY) {
-          setIsMenuVisible(true);
+          setIsMenuVisible(true); // اسکرول به بالا -> همه‌چیز باز شود
         }
         setLastScrollY(window.scrollY);
       }
@@ -25,19 +25,19 @@ export default function Header() {
 
   return (
     <>
-      {/* ۱. بنر اعلان بالایی */}
-      <div 
-        className={`w-full bg-gradient-to-r from-rose-500 to-pink-600 text-white text-center py-2 px-4 text-xs font-bold shadow-inner relative z-[60] select-none pointer-events-auto transition-all duration-300 ease-in-out transform ${
-          isMenuVisible ? 'translate-y-0' : '-translate-y-full absolute'
-        }`}
-      >
-        جشنواره شگفت‌انگیز سیب‌شاپ؛ تا ۴۰٪ تخفیف روی لوازم جانبی موبایل ⚡
-      </div>
-
-      {/* ۲. شاسی اصلی هدر */}
+      {/* شاسی اصلی هدر - کاملاً Fixed در سقف صفحه */}
       <header className="w-full fixed top-0 left-0 right-0 z-50 flex flex-col pointer-events-none bg-transparent">
         
-        {/* ردیف اول: لوگو، سرچ و ورود - اعمال افکت شیشه‌ای فوق غلیظ (bg-white/70 backdrop-blur-3xl) */}
+        {/* ۱. بنر اعلان بالایی - فیکس قطعی با انیمیشن کنترل ارتفاع (h) به جای جابجایی عمودی */}
+        <div 
+          className={`w-full bg-gradient-to-r from-rose-500 to-pink-600 text-white text-center text-xs font-bold shadow-inner pointer-events-auto transition-all duration-300 ease-in-out z-50 select-none overflow-hidden flex items-center justify-center ${
+            isMenuVisible ? 'h-9 py-2 px-4' : 'h-0 py-0 px-0'
+          }`}
+        >
+          <span>جشنواره شگفت‌انگیز سیب‌شاپ؛ تا ۴۰٪ تخفیف روی لوازم جانبی موبایل ⚡</span>
+        </div>
+
+        {/* ۲. ردیف اول: لوگو، سرچ و ورود - با افکت شیشه‌ای فوق غلیظ محبوبت */}
         <div className="w-full px-4 md:px-8 h-20 flex items-center justify-between gap-8 bg-white/70 backdrop-blur-3xl border-b border-slate-100 relative z-50 pointer-events-auto shadow-xs">
           
           {/* راست: لوگو */}
@@ -76,7 +76,7 @@ export default function Header() {
 
         </div>
 
-        {/* ردیف دوم: منوی دسته‌بندی‌ها - اعمال افکت شیشه‌ای متناسب (bg-white/75 backdrop-blur-2xl) */}
+        {/* ۳. ردیف دوم: منوی دسته‌بندی‌ها */}
         <div 
           className={`hidden md:block border-b border-slate-100/60 bg-white/75 backdrop-blur-2xl w-full h-12 transition-all duration-300 ease-in-out pointer-events-auto relative z-40 transform ${
             isMenuVisible 
@@ -141,7 +141,7 @@ export default function Header() {
 
       </header>
 
-      {/* ۳. دایو شبیه‌ساز ارتفاع */}
+      {/* ۴. دایو شبیه‌ساز ارتفاع */}
       <div className="w-full h-40 block shrink-0"></div>
 
       {/* ناوبری موبایل */}

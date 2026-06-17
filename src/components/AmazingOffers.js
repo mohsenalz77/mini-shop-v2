@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Timer, Flame, ArrowLeft } from 'lucide-react';
+import { Timer, Flame, ArrowLeft, ArrowRight } from 'lucide-react';
 
 const amazingProducts = [
   { id: 101, name: 'آیفون ۱۳ پرو مکس - ۱۲۸ گیگابایت (استوک کارهای عالی)', mainPrice: '۴۸,۹۰۰,۰۰۰', discountPrice: '۴۴,۵۰۰,۰۰۰', percent: '۹', image: '📱' },
@@ -20,10 +20,7 @@ export default function AmazingOffers() {
           clearInterval(timer);
           return prev;
         }
-        let s = prev.seconds - 1;
-        let m = prev.minutes;
-        let h = prev.hours;
-
+        let s = prev.seconds - 1; let m = prev.minutes; let h = prev.hours;
         if (s < 0) { s = 59; m -= 1; }
         if (m < 0) { m = 59; h -= 1; }
         return { hours: h, minutes: m, seconds: s };
@@ -35,81 +32,78 @@ export default function AmazingOffers() {
   const formatTime = (num) => String(num).padStart(2, '۰');
 
   return (
+    // حذف max-w-7xl برای باز شدن کادر و تراز شدن ۱۰۰٪ با لبه‌های هیرو بالا
     <div className="w-full px-4 md:px-8 my-12 relative z-10">
-      {/* اضافه شدن max-w-7xl و mx-auto برای هماهنگی با کل صفحه اصلی */}
-      <div className="max-w-7xl mx-auto bg-gradient-to-l from-rose-600 to-red-500 rounded-3xl p-6 flex flex-col lg:flex-row items-center gap-6 shadow-xl overflow-hidden">
+      <div className="w-full bg-gradient-to-l from-rose-600 to-red-500 rounded-3xl p-6 flex flex-col xl:flex-row items-center gap-5 shadow-xl relative overflow-hidden">
         
-        {/* بخش تابلوی اعلان و تایمر معکوس */}
-        <div className="flex flex-col items-center lg:items-start text-center lg:text-right text-white shrink-0 py-2 lg:w-48">
-          <div className="flex items-center gap-2 mb-2 bg-white/10 px-3 py-1 rounded-full border border-white/10 animate-bounce">
+        {/* ۱. بخش راست: تابلوی اعلان و تایمر معکوس */}
+        <div className="flex flex-col items-center xl:items-start text-center xl:text-right text-white shrink-0 py-2 xl:w-44 z-10">
+          <div className="flex items-center gap-2 mb-2 bg-white/10 px-3 py-1 rounded-full border border-white/10">
             <Flame className="w-4 h-4 text-amber-300 fill-amber-300" />
             <span className="text-[11px] font-black">پیشنهاد ویژه روز</span>
           </div>
           
           <h2 className="text-2xl font-black tracking-tight mb-1">شگفت‌انگیز</h2>
-          <span className="text-rose-100 text-xs font-medium mb-6">تخفیف‌های داغ سیب‌شاپ</span>
+          <span className="text-rose-100 text-xs font-medium mb-5">تخفیف‌های داغ سیب‌شاپ</span>
 
-          {/* باکس تایمر */}
-          <div className="flex items-center gap-1.5 font-black text-slate-900 direction-ltr mb-6">
-            <div className="bg-white rounded-xl w-9 h-9 flex items-center justify-center text-xs shadow-md">
-              {formatTime(timeLeft.seconds)}
-            </div>
-            <span className="text-white text-sm animate-pulse">:</span>
-            <div className="bg-white rounded-xl w-9 h-9 flex items-center justify-center text-xs shadow-md">
-              {formatTime(timeLeft.minutes)}
-            </div>
-            <span className="text-white text-sm animate-pulse">:</span>
-            <div className="bg-white rounded-xl w-9 h-9 flex items-center justify-center text-xs shadow-md">
-              {formatTime(timeLeft.hours)}
-            </div>
+          <div className="flex items-center gap-1 font-black text-slate-900 direction-ltr mb-5">
+            <div className="bg-white rounded-xl w-9 h-9 flex items-center justify-center text-xs shadow-md">{formatTime(timeLeft.seconds)}</div>
+            <span className="text-white text-sm">:</span>
+            <div className="bg-white rounded-xl w-9 h-9 flex items-center justify-center text-xs shadow-md">{formatTime(timeLeft.minutes)}</div>
+            <span className="text-white text-sm">:</span>
+            <div className="bg-white rounded-xl w-9 h-9 flex items-center justify-center text-xs shadow-md">{formatTime(timeLeft.hours)}</div>
           </div>
 
-          <button className="hidden lg:flex items-center gap-2 text-xs font-black text-white hover:text-amber-200 transition group mt-auto">
+          <button className="hidden xl:flex items-center gap-2 text-xs font-black text-white hover:text-amber-200 transition group mt-auto">
             <span>مشاهده همه</span>
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
           </button>
         </div>
 
-        {/* فیکس دسکتاپ: در موبایل اسکرول افقی می‌خورد، در دسکتاپ تبدیل به گرید ۴ ستونه کامل می‌شود تا جا پر شود */}
-        <div className="w-full flex lg:grid lg:grid-cols-4 gap-4 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 scrollbar-none snap-x">
+        {/* ۲. بخش وسط: رولر محصولات با حفظ ساختار اسکرول روان بدون ایجاد فضای خالی زشت در دسکتاپ */}
+        <div className="flex-1 w-full flex gap-4 overflow-x-auto pb-2 scrollbar-none snap-x z-10">
           {amazingProducts.map((prod) => (
             <div 
               key={prod.id} 
-              className="flex-shrink-0 w-44 lg:w-full snap-center bg-white rounded-2xl p-4 flex flex-col justify-between group cursor-pointer hover:shadow-2xl transition-all duration-300 relative border border-white"
+              className="flex-shrink-0 w-44 md:w-52 xl:w-56 snap-center bg-white rounded-2xl p-4 flex flex-col justify-between group cursor-pointer hover:shadow-2xl transition-all duration-300 relative border border-white"
             >
               <div className="relative">
-                <span className="absolute top-0 right-0 bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-lg z-10 shadow-xs">
+                <span className="absolute top-0 right-0 bg-rose-500 text-white text-[10px] font-black px-2 py-0.5 rounded-lg z-10">
                   %{prod.percent}
                 </span>
-
-                <div className="w-full bg-slate-50 rounded-xl h-28 md:h-36 flex items-center justify-center text-4xl md:text-5xl mb-3 relative overflow-hidden">
+                <div className="w-full bg-slate-50 rounded-xl h-28 md:h-36 flex items-center justify-center text-4xl md:text-5xl mb-3 overflow-hidden">
                   <span className="group-hover:scale-110 transition duration-300 select-none">{prod.image}</span>
                 </div>
-
                 <h3 className="text-xs font-bold text-slate-700 leading-5 line-clamp-2 h-10 mb-2">
                   {prod.name}
                 </h3>
               </div>
-
               <div className="mt-2 pt-2 border-t border-slate-50 flex flex-col gap-1.5">
                 <span className="text-[10px] text-slate-400 font-medium line-through text-right pr-1">
                   {prod.mainPrice}
                 </span>
-                
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-0.5 text-slate-950 font-black text-xs md:text-sm">
                     <span>{prod.discountPrice}</span>
                     <span className="text-[10px] font-normal text-slate-400">تومان</span>
                   </div>
-                  
-                  <button className="bg-slate-50 text-slate-600 w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs hover:bg-rose-500 hover:text-white transition duration-200 shrink-0">
-                    ＋
-                  </button>
+                  <button className="bg-slate-50 text-slate-600 w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs hover:bg-rose-500 hover:text-white transition duration-200">＋</button>
                 </div>
               </div>
-
             </div>
           ))}
+        </div>
+
+        {/* ۳. بخش جدید چپ: یک مینی‌بنر داخلی هوشمند اختصاصی که فقط در دسکتاپ عریض ظاهر می‌شود تا جای خالی را پر کند */}
+        <div className="hidden xl:flex flex-col items-center justify-center text-center border-2 border-dashed border-white/20 rounded-2xl p-5 w-48 h-full shrink-0 text-white relative overflow-hidden group/left cursor-pointer">
+          <div className="absolute inset-0 bg-white/5 opacity-0 group-hover/left:opacity-100 transition duration-300"></div>
+          <span className="text-4xl mb-2 animate-pulse">🎁</span>
+          <span className="text-xs font-black mb-1">شانس برنده شدن!</span>
+          <p className="text-[10px] text-rose-100 leading-4 mb-4">با هر خرید شگفت‌انگیز، یک کد قرعه‌کشی گجت ببر.</p>
+          <div className="bg-white text-rose-600 rounded-xl px-3 py-1.5 text-[10px] font-black flex items-center gap-1 shadow-sm">
+            <span>کلوپ مشتریان</span>
+            <ArrowLeft className="w-3 h-3" />
+          </div>
         </div>
 
       </div>

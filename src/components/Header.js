@@ -5,13 +5,15 @@ import {
   Search, ShoppingBag, User, ChevronDown, Menu, 
   Smartphone, Laptop, Headphones, Home, Grid, X, Bell
 } from 'lucide-react';
-// ۱. ایمپورت کامپوننت لایو لیندینگ نکست‌جی‌اس
 import Link from 'next/link';
+// ایمپورت هوک مسیرخوانی برای اکتیو کردن آیکون‌های پایین موبایل
+import { usePathname } from 'next/navigation';
 
 export default function Header() {
   const [isMenuVisible, setIsMenuVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname(); // خواندن مسیر فعلی مرورگر
 
   useEffect(() => {
     const controlNavbar = () => {
@@ -46,8 +48,6 @@ export default function Header() {
 
         {/* ردیف اول دسکتاپ */}
         <div className="w-full px-4 md:px-8 h-20 flex items-center justify-between gap-8 bg-white/70 backdrop-blur-3xl border-b border-slate-100 relative z-50 pointer-events-auto shadow-xs">
-          
-          {/* اتصال لوگوی دسکتاپ به صفحه اصلی */}
           <Link href="/" className="flex items-center shrink-0 pointer-events-auto">
             <span className="text-2xl font-black text-slate-800 tracking-tight cursor-pointer">
               سیب<span className="text-rose-500">‌شاپ</span>
@@ -70,15 +70,14 @@ export default function Header() {
             </button>
             <div className="h-6 w-[1px] bg-slate-200/60"></div>
             
-            {/* اتصال دکمه سبد خرید دسکتاپ به آدرس /cart */}
             <Link href="/cart" className="flex items-center justify-center p-2.5 text-slate-700 hover:bg-slate-50/80 rounded-xl transition duration-200 relative">
               <ShoppingBag className="w-5 h-5 stroke-[2.5]" />
-              <span className="absolute -top-0.5 -left-0.5 bg-rose-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">۲</span>
+              <span className="absolute -top-0.5 -left-0.5 bg-rose-500 text-white text-[10px] font-sans font-black w-5 h-5 rounded-full flex items-center justify-center shadow-xs">۲</span>
             </Link>
           </div>
         </div>
 
-        {/* ردیف دوم دسکتاپ: منوی دسته‌بندی‌ها */}
+        {/* ردیف دوم دسکتاپ */}
         <div 
           className={`border-b border-slate-100/60 bg-white/75 backdrop-blur-2xl w-full h-12 transition-all duration-300 ease-in-out pointer-events-auto relative z-40 transform ${
             isMenuVisible ? 'translate-y-0 opacity-100' : '-translate-y-20 opacity-0 pointer-events-none'
@@ -91,7 +90,6 @@ export default function Header() {
                 <span className="font-bold">دسته‌بندی محصولات</span>
                 <ChevronDown className="w-3 h-3 text-slate-400 group-hover/menu:rotate-180 transition duration-300" />
 
-                {/* پاپ آپ مگامنو */}
                 <div className="absolute top-full right-0 w-[700px] bg-white border border-slate-100 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.08)] rounded-3xl p-6 grid grid-cols-3 gap-6 opacity-0 pointer-events-none group-hover/menu:opacity-100 group-hover/menu:pointer-events-auto transition-all duration-300 transform translate-y-2 group-hover/menu:translate-y-0 z-50">
                   <div>
                     <div className="flex items-center gap-1.5 text-slate-900 font-bold mb-3 text-sm">
@@ -140,8 +138,6 @@ export default function Header() {
       {/* ========================================================================= */}
       <header className="md:hidden w-full fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-100 flex flex-col pt-2 pb-3 px-4 gap-2.5 shadow-xs">
         <div className="w-full flex items-center justify-between">
-          
-          {/* اتصال لوگوی موبایل به صفحه اصلی */}
           <Link href="/" className="flex items-center">
             <span className="text-xl font-black text-slate-800 tracking-tight">
               سیب<span className="text-rose-500">‌شاپ</span>
@@ -170,40 +166,61 @@ export default function Header() {
       <div className="w-full h-[120px] md:h-40 block shrink-0"></div>
 
       {/* ========================================================================= */}
-      {/* ۴. ناوبری پایین موبایل (Bottom Navigation) */}
+      {/* ۴. ناوبری پایین موبایل (Bottom Navigation - کاملاً هوشمند و داینامیک) */}
       {/* ========================================================================= */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] z-50 px-4 py-2.5 rounded-t-3xl">
         <div className="flex items-center justify-around text-slate-400">
           
-          <Link href="/" className="flex flex-col items-center gap-1.5 text-rose-500 font-bold relative pb-1 min-w-[60px]">
-            <span className="absolute top-0 w-1 h-1 bg-rose-500 rounded-full animate-pulse"></span>
-            <Home className="w-5 h-5 mt-1 stroke-[2.5]" />
-            <span className="text-[10px] font-bold tracking-tight">خانه</span>
+          {/* خانه: تغییر کلاس ثابت به استیت هوشمند داینامیک بر اساس آدرس */}
+          <Link 
+            href="/" 
+            className={`flex flex-col items-center gap-1 min-w-[60px] transition duration-200 ${
+              pathname === '/' ? 'text-rose-500 font-bold' : 'text-slate-400 font-medium hover:text-slate-700'
+            }`}
+          >
+            {pathname === '/' && <span className="absolute top-0 w-1 h-1 bg-rose-500 rounded-full animate-pulse"></span>}
+            <Home className="w-5 h-5 mt-0.5 stroke-[2.3]" />
+            <span className="text-[10px] tracking-tight">خانه</span>
           </Link>
 
+          {/* دسته‌بندی */}
           <button 
             onClick={() => setIsMobileMenuOpen(true)}
-            className={`flex flex-col items-center gap-1.5 font-semibold min-w-[60px] transition duration-200 ${isMobileMenuOpen ? 'text-rose-500' : 'text-slate-500 hover:text-slate-800'}`}
+            className={`flex flex-col items-center gap-1 font-semibold min-w-[60px] transition duration-200 ${
+              isMobileMenuOpen ? 'text-rose-500' : 'text-slate-400 hover:text-slate-700'
+            }`}
           >
             <Grid className="w-5 h-5 stroke-[2.2]" />
             <span className="text-[10px] tracking-tight">دسته‌بندی</span>
           </button>
 
-          {/* اتصال آیکون سبد خرید ناوبری کف موبایل به /cart */}
-          <Link href="/cart" className="flex flex-col items-center gap-1.5 text-slate-500 hover:text-slate-800 font-semibold relative min-w-[60px]">
-            <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
-            <span className="absolute top-0 right-4 bg-rose-500 text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-white">۲</span>
+          {/* سبد خرید: تغییر رنگ هوشمند + فیکس اورجینال و لوکس دایره عدد کالا */}
+          <Link 
+            href="/cart" 
+            className={`flex flex-col items-center gap-1 relative min-w-[60px] transition duration-200 ${
+              pathname === '/cart' ? 'text-rose-500 font-bold' : 'text-slate-400 font-medium hover:text-slate-700'
+            }`}
+          >
+            {pathname === '/cart' && <span className="absolute top-0 w-1 h-1 bg-rose-500 rounded-full animate-pulse"></span>}
+            <div className="relative p-0.5">
+              <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
+              {/* ارتقای دیزاین کپسولی عدد: کوچک، خوانا، بدون کشیدگی و کاملاً متقارن */}
+              <span className="absolute -top-1 -left-1.5 bg-rose-500 text-white text-[9px] font-sans font-black w-4 h-4 rounded-full flex items-center justify-center leading-none shadow-xs border border-white">
+                ۲
+              </span>
+            </div>
             <span className="text-[10px] tracking-tight">سبد خرید</span>
           </Link>
 
-          <button className="flex flex-col items-center gap-1.5 text-slate-500 hover:text-slate-800 font-semibold min-w-[60px]">
+          {/* پروفایل */}
+          <button className="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-700 font-semibold min-w-[60px]">
             <User className="w-5 h-5 stroke-[2.2]" />
             <span className="text-[10px] tracking-tight">پروفایل</span>
           </button>
         </div>
       </nav>
 
-      {/* ۵. منوی کشویی دسته‌بندی موبایل */}
+      {/* ۵. منوی کشویی دسته‌بندی موبایل کماکان در زیر قرار دارد... */}
       <div 
         className={`fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 transition-opacity duration-300 md:hidden ${
           isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
@@ -216,7 +233,7 @@ export default function Header() {
           }`}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="w-14 h-1.5 bg-slate-200 rounded-full mx-auto mb-5 cursor-pointer" onClick={() => setIsMobileMenuOpen(false)}></div>
+          <div className="w-14 h-1.5 bg-slate-200 rounded-full mx-auto mb-5" onClick={() => setIsMobileMenuOpen(false)}></div>
           
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-base font-black text-slate-800">دسته‌بندی محصولات سیب‌شاپ</h3>

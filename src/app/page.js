@@ -1,11 +1,11 @@
 import Header from '../components/Header';
 import Hero from '../components/Hero';
-import QuickAccess from '@/components/QuickAccess';
+import QuickAccess from '../components/QuickAccess'; // آدرس‌دهی اصلاح و یکدست شد
 import Categories from '../components/Categories';
 import AmazingOffers from '../components/AmazingOffers';
 import PromoBanners from '../components/PromoBanners';
 import ProductGrid from '../components/ProductGrid';
-import Footer from '../components/Footer'; // ۱. ایمپورت کردن فوتر جدید
+import Footer from '../components/Footer';
 
 export default function HomePage() {
   return (
@@ -19,7 +19,6 @@ export default function HomePage() {
       <PromoBanners />
       <ProductGrid />
       
-      {/* ۲. رندر فوتر سنگین و چندستونه در انتهای صفحه */}
       <Footer />
 
     </div>

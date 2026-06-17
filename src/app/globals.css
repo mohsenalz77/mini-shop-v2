@@ -6,3 +6,13 @@ body {
   background-color: #f9fafb;
   color: #111827;
 }
+/* حذف نوار اسکرول زشت برای تمام مرورگرها */
+@layer utilities {
+  .scrollbar-none::-webkit-scrollbar {
+    display: none; /* مرورگرهای کروم، سافاری و اپرا */
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;  /* مرورگر IE و Edge قدیمی */
+    scrollbar-width: none;  /* مرورگر فایرفاکس */
+  }
+}

@@ -5,6 +5,7 @@ import Categories from '../components/Categories';
 import AmazingOffers from '../components/AmazingOffers';
 import PromoBanners from '../components/PromoBanners';
 import ProductGrid from '../components/ProductGrid';
+import BrandCarousel from '../components/BrandCarousel';
 import Footer from '../components/Footer';
 
 export default function HomePage() {
@@ -17,8 +18,8 @@ export default function HomePage() {
       <Categories />
       <AmazingOffers />
       <PromoBanners />
-      <ProductGrid />
-      
+      <ProductGrid /> 
+      <BrandCarousel />
       <Footer />
 
     </div>

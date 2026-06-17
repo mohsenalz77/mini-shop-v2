@@ -11,9 +11,9 @@ export default function Header() {
     const controlNavbar = () => {
       if (typeof window !== 'undefined') {
         if (window.scrollY > lastScrollY && window.scrollY > 50) {
-          setIsMenuVisible(false); // اسکرول به پایین -> منو برود زیر ردیف اول
+          setIsMenuVisible(false); // اسکرول به پایین -> منو مخفی شود
         } else if (window.scrollY < lastScrollY) {
-          setIsMenuVisible(true); // اسکرول به بالا -> منو بیاید بیرون
+          setIsMenuVisible(true); // textاسکرول به بالا -> منو ظاهر شود
         }
         setLastScrollY(window.scrollY);
       }
@@ -25,16 +25,16 @@ export default function Header() {
 
   return (
     <>
-      {/* ۱. بنر اعلان بالایی */}
-      <div className="bg-gradient-to-r from-rose-500 to-pink-600 text-white text-center py-2 px-4 text-xs font-bold shadow-inner relative z-50 select-none">
+      {/* ۱. بنر اعلان بالایی (ثابت نیست و با اولین اسکرول غیب می‌شود) */}
+      <div className="w-full bg-gradient-to-r from-rose-500 to-pink-600 text-white text-center py-2 px-4 text-xs font-bold shadow-inner relative z-[60] select-none">
         جشنواره شگفت‌انگیز سیب‌شاپ؛ تا ۴۰٪ تخفیف روی لوازم جانبی موبایل ⚡
       </div>
 
-      {/* ۲. شاسی اصلی هدر - تبدیل به ریل نسبی برای مهار منوی حرکتی */}
-      <div className="w-full relative z-50">
+      {/* ۲. شاسی اصلی هدر قفل‌شده در بالای صفحه (Fixed) */}
+      <header className="w-full fixed top-0 left-0 right-0 z-50 flex flex-col pointer-events-none">
         
-        {/* ردیف اول: لوگو، سرچ‌بار و ورود - فیکس قفل چسبان به سقف (sticky top-0) */}
-        <div className="w-full px-4 md:px-8 h-20 flex items-center justify-between gap-8 bg-white/80 backdrop-blur-xl border-b border-slate-100 sticky top-0 z-50 shadow-xs">
+        {/* ردیف اول: لوگو، سرچ و ورود (همیشه و ۱۰۰٪ چسبیده به بالا و ثابت) */}
+        <div className="w-full px-4 md:px-8 h-20 flex items-center justify-between gap-8 bg-white/90 backdrop-blur-xl border-b border-slate-100 relative z-50 pointer-events-auto shadow-xs">
           
           {/* راست: لوگو */}
           <div className="flex items-center shrink-0">
@@ -72,12 +72,12 @@ export default function Header() {
 
         </div>
 
-        {/* ردیف دوم: منوی ناوبری - فیکس موقعیت چسبان هوشمند متصل به ردیف اول */}
+        {/* ردیف دوم: منوی دسته‌بندی‌ها (بسته به اسکرول، خیلی تمیز بالا و پایین می‌رود) */}
         <div 
-          className={`hidden md:block border-b border-slate-100/60 bg-white/90 backdrop-blur-md fixed left-0 right-0 h-12 transition-all duration-300 ease-in-out z-40 ${
+          className={`hidden md:block border-b border-slate-100/60 bg-white/95 backdrop-blur-md w-full h-12 transition-all duration-300 ease-in-out z-40 pointer-events-auto transform ${
             isMenuVisible 
-              ? 'top-20 opacity-100' 
-              : 'top-8 opacity-0 pointer-events-none'
+              ? 'translate-y-0 opacity-100' 
+              : '-translate-y-12 opacity-0'
           }`}
         >
           <div className="w-full px-4 md:px-8 h-12 flex items-center">
@@ -135,7 +135,10 @@ export default function Header() {
           </div>
         </div>
 
-      </div>
+      </header>
+
+      {/* ۳. دایو شبیه‌ساز ارتفاع (Spacer): جلوی افتادن بنر هیرو به زیر هدر فیکس‌شده را می‌گیرد */}
+      <div className="w-full h-32 md:h-32 block shrink-0"></div>
 
       {/* ناوبری موبایل */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-100 shadow-[0_-4px_20px_rgba(0,0,0,0.04)] z-50 px-6 py-2">

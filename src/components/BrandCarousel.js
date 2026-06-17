@@ -1,8 +1,8 @@
 "use client";
 
 import React from 'react';
+import { Award, Sparkles } from 'lucide-react';
 
-// لیست برندها به همراه نام انگلیسی (که بعداً می‌توانی جای متن، لوگوی SVG یا عکس بگذاری)
 const brands = [
   { id: 1, name: 'Apple', logo: '🍏', subtitle: 'اپل' },
   { id: 2, name: 'Samsung', logo: '📱', subtitle: 'سامسونگ' },
@@ -13,18 +13,27 @@ const brands = [
 
 export default function BrandCarousel() {
   return (
-    // مارجین استاندارد و متناسب با چیدمان قبل از فوتر
     <div className="w-full px-4 md:px-8 my-10 md:my-16 relative z-10 direction-rtl">
       
-      {/* هدر بخش برندها */}
-      <div className="w-full flex flex-col gap-1 text-right mb-6 border-b border-slate-100 pb-4">
-        <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 bg-slate-400 rounded-full"></span>
-          <h2 className="text-sm md:text-base font-black text-slate-800 tracking-tight">برندهای محبوب در سیب‌شاپ</h2>
+      {/* هدر بازطراحی شده و پرانرژی بخش برندها */}
+      <div className="flex flex-col gap-2 mb-6 items-center md:items-start text-center md:text-right border-b border-slate-100 pb-4">
+        
+        {/* تگ مینی‌مال هویت بصری فوق العاده شیک */}
+        <div className="flex items-center gap-1.5 bg-slate-100 text-slate-700 px-3 py-1 rounded-full border border-slate-200/50">
+          <Sparkles className="w-3 h-3 text-amber-500 fill-amber-500" />
+          <span className="text-[10px] font-black tracking-wide">شرکتهای معتبر</span>
+        </div>
+        
+        {/* عنوان اصلی همراه با آیکون و گرادینت اختصاصی برند سیب‌شاپ */}
+        <div className="flex items-center gap-2 mt-1">
+          <Award className="w-4 h-4 text-rose-500 hidden md:block" />
+          <h2 className="text-base md:text-xl font-black text-slate-800 tracking-tight">
+            برندهای محبوب در سیب‌<span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-600">شاپ</span>
+          </h2>
         </div>
       </div>
 
-      {/* ریل برندها: در موبایل اسکرول افقی روان و در دسکتاپ گرید ۵ ستونه فیکس */}
+      {/* ریل برندها */}
       <div className="w-full flex md:grid md:grid-cols-5 gap-4 overflow-x-auto md:overflow-visible pb-3 md:pb-0 scrollbar-none snap-x px-1 md:px-0">
         {brands.map((brand) => (
           <div 

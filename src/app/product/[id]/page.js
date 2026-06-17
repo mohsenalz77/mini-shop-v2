@@ -55,27 +55,27 @@ export default function ProductDetailPage() {
     <div className="min-h-screen bg-slate-50 overflow-x-hidden antialiased direction-rtl">
       <Header />
 
-      {/* هاله‌های آمبیانس نوری */}
+      {/* هاله‌های آمبیانس نوری مینی‌مال */}
       <div className="absolute top-32 left-1/4 w-[500px] h-[500px] bg-rose-500/5 blur-[150px] rounded-full pointer-events-none z-0"></div>
       <div className="absolute top-96 right-1/4 w-[500px] h-[500px] bg-blue-500/5 blur-[150px] rounded-full pointer-events-none z-0"></div>
-  
-      {/* پدینگ بالا و مارجین‌ها کاملاً مهندسی و فشرده شدند تا نقشه سایت به هدر بچسبد */}
-      <main className="w-full px-4 md:px-8 mt-20 md:mt-32 pt-4 md:pt-6 pb-16 relative z-10"> 
+
+      {/* 🛠️ تصحیح نهایی کانتینر اصلی: تراز ۱۰۰٪ با عرض هیرو دسکتاپ و مهار فضا */}
+      <main className="w-full px-4 md:px-8 mt-4 md:mt-6 pt-1 pb-16 relative z-10">
         
-        {/* بردکرامب مینی‌مال */}
-        <div className="flex items-center gap-2 text-[11px] md:text-xs font-bold text-slate-400 mb-6 text-right">
+        {/* بردکرامب (نقشه سایت) کاملاً چسبیده به زیر منو */}
+        <div className="flex items-center gap-2 text-[11px] md:text-xs font-bold text-slate-400 mb-4 text-right">
           <span className="hover:text-slate-600 cursor-pointer">سیب‌شاپ</span>
-          <ChevronRight className="w-3 h-3 animate-pulse" />
+          <ChevronRight className="w-3 h-3 text-slate-300" />
           <span className="hover:text-slate-600 cursor-pointer">گوشی موبایل</span>
-          <ChevronRight className="w-3 h-3" />
-          <span className="text-slate-800 truncate max-w-[200px] md:max-w-none">{productData.name}</span>
+          <ChevronRight className="w-3 h-3 text-slate-300" />
+          <span className="text-slate-800 truncate max-w-[180px] md:max-w-none">{productData.name}</span>
         </div>
 
-        {/* کادر اصلی سه ستونه محصول */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 md:gap-6 items-start mb-10">
+        {/* کادر اصلی سه ستونه محصول - گریدبندی تراز با لبه منوها */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 items-start mb-8">
           
-          {/* ستون اول: گالری عکس (کمپکت در موبایل، عریض در دسکتاپ) */}
-          <div className="lg:col-span-5 bg-white border border-slate-100 rounded-3xl p-4 md:p-6 flex flex-col justify-between h-[340px] md:h-[500px] shadow-2xs relative">
+          {/* ستون اول: گالری عکس */}
+          <div className="lg:col-span-5 bg-white border border-slate-100 rounded-3xl p-4 md:p-6 flex flex-col justify-between h-[340px] md:h-[480px] shadow-2xs relative">
             <div className="absolute top-4 right-4 flex flex-col gap-2 z-20">
               <button onClick={() => setIsLiked(!isLiked)} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50 border border-slate-100/70 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-500 transition shadow-3xs">
                 <Heart className={`w-4 h-4 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
@@ -85,11 +85,10 @@ export default function ProductDetailPage() {
               </button>
             </div>
             <div className="flex-1 flex items-center justify-center">
-              <span className="text-7xl md:text-9xl filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.1)] select-none transform hover:scale-105 transition duration-500">
+              <span className="text-7xl md:text-8xl lg:text-9xl filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.08)] select-none transform hover:scale-105 transition duration-500">
                 {productData.image}
               </span>
             </div>
-            {/* گالری تصاویر کوچک با اسکرول افقی ملایم در موبایل */}
             <div className="flex gap-2 justify-center mt-2 overflow-x-auto pb-1 scrollbar-none">
               <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-50 border-2 border-rose-500 rounded-xl flex items-center justify-center text-lg cursor-pointer shrink-0">📱</div>
               <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-lg opacity-60 hover:opacity-100 transition cursor-pointer shrink-0">📸</div>
@@ -98,29 +97,29 @@ export default function ProductDetailPage() {
           </div>
 
           {/* ستون دوم: مشخصات برجسته */}
-          <div className="lg:col-span-4 bg-white border border-slate-100 rounded-3xl p-5 md:p-6 flex flex-col justify-between min-h-[380px] md:min-h-[500px] shadow-2xs text-right">
-            <div>
-              <h1 className="text-sm md:text-lg font-black text-slate-900 leading-6 md:leading-7 mb-1.5">{productData.name}</h1>
-              <p className="text-[9px] md:text-[10px] font-bold text-slate-400 font-sans tracking-wide mb-4 text-left direction-ltr truncate">{productData.englishName}</p>
-              
-              <div className="flex items-center gap-1.5 mb-4 bg-slate-50/80 px-2.5 py-1 rounded-xl border border-slate-100/50 w-fit">
-                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                <span className="text-xs font-black text-slate-700">{productData.rating}</span>
-                <span className="text-[9px] text-slate-400 font-bold">({productData.reviewCount})</span>
-              </div>
+          <div className="lg:col-span-4 bg-white border border-slate-100 rounded-3xl p-5 flex flex-col justify-between min-h-[380px] md:h-[480px] shadow-2xs text-right">
+            <div className="h-full flex flex-col justify-between">
+              <div>
+                <h1 className="text-sm md:text-base lg:text-lg font-black text-slate-900 leading-6 md:leading-7 mb-1.5">{productData.name}</h1>
+                <p className="text-[9px] md:text-[10px] font-bold text-slate-400 font-sans tracking-wide mb-3 text-left direction-ltr truncate">{productData.englishName}</p>
+                
+                <div className="flex items-center gap-1.5 mb-3.5 bg-slate-50/80 px-2.5 py-1 rounded-xl border border-slate-100/50 w-fit">
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  <span className="text-xs font-black text-slate-700">{productData.rating}</span>
+                  <span className="text-[9px] text-slate-400 font-bold">({productData.reviewCount})</span>
+                </div>
 
-              {/* انتخاب رنگ */}
-              <div className="mb-4 bg-slate-50/50 p-3 rounded-2xl border border-slate-100/60">
-                <span className="text-[11px] md:text-xs font-black text-slate-800 block mb-2">رنگ: {productData.colors[selectedColor].name}</span>
-                <div className="flex items-center gap-2">
-                  {productData.colors.map((color, index) => (
-                    <button key={index} onClick={() => setSelectedColor(index)} className={`w-6 h-6 md:w-7 h-7 rounded-full ${color.class} border-2 transition-all duration-300 ${selectedColor === index ? 'border-rose-500 scale-110 ring-4 ring-rose-500/10 shadow-sm' : 'border-slate-200'}`} />
-                  ))}
+                <div className="mb-3.5 bg-slate-50/50 p-3 rounded-2xl border border-slate-100/60">
+                  <span className="text-[11px] md:text-xs font-black text-slate-800 block mb-2">رنگ: {productData.colors[selectedColor].name}</span>
+                  <div className="flex items-center gap-2">
+                    {productData.colors.map((color, index) => (
+                      <button key={index} onClick={() => setSelectedColor(index)} className={`w-6 h-6 md:w-7 h-7 rounded-full ${color.class} border-2 transition-all duration-300 ${selectedColor === index ? 'border-rose-500 scale-110 ring-4 ring-rose-500/10 shadow-sm' : 'border-slate-200'}`} />
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* ویژگی‌های مهم: بهینه‌سازی گرید در موبایل */}
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1.5">
                 <div className="flex items-center gap-1 text-slate-800 mb-0.5"><Info className="w-3.5 h-3.5 text-rose-500" /><span className="text-xs font-black">ویژگی‌های کلیدی:</span></div>
                 <div className="grid grid-cols-2 lg:grid-cols-1 gap-2">
                   {productData.specs.slice(0, 4).map((spec, index) => (
@@ -134,10 +133,10 @@ export default function ProductDetailPage() {
             </div>
           </div>
 
-          {/* ستون سوم: باکس خرید (تغییر طلایی: اضافه شدن lg:sticky برای چسبندگی هوشمند در دسکتاپ) */}
-          <div className="lg:col-span-3 lg:sticky lg:top-28 bg-slate-900 border border-slate-950 rounded-3xl p-5 flex flex-col justify-between min-h-[350px] md:min-h-[500px] shadow-xl text-white relative overflow-hidden">
+          {/* ستون سوم: باکس خرید */}
+          <div className="lg:col-span-3 lg:sticky lg:top-24 bg-slate-900 border border-slate-950 rounded-3xl p-5 flex flex-col justify-between h-[350px] md:h-[480px] shadow-xl text-white relative overflow-hidden">
             <div className="absolute -top-10 -left-10 w-32 h-32 bg-rose-500/10 blur-2xl rounded-full"></div>
-            <div className="flex flex-col gap-3.5 z-10">
+            <div className="flex flex-col gap-3 z-10">
               <span className="text-[11px] font-black text-slate-400 border-b border-white/5 pb-2 block text-right">فروشنده: سیب‌شاپ</span>
               <div className="flex items-start gap-2.5 text-right">
                 <ShieldCheck className="w-4.5 h-4.5 text-rose-500 shrink-0 mt-0.5" />
@@ -170,7 +169,7 @@ export default function ProductDetailPage() {
         </div>
 
         {/* بخش دوم: سیستم تب‌بندی نقد و بررسی */}
-        <div className="w-full bg-white border border-slate-100 rounded-3xl p-5 md:p-6 shadow-2xs mb-10 text-right">
+        <div className="w-full bg-white border border-slate-100 rounded-3xl p-5 md:p-6 shadow-2xs mb-8 text-right">
           <div className="flex items-center gap-6 border-b border-slate-100 pb-3 mb-5">
             <button onClick={() => setActiveTab('review')} className={`text-xs md:text-sm font-black pb-2 transition relative ${activeTab === 'review' ? 'text-rose-500' : 'text-slate-400'}`}>
               <span>نقد و بررسی تخصصی</span>
@@ -199,9 +198,9 @@ export default function ProductDetailPage() {
           )}
         </div>
 
-        {/* بخش سوم: گرید محصولات پیشنهادی (اسکرول افقی هوشمند در موبایل) */}
-        <div className="w-full text-right mb-10">
-          <div className="flex items-center gap-2 mb-5">
+        {/* بخش سوم: گرید محصولات پیشنهادی */}
+        <div className="w-full text-right mb-8">
+          <div className="flex items-center gap-2 mb-4">
             <Award className="w-4.5 h-4.5 text-rose-500" />
             <h3 className="text-sm md:text-lg font-black text-slate-900">لوازم جانبی پیشنهادی سیب‌<span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-600">شاپ</span></h3>
           </div>
@@ -219,7 +218,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* بخش چهارم: پنل دیدگاه‌ها و آنالیز امتیازها */}
+        {/* بخش چهارم: دیدگاه‌ها */}
         <div className="w-full bg-white border border-slate-100 rounded-3xl p-5 md:p-6 shadow-2xs text-right">
           <div className="flex items-center gap-2 mb-6 border-b border-slate-50 pb-3">
             <MessageSquare className="w-4.5 h-4.5 text-rose-500" />
@@ -227,7 +226,6 @@ export default function ProductDetailPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* کارت چپ: آنالیز امتیاز محصول */}
             <div className="lg:col-span-4 bg-slate-50/70 border border-slate-100/50 p-5 rounded-2xl flex flex-col items-center justify-center text-center">
               <span className="text-3xl font-black text-slate-900">{productData.rating}</span>
               <div className="flex items-center gap-0.5 my-1.5">
@@ -246,7 +244,6 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* کارت راست: لیست کامنت‌های کاربران */}
             <div className="lg:col-span-8 flex flex-col gap-4">
               {productData.comments.map((comment) => (
                 <div key={comment.id} className="border border-slate-100/80 p-4 rounded-xl flex flex-col gap-2.5">

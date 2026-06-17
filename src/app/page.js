@@ -1,5 +1,6 @@
 import Header from '../components/Header';
 import Hero from '../components/Hero';
+import QuickAccess from '@/components/QuickAccess';
 import Categories from '../components/Categories';
 import AmazingOffers from '../components/AmazingOffers';
 import PromoBanners from '../components/PromoBanners';

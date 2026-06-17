@@ -1,42 +1,44 @@
-import { ShieldCheck, Truck, Percent, ArrowLeft } from 'lucide-react';
+import React from 'react';
 
 export default function Hero() {
   return (
-    <div className="w-full px-4 md:px-8 my-6 relative overflow-visible">
-      
-      {/* باکس تیره هیرو - حتماً باید overflow-visible باشد */}
-      <div className="w-full bg-gradient-to-br from-slate-950 via-zinc-900 to-slate-900 text-white rounded-3xl p-8 md:p-16 flex flex-col md:flex-row items-center justify-between shadow-2xl relative overflow-visible border border-slate-800/50">
+    <div className="w-full bg-slate-900 text-white relative overflow-visible">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20 flex flex-col md:flex-row items-center justify-between gap-12 relative z-10">
         
-        {/* افکت‌های آمبیانس نوری */}
-        <div className="absolute -top-20 -left-20 w-[400px] h-[400px] bg-rose-500/10 rounded-full blur-[120px] pointer-events-none"></div>
-        <div className="absolute -bottom-20 left-1/3 w-[300px] h-[300px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none"></div>
-
-        {/* بخش راست: متون و تایپوگرافی */}
-        <div className="z-10 max-w-xl text-center md:text-right flex flex-col items-center md:items-start order-2 md:order-1 mt-8 md:mt-0">
-          
-          <div className="flex items-center gap-2 bg-gradient-to-r from-rose-500/10 to-transparent border border-rose-500/20 px-4 py-2 rounded-full mb-6 backdrop-blur-md">
-            <Percent className="w-3.5 h-3.5 text-rose-400 animate-pulse" />
-            <span className="text-[11px] font-bold text-rose-300 tracking-wide">
-              جشنواره افتتاحیه: ضمانت اصالت و ۱۸ ماه گارانتی شرکتی
-            </span>
+        {/* بخش راست: متن‌ها و دکمه اکشن */}
+        <div className="flex-1 flex flex-col items-start gap-4 text-right order-2 md:order-1">
+          <div className="inline-flex items-center gap-1.5 bg-white/10 text-white/90 px-3 py-1 rounded-full text-xs font-medium border border-white/10">
+            <span>✨ جشنواره افتتاحیه؛ ضمانت اصالت و ۱۸ ماه گارانتی شرکتی</span>
           </div>
-
-          <h1 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-zinc-200 to-zinc-400 leading-tight mb-6 tracking-tight">
-            اتصال به دنیای <span className="text-rose-500">پرچمدارها</span>
+          
+          <h1 className="text-3xl md:text-5xl font-black text-white leading-tight md:leading-snug">
+            اتصال به دنیای <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-pink-500">پرچمدارها</span>
           </h1>
           
-          <p className="text-zinc-400 text-xs md:text-sm mb-10 leading-8 max-w-md font-medium">
+          <p className="text-slate-400 text-xs md:text-sm max-w-xl leading-6 font-medium">
             برترین تکنولوژی‌های روز دنیا، لوازم جانبی اورجینال و خدمات تخصصی تعمیرات موبایل را در سیب‌شاپ با استانداردهای جهانی تجربه کنید.
           </p>
-
-          <div className="flex items-center gap-4 mb-10">
-            <button className="group bg-gradient-to-r from-white to-zinc-200 text-slate-950 text-xs font-black px-8 py-4 rounded-2xl hover:from-rose-500 hover:to-pink-600 hover:text-white transition-all duration-300 shadow-[0_20px_40px_rgba(255,255,255,0.05)] flex items-center gap-3">
+          
+          <div className="mt-4 flex flex-wrap gap-4">
+            <button className="bg-white text-slate-900 px-6 py-3 rounded-2xl text-xs font-black shadow-lg hover:bg-slate-100 transition duration-200 flex items-center gap-2">
               <span>کاوش در محصولات</span>
-              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1.5 stroke-[2.5]" />
+              <span>←</span>
             </button>
           </div>
+          
+          <div className="mt-8 flex items-center gap-6 text-slate-500 text-[10px] md:text-xs font-bold border-t border-slate-800/80 pt-4 w-full">
+            <div className="flex items-center gap-1.5">
+              <span>🛡️</span>
+              <span>۱۸ ماه گارانتی معتبر</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span>🚀</span>
+              <span>ارسال سریع اکسپرس</span>
+            </div>
+          </div>
+        </div>
 
-{/* بخش چپ: مهار و هول دادن قطعی عکس به خارج از مرز پایین با سایه ملایم */}
+        {/* بخش چپ: مهار آیفون با سایه ملایم و تصحیح‌شده بدون کامنت تداخلی */}
         <div className="hidden md:flex flex-1 justify-center items-center order-1 md:order-2 relative z-30 h-96">
           <div className="relative w-[360px] h-[540px] transform translate-y-24 rotate-1 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-center justify-center">
             <img 
@@ -47,20 +49,6 @@ export default function Hero() {
           </div>
         </div>
 
-        </div>
-
-        
-{/* بخش چپ: ملایم کردن فوق‌العاده سایه برای طبیعی شدن افکت سه‌بعدی */}
-<div className="hidden md:flex flex-1 justify-center items-center order-1 md:order-2 relative z-30 h-96">
-          <div className="relative w-[360px] h-[540px] transform translate-y-24 rotate-1 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-center justify-center">
-            <img 
-              src="/hero-phone.png" 
-              alt="آیفون پرچمدار سیب شاپ"
-              {/* تغییر اصلی: کاهش غلظت سایه از 0.80 به 0.25 و افزایش میزان پخش‌شدگی (Blur) به 50px */}
-              className="w-full h-full object-contain drop-shadow-[0_35px_50px_rgba(0,0,0,0.25)]"
-            />
-          </div>
-        
       </div>
     </div>
   );

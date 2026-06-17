@@ -58,9 +58,9 @@ export default function ProductDetailPage() {
       {/* هاله‌های آمبیانس نوری */}
       <div className="absolute top-32 left-1/4 w-[500px] h-[500px] bg-rose-500/5 blur-[150px] rounded-full pointer-events-none z-0"></div>
       <div className="absolute top-96 right-1/4 w-[500px] h-[500px] bg-blue-500/5 blur-[150px] rounded-full pointer-events-none z-0"></div>
-
-      {/* کانتینر اصلی: تراز کامل با هیرو دسکتاپ (w-full px-4 md:px-8) */}
-      <main className="w-full px-4 md:px-8 pt-24 md:pt-28 pb-16 relative z-10">
+  
+      {/* پدینگ بالا و مارجین‌ها کاملاً مهندسی و فشرده شدند تا نقشه سایت به هدر بچسبد */}
+      <main className="w-full px-4 md:px-8 mt-20 md:mt-32 pt-4 md:pt-6 pb-16 relative z-10"> 
         
         {/* بردکرامب مینی‌مال */}
         <div className="flex items-center gap-2 text-[11px] md:text-xs font-bold text-slate-400 mb-6 text-right">

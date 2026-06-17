@@ -27,7 +27,7 @@ const products = [
     name: 'هدفون بی‌سیم اپل مدل AirPods Pro 2 محفظه شارژ Type-C', 
     price: '۱۰,۴۰۰,۰۰۰', 
     oldPrice: '۱۱,۹۰۰,۰۰۰',
-    rating: '۴.竞赛',
+    rating: '۴.۹',
     image: 'https://images.unsplash.com/photo-1588444837495-c6cfeb53f32d?w=400&q=75', 
     tag: 'جدید' 
   },
@@ -44,7 +44,6 @@ const products = [
 
 export default function ProductGrid() {
   return (
-    // پدینگ تراز با هیرو بالا (px-4 md:px-8)
     <div className="w-full px-4 md:px-8 my-12 relative z-10">
       
       {/* هدر بخش محصولات */}
@@ -60,16 +59,18 @@ export default function ProductGrid() {
         </button>
       </div>
 
-      {/* گرید ۴ ستونه دسکتاپ و ۲ ستونه موبایل کاملاً خط‌کشی‌شده */}
+      {/* گرید بدون باگ */}
       <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         {products.map((product) => (
           <div 
             key={product.id} 
             className="bg-white rounded-3xl p-3 md:p-4 border border-slate-100 shadow-xs hover:shadow-[0_20px_40px_rgba(0,0,0,0.04)] hover:border-slate-200/60 transition-all duration-300 flex flex-col justify-between group cursor-pointer relative overflow-hidden"
           >
-            <div>
-              {/* باکس تصویر محصول */}
-              <div className="bg-slate-50 rounded-2xl h-36 md:h-44 flex items-center justify-center relative overflow-hidden mb-3 border border-slate-50 p-2">
+            {/* بخش بالایی کارت */}
+            <div className="relative w-full">
+              
+              {/* باکس تصویر محصول - افزایش ارتفاع به h-40 برای مهار سقف کادر */}
+              <div className="bg-slate-50 rounded-2xl h-40 md:h-48 flex items-center justify-center relative overflow-hidden mb-3 border border-slate-50 p-2">
                 <img 
                   src={product.image} 
                   alt={product.name}
@@ -77,14 +78,15 @@ export default function ProductGrid() {
                   loading="lazy"
                 />
                 
+                {/* تگ کالا - فیکس چسبندگی بالا با مرز بندی درست */}
                 {product.tag && (
-                  <span className="absolute top-2 right-2 bg-slate-900 text-white text-[9px] font-black px-2 py-0.5 rounded-lg shadow-xs">
+                  <span className="absolute top-2 right-2 bg-slate-900 text-white text-[9px] font-black px-2 py-0.5 rounded-lg shadow-xs z-20">
                     {product.tag}
                   </span>
                 )}
 
                 {/* دکمه افزودن سریع دسکتاپ */}
-                <div className="absolute inset-x-2 bottom-2 translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out z-10 hidden md:block">
+                <div className="absolute inset-x-2 bottom-2 translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out z-20 hidden md:block">
                   <button className="w-full bg-slate-900 text-white py-2 rounded-xl text-xs font-black shadow-md hover:bg-rose-500 transition duration-200">
                     افزودن به سبد خرید
                   </button>
@@ -97,16 +99,16 @@ export default function ProductGrid() {
                 <span className="text-[10px] font-bold text-slate-400">{product.rating}</span>
               </div>
 
-              {/* عنوان کالا */}
-              <h3 className="text-xs font-bold text-slate-700 leading-5 line-clamp-2 h-10 mb-2 text-right">
+              {/* عنوان کالا - فیکس راست‌چین و بدون تداخل */}
+              <h3 className="text-xs font-bold text-slate-700 leading-5 line-clamp-2 h-10 mb-2 text-right w-full block">
                 {product.name}
               </h3>
             </div>
 
-            {/* بخش قیمت‌ها */}
+            {/* بخش قیمت‌ها در کف کارت */}
             <div className="mt-2 pt-2.5 border-t border-slate-50 flex flex-col gap-0.5">
               <span className="text-[10px] text-slate-400 font-medium line-through text-right pr-1">
-                {product.oldPrice}
+                {product.oldPrice} تومان
               </span>
 
               <div className="flex items-center justify-between w-full">

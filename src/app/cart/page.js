@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import Header from '../../../components/Header';
+import Footer from '../../../components/Footer';
 import { Trash2, Plus, Minus, ShoppingBag, CreditCard, ShieldCheck } from 'lucide-react';
 
 // دیتای ماک موقت برای نمایش ظاهر سبد خرید

@@ -9,7 +9,8 @@ const quickLinks = [
   { id: 5, title: 'باندل‌ها', icon: Percent, color: 'bg-rose-500 text-white shadow-rose-500/20' },
 ];
 
-export default function MobileQuickAccess() {
+// اسم تابع به QuickAccess تغییر یافت تا با نام فایل ست باشد
+export default function QuickAccess() {
   return (
     // این بخش فقط در موبایل نمایش داده می‌شود (md:hidden)
     <div className="w-full px-4 my-4 md:hidden relative z-10 direction-rtl">

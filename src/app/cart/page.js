@@ -57,7 +57,7 @@ export default function CartPage() {
     <div className="min-h-screen bg-slate-50 overflow-x-hidden antialiased direction-rtl pb-32 md:pb-0">
       <Header />
 
-      {/* 🛠️ فیکس مارجین بالا (mt-4 md:mt-6) برای چسبیدن به هدر و رفع ۱۰۰٪ فضای خالی اسکرین‌شات */}
+      {/* کانتینر اصلی تراز با شاسی هیرو صفحه اصلی و فیکس فواصل مرده */}
       <main className="w-full px-4 md:px-8 mt-4 md:mt-6 pt-1 pb-16 relative z-10">
         
         {/* عنوان صفحه */}
@@ -74,7 +74,7 @@ export default function CartPage() {
             <div className="w-16 h-14 bg-rose-50 rounded-2xl flex items-center justify-center mb-4 text-rose-500">
               <ShoppingBag className="w-7 h-7" />
             </div>
-            <h2 className="text-sm font-black text-slate-800 mb-1">سبد خرید شما فعلاً خالی است!</h2>
+            <h2 className="text-sm md:text-base font-black text-slate-800 mb-1">سبد خرید شما فعلاً خالی است!</h2>
             <p className="text-[11px] md:text-xs text-slate-400 font-medium mb-6">می‌توانید برای مشاهده و انتخاب گجت‌ها به فروشگاه بازگردید.</p>
             <a href="/" className="bg-slate-900 hover:bg-rose-500 text-white font-black text-xs px-6 py-3 rounded-xl shadow-md transition duration-200">
               بازگشت به سیب‌شاپ
@@ -130,7 +130,7 @@ export default function CartPage() {
                 ))}
               </div>
 
-              {/* محصولات مکمل */}
+              {/* محصولات مکمل پیشنهادی */}
               <div className="w-full text-right mt-2">
                 <div className="flex items-center gap-1.5 mb-4">
                   <Sparkles className="w-4 h-4 text-rose-500" />
@@ -152,7 +152,7 @@ export default function CartPage() {
 
             </div>
 
-            {/* ستون چپ: خلاصه فاکتور */}
+            {/* ستون چپ: خلاصه فاکتور + باکس کد تخفیف */}
             <div className="lg:col-span-4 lg:sticky lg:top-24 bg-slate-900 border border-slate-950 text-white rounded-3xl p-5 flex flex-col justify-between min-h-[360px] md:min-h-[420px] shadow-xl relative overflow-hidden">
               <div className="absolute -top-10 -left-10 w-32 h-32 bg-rose-500/10 blur-2xl rounded-full"></div>
               
@@ -167,6 +167,7 @@ export default function CartPage() {
                   </div>
                 </div>
 
+                {/* کادر مینی‌مال اعمال کد تخفیف */}
                 <div className="w-full py-1 border-b border-white/5">
                   <div className="w-full flex items-center bg-white/[0.04] border border-white/5 rounded-xl p-1">
                     <Percent className="w-3.5 h-3.5 text-slate-500 mr-2 shrink-0" />
@@ -200,8 +201,9 @@ export default function CartPage() {
                 </div>
               </div>
 
+              {/* دکمه تسویه حساب (همیشه و در همه حالتها فعال است) */}
               <div className="mt-6 flex flex-col gap-3 z-10">
-                <button className="hidden md:flex w-full bg-rose-500 hover:bg-rose-600 text-white font-black text-xs md:text-sm py-3.5 rounded-2xl shadow-lg shadow-rose-500/10 transition-all duration-300 items-center justify-center gap-2 group">
+                <button className="w-full bg-rose-500 hover:bg-rose-600 text-white font-black text-xs md:text-sm py-3.5 rounded-2xl shadow-lg shadow-rose-500/10 transition-all duration-300 flex items-center justify-center gap-2 group active:scale-98">
                   <CreditCard className="w-4 h-4" />
                   <span>ادامه فرآیند خرید</span>
                 </button>
@@ -219,7 +221,7 @@ export default function CartPage() {
 
       </main>
 
-      {/* 🌟 سیستم شیشه‌ای فیکس پایین صفحه موبایل (تغییر طلایی: با کلس bottom-[68px] دقیقاً بالای ناوبری شما قفل شد) */}
+      {/* سیستم شیشه‌ای فیکس پایین صفحه موبایل */}
       {cartItems.length > 0 && (
         <div className="md:hidden fixed bottom-[68px] left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-200/60 p-3.5 flex items-center justify-between z-40 shadow-[0_-8px_24px_rgba(0,0,0,0.04)] rounded-t-2xl">
           <div className="flex flex-col text-right">

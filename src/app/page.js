@@ -2,43 +2,36 @@ import Header from '../components/Header';
 import Hero from '../components/Hero';
 import Categories from '../components/Categories';
 import AmazingOffers from '../components/AmazingOffers';
+import PromoBanners from '../components/PromoBanners'; // ۱. ایمپورت بنرهای جدید
 
 // دیتای موقت محصولات فروشگاه سیب‌شاپ
 const products = [
   { id: 1, name: 'گوشی موبایل آیفون ۱۵ پرو مکس - ۲۵۶ گیگابایت', price: '۶۴,۵۰۰,۰۰۰', image: '📱', tag: 'پیشنهاد ویژه' },
   { id: 2, name: 'گوشی موبایل سامسونگ گلکسی S24 اولترا ۵G', price: '۵۹,۹۰۰,۰۰۰', image: '📱', tag: 'پرفروش‌ترین' },
   { id: 3, name: 'هدفون بی‌سیم اپل مدل AirPods Pro نسل ۲', price: '۹,۸۰۰,۰۰۰', image: '🎧', tag: 'جدیدترین' },
-  { id: 4, name: 'شارژر دیواری انکر مدل ۲۰ وات مناسب آیفون', price: '۸۵۰,۰۰۰', image: '🔌', tag: 'لوازم جانبی' },
+  { id: 4, name: 'شارژر دیواری انکر مدل ۲۰ وات مناسب آیفون', price: '۸۵۰,۰۰۰', image: '🔌', py: 'لوازم جانبی' },
 ];
 
 export default function HomePage() {
   return (
-    // لایه والد اصلی با فیکس سرریز افقی جهت مهار افکت سه‌بعدی آیفون هیرو
     <div className="min-h-screen bg-gray-50/40 overflow-x-hidden">
       
-      {/* ۱. هدر سایت */}
       <Header />
-      
-      {/* ۲. بنر اصلی (هیرو) با افکت بیرون‌زدگی آیفون از کف باکس تیره */}
       <Hero />
-      
-      {/* ۳. بخش دسته‌بندی‌های سریع و دایره‌ای با تیوتر جدید */}
       <Categories />
-
-      {/* ۴. باکس شگفت‌انگیز تایمردار سیب‌شاپ */}
       <AmazingOffers />
 
-      {/* ۵. ویترین محصولات (جدیدترین‌های دنیای فناوری) - کاملاً ست شده با کد رنگ هدر */}
+      {/* ۲. تزریق بنرهای دوقلوی آفری بین شگفت‌انگیز و جدیدترین‌ها */}
+      <PromoBanners />
+
       <main className="max-w-7xl mx-auto px-4 py-8 pt-4 pb-24 relative z-0">
         
         {/* تیتر بخش محصولات */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            {/* خط عمودی هماهنگ با کد رنگ رز هدر */}
             <span className="w-1.5 h-5 bg-rose-500 rounded-full"></span>
             <h2 className="text-base md:text-lg font-black text-gray-900">جدیدترین‌های دنیای فناوری</h2>
           </div>
-          {/* دکمه مشاهده همه هماهنگ با کد رنگ رز هدر */}
           <span className="text-xs text-rose-500 font-bold cursor-pointer hover:text-rose-600 transition duration-200">
             مشاهده همه ←
           </span>
@@ -52,7 +45,6 @@ export default function HomePage() {
               className="bg-white rounded-2xl p-3 md:p-4 border border-gray-100/80 hover:shadow-[0_10px_30px_rgba(0,0,0,0.04)] hover:border-gray-200/60 transition-all duration-300 flex flex-col justify-between group cursor-pointer"
             >
               <div>
-                {/* باکس تصویر کارت محصول */}
                 <div className="bg-gray-50 rounded-xl h-36 md:h-44 flex items-center justify-center text-4xl md:text-5xl relative overflow-hidden mb-3">
                   <span className="group-hover:scale-110 transition duration-300 select-none">
                     {product.image}
@@ -64,13 +56,11 @@ export default function HomePage() {
                   )}
                 </div>
                 
-                {/* عنوان کالا با افکت لاین‌کلمپ برای هماهنگی ارتفاع کارت‌ها */}
                 <h3 className="text-[11px] md:text-xs font-bold text-gray-700 leading-5 md:leading-6 group-hover:text-gray-900 transition duration-200 line-clamp-2 h-10 md:h-12">
                   {product.name}
                 </h3>
               </div>
 
-              {/* بخش قیمت و دکمه پلاس خرید */}
               <div className="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[9px] md:text-[10px] text-gray-400 font-medium">قیمت</span>
@@ -80,7 +70,6 @@ export default function HomePage() {
                   </div>
                 </div>
                 
-                {/* دکمه افزودن پلاس مدرن - هماهنگ با کد رنگ رز هدر در حالت هوور */}
                 <button className="bg-gray-50 text-gray-600 w-7 h-7 md:w-8 md:h-8 rounded-lg md:rounded-xl flex items-center justify-center font-bold text-xs md:text-sm hover:bg-rose-500 hover:text-white transition duration-200">
                   ＋
                 </button>

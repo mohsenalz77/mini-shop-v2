@@ -46,18 +46,27 @@ export default function ProductGrid() {
   return (
     <div className="w-full px-4 md:px-8 my-12 relative z-10">
       
-      {/* هدر بخش محصولات */}
-      <div className="w-full flex items-center justify-between mb-8 border-b border-slate-100/80 pb-4">
-        <div className="flex items-center gap-2.5">
-          <span className="w-1 h-4 bg-slate-950 rounded-full"></span>
-          <h2 className="text-base md:text-lg font-black text-slate-900 tracking-tight">ویترین محصولات</h2>
-        </div>
-        
-        <button className="flex items-center gap-1.5 text-xs font-bold text-rose-500 hover:text-rose-600 transition duration-200 group">
-          <span>مشاهده همه کالاها</span>
-          <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-1" />
-        </button>
-      </div>
+{/* هدر بخش محصولات: مدرن، اروپایی و مینی‌مال */}
+<div className="w-full flex flex-col md:flex-row md:items-end justify-between mb-10 border-b border-slate-100 pb-5 gap-4">
+  <div className="flex flex-col gap-1 text-right">
+    {/* تگ کوچک انگلیسی برای ایجاد حس پویایی و خفن بودن لایوت */}
+    <span className="text-[10px] font-black tracking-widest text-rose-500 uppercase">
+      / Selected Collection
+    </span>
+    <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+      <span>منتخب محصولات سیب‌شاپ</span>
+      <span className="text-xs font-medium text-slate-400 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-full hidden sm:inline-block">
+        ۴ کالا
+      </span>
+    </h2>
+  </div>
+  
+  {/* دکمه ناوبری شیک با افکت تغییر رنگ نرم و هاور انیمیشنی */}
+  <button className="flex items-center gap-2 text-xs font-black text-slate-900 bg-slate-100 hover:bg-rose-500 hover:text-white px-4 py-2.5 rounded-2xl transition-all duration-300 group self-start md:self-auto shadow-xs">
+    <span>همه محصولات فروشگاه</span>
+    <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" />
+  </button>
+</div>
 
       {/* گرید بدون باگ */}
       <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">

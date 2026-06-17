@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Search, ShoppingBag, User, ChevronDown, Menu, Smartphone, Laptop, Headphones } from 'lucide-react';
+import { 
+  Search, ShoppingBag, User, ChevronDown, Menu, 
+  Smartphone, Laptop, Headphones, Home, Grid 
+} from 'lucide-react';
 
 export default function Header() {
   const [isMenuVisible, setIsMenuVisible] = useState(true);
@@ -142,27 +145,40 @@ export default function Header() {
       </header>
 
       {/* ۴. دایو شبیه‌ساز ارتفاع */}
-      <div className="w-full h-40 block shrink-0"></div>
+      <div className="w-full h-24 md:h-40 block shrink-0"></div>
 
-      {/* ناوبری موبایل */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-100 shadow-[0_-4px_20px_rgba(0,0,0,0.04)] z-50 px-6 py-2">
-        <div className="flex items-center justify-between text-slate-400">
-          <button className="flex flex-col items-center gap-1 text-rose-500 font-bold">
-            <span className="text-sm">🏠</span>
-            <span className="text-[9px]">خانه</span>
+      {/* ناوبری موبایل مدرن و بهینه‌سازی شده */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] z-50 px-4 py-2.5 rounded-t-3xl">
+        <div className="flex items-center justify-around text-slate-400">
+          
+          {/* دکمه خانه (فعال) */}
+          <button className="flex flex-col items-center gap-1.5 text-rose-500 font-bold relative pb-1 min-w-[60px] transition duration-200">
+            <span className="absolute top-0 w-1 h-1 bg-rose-500 rounded-full animate-pulse"></span>
+            <Home className="w-5 h-5 mt-1 stroke-[2.5]" />
+            <span className="text-[10px] font-bold tracking-tight">خانه</span>
           </button>
-          <button className="flex flex-col items-center gap-1 hover:text-slate-800">
-            <span className="text-sm">🗂️</span>
-            <span className="text-[9px]">دسته‌بندی</span>
+
+          {/* دکمه دسته‌بندی */}
+          <button className="flex flex-col items-center gap-1.5 hover:text-slate-800 text-slate-500 font-semibold min-w-[60px] transition duration-200">
+            <Grid className="w-5 h-5 stroke-[2.2]" />
+            <span className="text-[10px] tracking-tight">دسته‌بندی</span>
           </button>
-          <button className="flex flex-col items-center gap-1 hover:text-slate-800">
-            <span className="text-sm">🛒</span>
-            <span className="text-[9px]">سبد خرید</span>
+
+          {/* دکمه سبد خرید */}
+          <button className="flex flex-col items-center gap-1.5 hover:text-slate-800 text-slate-500 font-semibold relative min-w-[60px] transition duration-200">
+            <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
+            <span className="absolute top-0 right-4 bg-rose-500 text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border-2 border-white">
+              ۰
+            </span>
+            <span className="text-[10px] tracking-tight">سبد خرید</span>
           </button>
-          <button className="flex flex-col items-center gap-1 hover:text-slate-800">
-            <span className="text-sm">👤</span>
-            <span className="text-[9px]">پروفایل</span>
+
+          {/* دکمه پروفایل */}
+          <button className="flex flex-col items-center gap-1.5 hover:text-slate-800 text-slate-500 font-semibold min-w-[60px] transition duration-200">
+            <User className="w-5 h-5 stroke-[2.2]" />
+            <span className="text-[10px] tracking-tight">پروفایل</span>
           </button>
+
         </div>
       </nav>
     </>

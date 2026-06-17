@@ -18,7 +18,7 @@ const products = [
     name: 'گوشی موبایل سامسونگ مدل Galaxy S24 Ultra ظرفیت ۲۵۶ گیگابایت', 
     price: '۶۱,۹۰۰,۰۰۰', 
     oldPrice: '۶۴,۵۰۰,۰۰۰',
-    rating: '۴.۷',
+    rating: '۴.运行',
     image: '📱', 
     tag: 'پرفروش' 
   },
@@ -36,7 +36,7 @@ const products = [
     name: 'شارژر دیواری انکر مدل Nano ۲۰W مناسب برای آیفون', 
     price: '۸۹۰,۰۰۰', 
     oldPrice: '۱,۲۰۰,۰۰۰',
-    rating: '۴.٥',
+    rating: '۴.۵',
     image: '🔌', 
     tag: 'اکسسوری' 
   },
@@ -44,20 +44,21 @@ const products = [
 
 export default function ProductGrid() {
   return (
-    // مهار فاصله‌ها متناسب با دیگر اجزای موبایل
     <div className="w-full px-4 md:px-8 my-10 md:my-16 relative z-10 direction-rtl">
       
-      {/* هدر بهینه‌شده: دکمه در موبایل به صورت آیکون یا متن مینی‌مال در می‌آید */}
+      {/* هدر ویترین: کلمه «شاپ» کاملاً هم‌تراز با لوگوی اصلی رنگی و گرادینت شد */}
       <div className="w-full flex items-center justify-between mb-6 md:mb-10 border-b border-slate-100 pb-4 md:pb-5">
         <div className="flex flex-col gap-1 text-right">
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></span>
-            <h2 className="text-base md:text-2xl font-black text-slate-900 tracking-tight">ویترین سیب‌شاپ</h2>
+            <h2 className="text-base md:text-2xl font-black text-slate-900 tracking-tight">
+              ویترین سیب‌<span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-600">شاپ</span>
+            </h2>
           </div>
           <p className="text-[10px] md:text-[11px] font-medium text-slate-400">دست‌چین محبوب‌ترین گجت‌های بازار</p>
         </div>
         
-        {/* دکمه خلاصه شده در موبایل برای جلوگیری از شلوغی کادر */}
+        {/* دکمه بهینه‌شده نمایش همه برای موبایل و دسکتاپ */}
         <button className="flex items-center gap-1 text-[11px] md:text-xs font-black text-slate-700 hover:text-rose-500 border border-slate-200 hover:border-rose-200 bg-white px-2.5 py-1.5 md:px-4 md:py-2 rounded-xl md:rounded-2xl transition-all duration-300 group shadow-2xs">
           <span className="hidden md:inline">مشاهده همه محصولات</span>
           <span className="md:hidden">همه</span>
@@ -86,7 +87,7 @@ export default function ProductGrid() {
                   </span>
                 )}
 
-                {/* دکمه سبد خرید دسکتاپ */}
+                {/* دکمه سبد خرید دسکتاپ (فقط هاور دسکتاپ) */}
                 <div className="absolute inset-x-2 bottom-2 translate-y-14 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out z-20 hidden md:block">
                   <button className="w-full bg-slate-950 hover:bg-rose-500 text-white py-2.5 rounded-xl text-xs font-black shadow-md transition duration-200 flex items-center justify-center gap-1.5">
                     <ShoppingBag className="w-3.5 h-3.5" />

@@ -1,13 +1,18 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Timer, Flame, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Flame, ArrowLeft } from 'lucide-react';
 
 const amazingProducts = [
   { id: 101, name: 'آیفون ۱۳ پرو مکس - ۱۲۸ گیگابایت (استوک کارهای عالی)', mainPrice: '۴۸,۹۰۰,۰۰۰', discountPrice: '۴۴,۵۰۰,۰۰۰', percent: '۹', image: '📱' },
   { id: 102, name: 'ساعت هوشمند اپل واچ سری ۹ مدل Aluminum 45mm', mainPrice: '۲۱,۵۰۰,۰۰۰', discountPrice: '۱۸,۹۰۰,۰۰۰', percent: '۱۲', image: '⌚' },
   { id: 103, name: 'ایرپاد پرو نسل ۲ مدل Type-C اورجینال', mainPrice: '۱۱,۲۰۰,۰۰۰', discountPrice: '۹,۶۰۰,۰۰۰', percent: '۱۴', image: '🎧' },
   { id: 104, name: 'پاوربانک بیسوس ۲۰ هزار وات فست شارژ', mainPrice: '۲,۴۰۰,۰۰۰', discountPrice: '۱,۸۵۰,۰۰۰', percent: '۲۳', image: '🔌' },
+  // محصولات جدید اضافه شده برای تست ظرفیت اسکرول
+  { id: 105, name: 'گوشی موبایل اپل مدل iPhone 15 Pro ظرفیت ۱۲۸ گیگابایت', mainPrice: '۵۴,۹۰۰,۰۰۰', discountPrice: '۵۱,۲۰۰,۰۰۰', percent: '۷', image: '📱' },
+  { id: 106, name: 'گوشی موبایل سامسونگ گلکسی S24 ظرفیت ۲۵۶ گیگابایت', mainPrice: '۴۳,۵۰۰,۰۰۰', discountPrice: '۳۹,۹۰۰,۰۰۰', percent: '۸', image: '📱' },
+  { id: 107, name: 'مچ‌بند هوشمند شیائومی مدل Mi Band 8 Global Version', mainPrice: '۲,۱۰۰,۰۰۰', discountPrice: '۱,۶۵۰,۰۰۰', percent: '۲۱', image: '⌚' },
+  { id: 108, name: 'قاب محافظ مگ‌سیف نیلکین مناسب برای آیفون ۱۵ پرو مکس', mainPrice: '۱,۴۵۰,۰۰۰', discountPrice: '۹۸۰,۰۰۰', percent: '۳۲', image: '🛡️' },
 ];
 
 export default function AmazingOffers() {
@@ -32,8 +37,7 @@ export default function AmazingOffers() {
   const formatTime = (num) => String(num).padStart(2, '۰');
 
   return (
-    // حذف max-w-7xl برای باز شدن کادر و تراز شدن ۱۰۰٪ با لبه‌های هیرو بالا
-    <div className="w-full px-4 md:px-8 my-12 relative z-10">
+    <div className="w-full px-4 md:px-8 my-12 relative block z-10">
       <div className="w-full bg-gradient-to-l from-rose-600 to-red-500 rounded-3xl p-6 flex flex-col xl:flex-row items-center gap-5 shadow-xl relative overflow-hidden">
         
         {/* ۱. بخش راست: تابلوی اعلان و تایمر معکوس */}
@@ -43,7 +47,7 @@ export default function AmazingOffers() {
             <span className="text-[11px] font-black">پیشنهاد ویژه روز</span>
           </div>
           
-          <h2 className="text-2xl font-black tracking-tight mb-1">شگفت‌انگیز</h2>
+          <h2 className="text-2xl font-black tracking-tight mb-1">شگفت‌آور</h2>
           <span className="text-rose-100 text-xs font-medium mb-5">تخفیف‌های داغ سیب‌شاپ</span>
 
           <div className="flex items-center gap-1 font-black text-slate-900 direction-ltr mb-5">
@@ -60,8 +64,8 @@ export default function AmazingOffers() {
           </button>
         </div>
 
-        {/* ۲. بخش وسط: رولر محصولات با حفظ ساختار اسکرول روان بدون ایجاد فضای خالی زشت در دسکتاپ */}
-        <div className="flex-1 w-full flex gap-4 overflow-x-auto pb-2 scrollbar-none snap-x z-10">
+        {/* ۲. بخش وسط: رولر محصولات افزوده شده (با قابلیت اسکرول نرم ریلی در تمام رزولوشن‌ها) */}
+        <div className="flex-1 w-full flex gap-4 overflow-x-auto pb-3 scrollbar-none snap-x z-10">
           {amazingProducts.map((prod) => (
             <div 
               key={prod.id} 
@@ -74,7 +78,7 @@ export default function AmazingOffers() {
                 <div className="w-full bg-slate-50 rounded-xl h-28 md:h-36 flex items-center justify-center text-4xl md:text-5xl mb-3 overflow-hidden">
                   <span className="group-hover:scale-110 transition duration-300 select-none">{prod.image}</span>
                 </div>
-                <h3 className="text-xs font-bold text-slate-700 leading-5 line-clamp-2 h-10 mb-2">
+                <h3 className="text-xs font-bold text-slate-700 leading-5 line-clamp-2 h-10 mb-2 text-right">
                   {prod.name}
                 </h3>
               </div>
@@ -94,7 +98,7 @@ export default function AmazingOffers() {
           ))}
         </div>
 
-        {/* ۳. بخش جدید چپ: یک مینی‌بنر داخلی هوشمند اختصاصی که فقط در دسکتاپ عریض ظاهر می‌شود تا جای خالی را پر کند */}
+        {/* ۳. بخش چپ: مینی‌بنر انتهای صف که حالا بعد از اسکرول ۸ محصول خودش را زیباتر نشان می‌دهد */}
         <div className="hidden xl:flex flex-col items-center justify-center text-center border-2 border-dashed border-white/20 rounded-2xl p-5 w-48 h-full shrink-0 text-white relative overflow-hidden group/left cursor-pointer">
           <div className="absolute inset-0 bg-white/5 opacity-0 group-hover/left:opacity-100 transition duration-300"></div>
           <span className="text-4xl mb-2 animate-pulse">🎁</span>

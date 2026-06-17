@@ -36,16 +36,16 @@ export default function Hero() {
             </button>
           </div>
 
-          <div className="grid grid-cols-2 md:flex items-center gap-8 pt-8 border-t border-white/5 w-full justify-center md:justify-start">
-            <div className="flex items-center gap-2.5 text-zinc-400 group cursor-pointer">
-              <ShieldCheck className="w-5 h-5 text-rose-400 shrink-0" />
-              <span className="text-xs font-bold text-zinc-300">۱۸ ماه گارانتی معتبر</span>
-            </div>
-            <div className="flex items-center gap-2.5 text-zinc-400 group cursor-pointer">
-              <Truck className="w-5 h-5 text-blue-400 shrink-0" />
-              <span className="text-xs font-bold text-zinc-300">ارسال سریع اکسپرس</span>
-            </div>
+{/* بخش چپ: مهار و هول دادن قطعی عکس به خارج از مرز پایین با سایه ملایم */}
+        <div className="hidden md:flex flex-1 justify-center items-center order-1 md:order-2 relative z-30 h-96">
+          <div className="relative w-[360px] h-[540px] transform translate-y-24 rotate-1 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-center justify-center">
+            <img 
+              src="/hero-phone.png" 
+              alt="آیفون پرچمدار سیب شاپ"
+              className="w-full h-full object-contain drop-shadow-[0_35px_50px_rgba(0,0,0,0.25)]"
+            />
           </div>
+        </div>
 
         </div>
 

@@ -25,16 +25,16 @@ export default function Header() {
 
   return (
     <>
-      {/* ۱. بنر اعلان بالایی - این بخش ثابت نیست و با اسکرول بالا می‌رود */}
+      {/* ۱. بنر اعلان بالایی */}
       <div className="bg-gradient-to-r from-rose-500 to-pink-600 text-white text-center py-2 px-4 text-xs font-bold shadow-inner relative z-50 select-none">
         جشنواره شگفت‌انگیز سیب‌شاپ؛ تا ۴۰٪ تخفیف روی لوازم جانبی موبایل ⚡
       </div>
 
-      {/* ۲. شاسی اصلی هدر چسبان - کل مجموعه هدر به بالا قفل می‌شود */}
-      <header className="sticky top-0 z-50 w-full pointer-events-none">
+      {/* ۲. شاسی اصلی هدر - تبدیل به ریل نسبی برای مهار منوی حرکتی */}
+      <div className="w-full relative z-50">
         
-        {/* ردیف اول: لوگو، سرچ‌بار و ورود - با پس‌زمینه شیشه‌ای و فعال بودن کلیک‌ها */}
-        <div className="w-full px-4 md:px-8 h-20 flex items-center justify-between gap-8 bg-white/80 backdrop-blur-xl border-b border-slate-100 relative z-50 pointer-events-auto">
+        {/* ردیف اول: لوگو، سرچ‌بار و ورود - فیکس قفل چسبان به سقف (sticky top-0) */}
+        <div className="w-full px-4 md:px-8 h-20 flex items-center justify-between gap-8 bg-white/80 backdrop-blur-xl border-b border-slate-100 sticky top-0 z-50 shadow-xs">
           
           {/* راست: لوگو */}
           <div className="flex items-center shrink-0">
@@ -72,9 +72,9 @@ export default function Header() {
 
         </div>
 
-        {/* ردیف دوم: منوی ناوبری - حالا به صورت انیمیشنی تمیز پشت ردیف اول پنهان می‌شود */}
+        {/* ردیف دوم: منوی ناوبری - فیکس موقعیت چسبان هوشمند متصل به ردیف اول */}
         <div 
-          className={`hidden md:block border-b border-slate-100/60 bg-white/90 backdrop-blur-md absolute left-0 right-0 h-12 transition-all duration-300 ease-in-out z-40 pointer-events-auto ${
+          className={`hidden md:block border-b border-slate-100/60 bg-white/90 backdrop-blur-md fixed left-0 right-0 h-12 transition-all duration-300 ease-in-out z-40 ${
             isMenuVisible 
               ? 'top-20 opacity-100' 
               : 'top-8 opacity-0 pointer-events-none'
@@ -135,7 +135,7 @@ export default function Header() {
           </div>
         </div>
 
-      </header>
+      </div>
 
       {/* ناوبری موبایل */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-100 shadow-[0_-4px_20px_rgba(0,0,0,0.04)] z-50 px-6 py-2">

@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { ShieldCheck, Truck, RotateCcw, Headphones, Instagram, Send, Phone } from 'lucide-react';
+// ۱. ایمپورت کامپوننت Link از نکست‌جی‌اس
+import Link from 'next/link';
 
 export default function Footer() {
   return (
@@ -56,19 +58,18 @@ export default function Footer() {
         {/* ۲. بخش ستون‌های ناوبری و لینک‌های سریع */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-10 py-8 md:py-10">
           
-          {/* ستون اول: درباره سیب‌شاپ */}
+          {/* ستون اول: درباره سیب‌شاپ + اتصال نام برند به صفحه اصلی */}
           <div className="md:col-span-1 flex flex-col gap-3">
-            <div className="text-lg md:text-xl font-black text-white flex items-center gap-1.5">
+            <Link href="/" className="text-lg md:text-xl font-black text-white flex items-center gap-1.5 w-fit">
               <span>سیب‌<span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-600">شاپ</span></span>
-            </div>
+            </Link>
             <p className="text-[11px] md:text-xs leading-6 font-medium text-slate-400">
               مرجع تخصصی خرید گجت‌های هوشمند، آیفون و مدرن‌ترین لوازم جانبی بازار فناوری. با سیب‌شاپ، اصالت کالا و خدمات درجه‌یک را تجربه کنید.
             </p>
           </div>
 
-          {/* ردیف ترکیبی لینک‌ها برای موبایل (قرارگیری دو ستون در یک ردیف افقی جهت کاهش اسکرول عمودی) */}
+          {/* لینک‌های کمکی دیگر */}
           <div className="grid grid-cols-2 md:contents gap-6">
-            {/* ستون دوم: دسترسی‌های خرید */}
             <div className="flex flex-col gap-3">
               <h4 className="text-xs md:text-sm font-black text-white border-r-2 border-rose-500 pr-2">راهنمای خرید</h4>
               <ul className="flex flex-col gap-2.5 text-[11px] md:text-xs font-medium">
@@ -79,7 +80,6 @@ export default function Footer() {
               </ul>
             </div>
 
-            {/* ستون سوم: لینک‌های شرکتی */}
             <div className="flex flex-col gap-3">
               <h4 className="text-xs md:text-sm font-black text-white border-r-2 border-rose-500 pr-2">همراه با ما</h4>
               <ul className="flex flex-col gap-2.5 text-[11px] md:text-xs font-medium">

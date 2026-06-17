@@ -7,26 +7,31 @@ import ProductGrid from '../components/ProductGrid';
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gray-50/40 overflow-x-hidden">
+    // لایه اصلی والد با فیکس قطعی سرریز
+    <div className="min-h-screen bg-gray-50/40 overflow-x-hidden relative">
       
-      {/* ۱. هدر همیشه ثابت بر سقف صفحه */}
+      {/* ۱. هدر شیشه‌ای هوشمند */}
       <Header />
       
-      {/* ۲. بنر اصلی هیرو با افکت باکسی شما */}
+      {/* ۲. بنر اصلی هیرو */}
       <Hero />
       
-      {/* ۳. دسته‌بندی‌های سریع دایره‌ای */}
-      <Categories />
+      {/* ظرف مهارکننده (Container): این دایو اجازه نمی‌دهد هیچ المانی به لایه‌های بالاتر تجاوز کند */}
+      <div className="w-full relative z-10 flex flex-col">
+        
+        {/* ۳. دسته‌بندی‌های سریع */}
+        <Categories />
 
-      {/* ۴. شگفت‌انگیز تایمردار قرمز (حتماً مطمئن شو فایل AmazingOffers.js در پوشه components وجود دارد) */}
-      <AmazingOffers />
+        {/* ۴. شگفت‌انگیز تایمردار */}
+        <AmazingOffers />
 
-      {/* ۵. بنرهای تبلیغاتی سه‌قلو نئونی */}
-      <PromoBanners />
-      
-      {/* ۶. ویترین نهایی و فیکس‌شده‌ی محصولات */}
-      <ProductGrid />
+        {/* ۵. بنرهای تبلیغاتی سه‌قلو */}
+        <PromoBanners />
+        
+        {/* ۶. ویترین محصولات */}
+        <ProductGrid />
 
+      </div>
     </div>
   );
 }

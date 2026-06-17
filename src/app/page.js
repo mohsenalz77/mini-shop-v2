@@ -12,6 +12,7 @@ export default function HomePage() {
       
       <Header />
       <Hero />
+      <QuickAccess />
       <Categories />
       <AmazingOffers />
       <PromoBanners />

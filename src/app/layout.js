@@ -1,5 +1,7 @@
 import { Vazirmatn } from 'next/font/google';
 import "./globals.css";
+// 🚀 ایمپورت پرووایدر سبد خرید که در مرحله قبل ساختیم
+import { CartProvider } from "@/context/CartContext";
 
 // لود کردن فونت بهینه‌شده‌ی وزیرمتن از گوگل فونت
 const vazirmatn = Vazirmatn({ 
@@ -16,7 +18,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="fa" dir="rtl" className={vazirmatn.className}>
       <body className="bg-gray-50/50 text-gray-900 antialiased">
-        {children}
+        {/* تزریق طلایی: تمام صفحات سایت حالا به استیت سبد خرید متصل هستند */}
+        <CartProvider>
+          {children}
+        </CartProvider>
       </body>
     </html>
   );

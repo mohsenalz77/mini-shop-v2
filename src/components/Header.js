@@ -7,12 +7,17 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+// 🚀 تغییر طلایی ۱: ایمپورت هوک سبد خرید برای داینامیک کردن تعداد
+import { useCart } from "../context/CartContext";
 
 export default function Header() {
   const [isMenuVisible, setIsMenuVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  
+  // 🚀 تغییر طلایی ۲: بیرون کشیدن تعداد کل کالاهای سبد خرید
+  const { cartCount } = useCart();
 
   useEffect(() => {
     const controlNavbar = () => {
@@ -76,7 +81,12 @@ export default function Header() {
             
             <Link href="/cart" className="flex items-center justify-center p-2.5 text-slate-700 hover:bg-slate-50/80 rounded-xl transition duration-200 relative">
               <ShoppingBag className="w-5 h-5 stroke-[2.5]" />
-              <span className="absolute -top-0.5 -left-0.5 bg-rose-500 text-white text-[10px] font-sans font-black w-5 h-5 rounded-full flex items-center justify-center shadow-xs">۲</span>
+              {/* 🚀 تغییر طلایی ۳: رندر هوشمند تعداد واقعی اقلام در دسکتاپ تنها در صورت وجود کالا */}
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -left-0.5 bg-rose-500 text-white text-[10px] font-sans font-black w-5 h-5 rounded-full flex items-center justify-center shadow-xs animate-fade-in">
+                  {cartCount.toLocaleString('fa-IR')}
+                </span>
+              )}
             </Link>
           </div>
         </div>
@@ -175,7 +185,7 @@ export default function Header() {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] z-50 px-4 py-2 rounded-t-2xl">
         <div className="flex items-center justify-around text-slate-400">
           
-          {/* دکمه خانه - فقط زمانی قرمز است که در ریشه باشیم و منو باز نباشد */}
+          {/* دکمه خانه */}
           <Link 
             href="/" 
             className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${
@@ -186,7 +196,7 @@ export default function Header() {
             <span className="text-[10px] tracking-tight">خانه</span>
           </Link>
 
-          {/* دکمه دسته‌بندی - فعال‌سازی کشو با استایل مجزا */}
+          {/* دکمه دسته‌بندی */}
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className={`flex flex-col items-center gap-1 font-semibold min-w-[60px] py-1 transition duration-200 ${
@@ -197,20 +207,21 @@ export default function Header() {
             <span className="text-[10px] tracking-tight">دسته‌بندی</span>
           </button>
 
-          {/* دکمه سبد خرید - فقط زمانی قرمز است که در روت /cart باشیم و منو باز نباشد */}
+          {/* دکمه سبد خرید */}
           <Link 
             href="/cart" 
             className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${
               pathname === '/cart' && !isMobileMenuOpen ? 'text-rose-500 font-bold scale-102' : 'text-slate-400 font-medium hover:text-slate-700'
             }`}
           >
-            {/* باکس آیکون با عرض فیکس برای مهار جابه‌جایی پوزیشن مطلق عدد */}
             <div className="w-6 h-6 flex items-center justify-center relative">
               <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
-              {/* طراحی جدید و مینیاتوری دایره نوتیفیکیشن: کاملاً لوکس و متقارن با فونت انگلیسی بدون کشیدگی */}
-              <span className="absolute -top-1.5 -left-1.5 bg-rose-500 text-white text-[9px] font-sans font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white shadow-xs leading-none">
-                ۲
-              </span>
+              {/* 🚀 تغییر طلایی ۴: رندر تعداد کاملاً زنده در ناوبری موبایل */}
+              {cartCount > 0 && (
+                <span className="absolute -top-1.5 -left-1.5 bg-rose-500 text-white text-[9px] font-sans font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white shadow-xs leading-none">
+                  {cartCount}
+                </span>
+              )}
             </div>
             <span className="text-[10px] tracking-tight">سبد خرید</span>
           </Link>

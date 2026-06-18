@@ -1,8 +1,7 @@
 import { Vazirmatn } from 'next/font/google';
 import "./globals.css";
 // 🚀 ایمپورت پرووایدر سبد خرید که در مرحله قبل ساختیم
-import { CartProvider } from "@/context/CartContext";
-
+import { CartProvider } from "../context/CartContext";
 // لود کردن فونت بهینه‌شده‌ی وزیرمتن از گوگل فونت
 const vazirmatn = Vazirmatn({ 
   subsets: ['arabic'],

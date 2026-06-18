@@ -1,12 +1,12 @@
 import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
-import ProductDetailClient from './ProductDetailClient'; // کامپوننت کلاینت که الان می‌سازیم
+import ProductDetailClient from './ProductDetailClient';
 
-// 🚀 تابع فچ کردن اطلاعات تک محصول از استراپی آنلاین
+// 🚀 تابع فچ کردن اطلاعات تک محصول از استراپی آنلاین رندر
 async function getSingleProduct(id) {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${id}?populate=*`, {
-      cache: 'no-store'
+      cache: 'no-store' // برای جلوگیری از کش شدن قیمت‌ها
     });
 
     if (!res.ok) return null;
@@ -19,9 +19,7 @@ async function getSingleProduct(id) {
   }
 }
 
-// این یک Server Component است و پارامتر آدرس را در پراپ params می‌گیرد
 export default async function ProductDetailPage({ params }) {
-  // گرفتن شناسه محصول از آدرس
   const { id } = params;
   
   // گرفتن دیتای واقعی از استراپی
@@ -37,19 +35,19 @@ export default async function ProductDetailPage({ params }) {
     );
   }
 
-  // استخراج مشخصات از استراپی
-  const { title, price, oldPrice, description } = apiProduct.attributes;
+  // استخراج مشخصات اصلی از دیتای استراپی
+  const { title, price, oldPrice, description, image } = apiProduct.attributes;
 
-  // ادغام دیتای استراپی با ساختار لایوت تو
+  // آماده‌سازی دیتای تمیز برای تحویل به قالب فرانت‌اَند شما
   const productData = {
     id: apiProduct.id,
     name: title,
-    englishName: 'Apple Flagship Device', // می‌توانی بعداً فیلد انگلیسی را به استراپی اضافه کنی
+    rawImage: image, // پاس دادن آبجکت کامل عکس برای پردازش در کلاینت
+    englishName: 'Apple Flagship Device', 
     price: Number(price).toLocaleString('fa-IR'),
     oldPrice: oldPrice ? Number(oldPrice).toLocaleString('fa-IR') : null,
     rating: '۴.۹',
     reviewCount: '۱ دیدگاه',
-    image: '📱',
     storages: ['۱۲۸ گیگ', '۲۵۶ گیگ', '۵۱۲ گیگ'],
     colors: [
       { name: 'تایتانیم طبیعی', class: 'bg-stone-400' },
@@ -59,17 +57,17 @@ export default async function ProductDetailPage({ params }) {
     specs: [
       { title: 'حافظه داخلی', value: '۲۵۶ گیگابایت' },
       { title: 'حافظه رم', value: '۸ گیگابایت' },
-      { title: 'وضعیت در دیتابیس', value: 'آنلاین و زنده' },
+      { title: 'ارتباطات زنده', value: 'دیتابیس استراپی آنلاین' },
     ],
     fullSpecs: [
-      { label: 'توضیحات ثبت شده:', value: description || 'توضیحاتی برای این محصول وارد نشده است.' },
+      { label: 'توضیحات محصول', value: description || 'توضیحاتی برای این محصول در استراپی وارد نشده است.' },
     ],
     relatedProducts: [
       { id: 2, name: 'شارژر دیواری انکر مدل Nano ۲۰W', price: '۸۹۰,۰۰۰', image: '🔌' },
       { id: 3, name: 'هدفون بی‌سیم اپل مدل AirPods Pro 2', price: '۱۰,۴۰۰,۰۰۰', image: '🎧' },
     ],
     comments: [
-      { id: 1, user: 'سیب‌شاپ بوتمپ', date: 'امروز', rating: 5, text: 'این دیتا مستقیماً و به صورت داینامیک بر اساس آدرس ID از دیتابیس استراپی لود شده است!', badge: 'توسعه‌دهنده' },
+      { id: 1, user: 'سیب‌شاپ بوت‌کمپ', date: 'امروز', rating: 5, text: 'این دیتا مستقیماً و به صورت داینامیک بر اساس آدرس ID از دیتابیس استراپی لود شده است!', badge: 'توسعه‌دهنده' },
     ]
   };
 

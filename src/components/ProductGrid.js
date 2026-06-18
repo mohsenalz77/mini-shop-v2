@@ -5,7 +5,6 @@ import { ArrowLeft, Star, ShoppingBag } from 'lucide-react';
 // ۱. ایمپورت کامپوننت Link از نکست‌جی‌آس
 import Link from 'next/link';
 
-// تغییر طلایی ۱: دیتای ثابت حذف شد و کامپوننت حالا پراپ products را از سرور دریافت می‌کند
 export default function ProductGrid({ products }) {
   
   // اگر دیتایی از سرور نیامده باشد، برای جلوگیری از کرش کادر خالی یا لودینگ نشان می‌دهیم
@@ -42,8 +41,8 @@ export default function ProductGrid({ products }) {
       {/* گرید ۲ ستونه در موبایل و ۴ ستونه در دسکتاپ */}
       <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
         {products.map((product) => {
-          // استخراج مشخصات از ساختار دیتای استراپی v4
-          const { title, price, oldPrice, slug } = product.attributes;
+          // استخراج مشخصات از ساختار دیتای استراپی v4 (اضافه کردن image)
+          const { title, price, oldPrice, slug, image } = product.attributes;
           
           return (
             // تغییر تگ div اصلی به کامپوننت Link به همراه آدرس‌دهی داینامیک محصول بر اساس ID استراپی
@@ -56,12 +55,21 @@ export default function ProductGrid({ products }) {
                 <div>
                   {/* باکس تصویر محصول */}
                   <div className="bg-slate-50 rounded-xl md:rounded-2xl h-28 md:h-44 flex items-center justify-center relative overflow-hidden mb-3 border border-slate-100/50">
-                    {/* چون در استراپی هنوز اموجی یا عکس داینامیک ست نکردیم، موقتاً یک اموجی ثابت یا هندل کننده می‌گذاریم */}
-                    <span className="text-4xl md:text-6xl group-hover:scale-110 transition duration-500 select-none filter drop-shadow-sm">
-                      📱
-                    </span>
                     
-                    {/* تگ کالا (اگر مایل بودی بعداً فیلد tag را هم در استراپی بساز) */}
+                    {/* 🚀 تغییر طلایی: رندر هوشمند تصویر آنلاین استراپی یا اموجی به عنوان جایگزین */}
+                    {image?.data ? (
+                      <img 
+                        src={`${process.env.NEXT_PUBLIC_STRAPI_URL}${image.data.attributes.url}`} 
+                        alt={title}
+                        className="w-full h-full object-contain p-2 group-hover:scale-105 transition duration-500 select-none"
+                      />
+                    ) : (
+                      <span className="text-4xl md:text-6xl group-hover:scale-110 transition duration-500 select-none filter drop-shadow-sm">
+                        📱
+                      </span>
+                    )}
+                    
+                    {/* تگ کالا */}
                     <span className="absolute top-2 right-2 bg-slate-950/90 backdrop-blur-xs text-white text-[8px] md:text-[9px] font-black px-1.5 py-0.5 rounded-md md:rounded-lg shadow-xs">
                       جدید
                     </span>
@@ -87,7 +95,7 @@ export default function ProductGrid({ products }) {
                     <span className="text-[9px] md:text-[10px] font-black text-slate-500">۴.۹</span>
                   </div>
 
-                  {/* عنوان کالا (تغییر از product.name به دیتای واقعی استراپی یعنی title) */}
+                  {/* عنوان کالا */}
                   <h3 className="text-[11px] md:text-sm font-bold text-slate-800 leading-5 md:leading-6 line-clamp-2 h-10 md:h-12 mb-3 text-right pr-0.5">
                     {title}
                   </h3>
@@ -95,17 +103,17 @@ export default function ProductGrid({ products }) {
 
                 {/* بخش قیمت‌ها در کف کارت */}
                 <div className="mt-1 pt-2 md:pt-3 border-t border-slate-100 flex flex-col gap-0.5 text-right">
-                  {/* قیمت قبلی (تنها اگر در پنل استراپی پر شده باشد رندر می‌شود) */}
+                  {/* قیمت قبلی */}
                   {oldPrice ? (
                     <span className="text-[9px] md:text-[11px] text-slate-400 font-medium line-through pr-1">
                       {Number(oldPrice).toLocaleString('fa-IR')} <span className="text-[8px] md:text-[9px] font-normal no-underline">تومان</span>
                     </span>
                   ) : (
-                    <div className="h-[14px] md:h-[16px]"></div> // برای اینکه توازن عمودی کارت‌ها به هم نخورد
+                    <div className="h-[14px] md:h-[16px]"></div>
                   )}
 
                   <div className="flex items-center justify-between w-full mt-0.5">
-                    {/* قیمت نهایی کاملاً داینامیک و فارسی‌سازی شده */}
+                    {/* قیمت نهایی */}
                     <div className="text-xs md:text-base font-black text-slate-950 flex items-center gap-0.5">
                       <span>{Number(price).toLocaleString('fa-IR')}</span>
                       <span className="text-[9px] md:text-[10px] font-normal text-slate-400">تومان</span>

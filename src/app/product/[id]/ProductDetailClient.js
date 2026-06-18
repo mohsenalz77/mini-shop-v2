@@ -32,7 +32,7 @@ export default function ProductDetailClient({ productData }) {
         {/* کادر اصلی محصول */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 items-start mb-8">
           
-          {/* ستون اول: گالری عکس */}
+          {/* ستون اول: گالری عکس کاملاً هوشمند */}
           <div className="lg:col-span-5 bg-white border border-slate-100 rounded-3xl p-4 md:p-6 flex flex-col justify-between h-[340px] md:h-[490px] shadow-2xs relative">
             <div className="absolute top-4 right-4 flex flex-col gap-2 z-20">
               <button onClick={() => setIsLiked(!isLiked)} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50 border border-slate-100/70 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-500 transition shadow-3xs">
@@ -42,10 +42,20 @@ export default function ProductDetailClient({ productData }) {
                 <Share2 className="w-4 h-4" />
               </button>
             </div>
-            <div className="flex-1 flex items-center justify-center">
-              <span className="text-7xl md:text-8xl lg:text-9xl filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.08)] select-none">
-                {productData.image}
-              </span>
+            
+            {/* کادر رندر عکس زنده از استراپی یا اموجی پیش‌فرض */}
+            <div className="flex-1 flex items-center justify-center w-full h-full">
+              {productData.rawImage?.data ? (
+                <img 
+                  src={`${process.env.NEXT_PUBLIC_STRAPI_URL}${productData.rawImage.data.attributes.url}`} 
+                  alt={productData.name}
+                  className="max-h-[260px] md:max-h-[380px] object-contain filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.08)] select-none"
+                />
+              ) : (
+                <span className="text-7xl md:text-8xl lg:text-9xl filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.08)] select-none">
+                  📱
+                </span>
+              )}
             </div>
           </div>
 

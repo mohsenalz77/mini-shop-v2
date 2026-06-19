@@ -1,212 +1,62 @@
-"use client";
+import React from 'react';
 
-import React, { useState, useEffect } from 'react';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
-import { SlidersHorizontal, ArrowUpDown, Smartphone, Percent, CheckCircle2 } from 'lucide-react';
-import Link from 'next/link';
-import { useCart } from '../../context/CartContext'; 
-
-export default function ProductsPage() {
-  const { addToCart } = useCart(); 
-  const [products, setProducts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchProducts() {
-      try {
-        const res = await fetch('https://b.dr-sib.xyz/api/products?populate=*', { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json();
-          setProducts(data.data || []);
-        }
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchProducts();
-  }, []);
-
+export default function Hero() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 direction-rtl antialiased flex flex-col justify-between">
-      <Header />
-
-      {/* 🌌 بنر بالای محصولات - کاملاً هم‌تراز با سایز چپ و راست هیرو باکس اصلی سایت */}
-      <div className="w-full px-4 md:px-8 mt-3 md:my-6">
-        <div className="relative bg-gradient-to-l from-slate-950 to-slate-900 text-white py-8 md:py-12 px-6 md:px-10 overflow-hidden rounded-3xl border border-slate-800/50 shadow-2xl text-right">
-          <div className="absolute top-0 right-1/4 w-[250px] h-[250px] bg-rose-500/10 blur-[90px] rounded-full pointer-events-none"></div>
-          <div className="relative z-10">
-            <span className="text-rose-500 font-black text-[10px] md:text-xs uppercase bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">
-              فروشگاه آنلاین
-            </span>
-            <h1 className="text-xl md:text-3xl font-black mt-2.5 bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-              بررسی و خرید انواع گوشی موبایل
-            </h1>
-            <p className="hidden md:block text-xs text-slate-400 mt-2 max-w-xl font-medium leading-6">
-              جدیدترین پرچمداران و میان‌رده‌های بازار را با گارانتی معتبر شرکتی و ارسال اکسپرس از سیب‌شاپ تهیه کنید.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* 🏪 بخش اصلی فروشگاه - با پدینگ و متد دقیق همسان با هیرو باکس شما */}
-      <main className="w-full px-4 md:px-8 py-4 md:py-6 flex-1">
+    <div className="w-full px-4 md:px-8 my-3 md:my-6 relative overflow-visible">
+      
+      {/* باکس تیره هیرو - ارتفاع در موبایل بهینه‌تر و کوتاه‌تر شده است */}
+      <div className="w-full bg-gradient-to-br from-slate-950 via-zinc-900 to-slate-900 text-white rounded-3xl p-5 py-6 md:p-16 flex flex-col md:flex-row items-center justify-between shadow-2xl relative overflow-visible border border-slate-800/50">
         
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-          
-          {/* 🛡️ فیلترهای سایدبار دسکتاپ */}
-          <aside className="hidden lg:block lg:col-span-3 bg-white border border-slate-100 rounded-3xl p-5 sticky top-24 text-right shadow-3xs">
-            <div className="flex items-center gap-2 pb-3 border-b border-slate-100 mb-4">
-              <SlidersHorizontal className="w-4 h-4 text-slate-800" />
-              <h3 className="text-sm font-black text-slate-800">فیلترهای پیشرفته</h3>
-            </div>
-            
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <span className="text-xs font-black text-slate-500">وضعیت موجودی</span>
-                <label className="flex items-center gap-2 text-xs font-bold text-slate-700 mt-1 cursor-pointer">
-                  <input type="checkbox" defaultChecked className="rounded-md accent-rose-500 w-4 h-4" />
-                  <span>فقط کالاهای موجود</span>
-                </label>
-              </div>
-            </div>
-          </aside>
+        {/* افکت‌های آمبیانس نوری */}
+        <div className="absolute -top-20 -left-20 w-[250px] md:w-[400px] h-[250px] md:h-[400px] bg-rose-500/10 rounded-full blur-[90px] md:blur-[120px] pointer-events-none"></div>
+        <div className="absolute -bottom-20 left-1/3 w-[200px] md:w-[300px] h-[200px] md:h-[300px] bg-blue-600/10 rounded-full blur-[80px] md:blur-[100px] pointer-events-none"></div>
 
-          {/* ستون محصولات */}
-          <div className="lg:col-span-9 w-full">
-            
-            {/* 📱 نوار ابزار بالا */}
-            <div className="bg-white border border-slate-100 rounded-2xl p-3 md:p-4 mb-4 flex items-center justify-between gap-2 shadow-3xs text-right">
-              <div className="hidden sm:flex items-center gap-2">
-                <span className="text-xs font-black text-slate-800">
-                  {isLoading ? "در حال محاسبه..." : `${products.length} کالا`}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2 w-full sm:w-auto justify-start sm:justify-end overflow-x-auto scrollbar-none">
-                <button className="flex items-center gap-1 text-[11px] font-black text-slate-700 bg-slate-50 border border-slate-200/70 px-3 py-2 rounded-xl shrink-0">
-                  <SlidersHorizontal className="w-3.5 h-3.5" />
-                  <span>فیلتر برندها</span>
-                </button>
-                <button className="flex items-center gap-1 text-[11px] font-black text-slate-700 bg-slate-50 border border-slate-200/70 px-3 py-2 rounded-xl shrink-0">
-                  <ArrowUpDown className="w-3.5 h-3.5" />
-                  <span>محبوب‌ترین‌ها</span>
-                </button>
-              </div>
-            </div>
-
-            {/* 🛍️ گرید محصولات: در مانیتورها کاملاً پهن و متناسب با هیرو باکس باز می‌شود */}
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
-              {isLoading ? (
-                Array(8).fill(0).map((_, idx) => (
-                  <div key={idx} className="bg-white border border-slate-100 rounded-xl md:rounded-3xl p-3 flex flex-col gap-3 animate-pulse">
-                    <div className="w-full h-24 md:h-40 bg-slate-100 rounded-lg md:rounded-2xl"></div>
-                    <div className="h-3 bg-slate-100 rounded-full w-3/4 mx-auto mt-2"></div>
-                    <div className="h-3 bg-slate-100 rounded-full w-1/2 mx-auto"></div>
-                    <div className="h-6 bg-slate-50 rounded-lg w-full mt-4 flex items-center justify-between px-2">
-                      <div className="h-3 bg-slate-200 rounded-full w-1/3"></div>
-                      <div className="w-5 h-5 bg-slate-200 rounded-md"></div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                products.map((item) => {
-                  const id = item.id;
-                  const attr = item.attributes || {};
-                  
-                  const name = attr.name || "محصول سیب‌شاپ";
-                  const priceNum = attr.price || 0;
-                  const oldPriceNum = attr.oldPrice || null;
-                  
-                  let discountPercent = 0;
-                  if (oldPriceNum && oldPriceNum > priceNum) {
-                    discountPercent = Math.round(((oldPriceNum - priceNum) / oldPriceNum) * 100);
-                  }
-
-                  let imgUrl = null;
-                  if (attr.image && attr.image.data && attr.image.data.attributes) {
-                    imgUrl = attr.image.data.attributes.url;
-                    if (!imgUrl.startsWith('http')) {
-                      imgUrl = `https://b.dr-sib.xyz${imgUrl}`;
-                    }
-                  }
-
-                  const cleanProductData = {
-                    id: id,
-                    name: name,
-                    price: Number(priceNum),
-                    imageUrl: imgUrl
-                  };
-
-                  return (
-                    <div 
-                      key={id}
-                      className="group bg-white border border-slate-100 rounded-xl md:rounded-3xl p-2.5 md:p-4 flex flex-col justify-between transition-all duration-300 hover:shadow-[0_12px_24px_rgba(0,0,0,0.03)] hover:border-slate-200 relative overflow-hidden"
-                    >
-                      <Link href={`/product/${attr.slug || id}`} className="block w-full">
-                        {discountPercent > 0 && (
-                          <div className="absolute top-2 right-2 bg-rose-500 text-white text-[8px] md:text-[10px] font-black px-1.5 md:px-2 py-0.5 rounded-lg z-10">
-                            ٪{discountPercent.toLocaleString('fa-IR')}
-                          </div>
-                        )}
-
-                        <div className="w-full h-24 md:h-40 flex items-center justify-center mb-2 bg-slate-50/40 rounded-lg md:rounded-2xl p-2 md:p-3 group-hover:scale-[1.02] transition-transform duration-300">
-                          {imgUrl ? (
-                            <img 
-                              src={imgUrl} 
-                              alt={name}
-                              referrerPolicy="no-referrer-when-downgrade"
-                              className="max-h-20 md:max-h-32 object-contain filter drop-shadow-3xs select-none"
-                            />
-                          ) : (
-                            <span className="text-2xl md:text-4xl select-none">📱</span>
-                          )}
-                        </div>
-
-                        <div className="text-right">
-                          <h3 className="text-[10px] md:text-xs font-bold md:font-black text-slate-800 leading-4 md:leading-5 line-clamp-2 min-h-[32px] md:min-h-[40px] px-0.5">
-                            {name}
-                          </h3>
-                        </div>
-                      </Link>
-
-                      <div className="mt-2 md:mt-3 pt-1.5 border-t border-slate-50 flex flex-col gap-0.5 w-full text-right">
-                        {oldPriceNum && (
-                          <span className="text-[8px] md:text-[10px] text-slate-400 font-medium line-through pr-1">
-                            {oldPriceNum.toLocaleString('fa-IR')}
-                          </span>
-                        )}
-                        
-                        <div className="flex items-center justify-between w-full mt-0.5">
-                          <div className="text-[10px] md:text-sm font-black text-slate-950 flex items-center gap-0.5">
-                            <span>{priceNum.toLocaleString('fa-IR')}</span>
-                            <span className="text-[8px] md:text-[9px] font-normal text-slate-400 mr-0.5">تومان</span>
-                          </div>
-                          
-                          <button 
-                            onClick={() => addToCart(cleanProductData)}
-                            className="bg-slate-50 text-slate-600 hover:bg-rose-500 hover:text-white w-5 h-5 md:w-7 md:h-7 rounded-md md:rounded-lg flex items-center justify-center font-bold text-xs transition-all duration-200 border border-slate-100"
-                            title="افزودن به سبد خرید"
-                          >
-                            ＋
-                          </button>
-                        </div>
-                      </div>
-
-                    </div>
-                  );
-                })
-              )}
-            </div>
-
+        {/* بخش تصویر: ارتفاع آیفون در موبایل از h-64 به h-44 کاهش یافت تا طول باکس کاملاً کوتاه شود */}
+        <div className="w-full md:flex-1 flex justify-center items-center order-1 md:order-2 relative z-30 h-44 md:h-96 mb-3 md:mb-0">
+          <div className="relative w-[140px] h-[220px] md:w-[360px] md:h-[540px] transform translate-y-2 md:translate-y-24 rotate-1 hover:rotate-0 hover:scale-105 transition-all duration-500 ease-out cursor-pointer group flex items-center justify-center">
+            <img 
+              src="/hero-phone.png" 
+              alt="آیفون پرچمدار سیب شاپ"
+              className="w-full h-full object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.3)] md:drop-shadow-[0_35px_50px_rgba(0,0,0,0.25)]"
+            />
           </div>
-
         </div>
-      </main>
 
-      <Footer />
+        {/* بخش راست: متن‌ها و دکمه اکشن */}
+        <div className="flex-1 flex flex-col items-center md:items-start gap-3 md:gap-4 text-center md:text-right order-2 md:order-1 w-full">
+          
+          <div className="inline-flex items-center gap-1.5 bg-white/10 text-white/90 px-3 py-1 rounded-full text-[9px] md:text-xs font-medium border border-white/10 max-w-full">
+            <span className="truncate">✨ جشنواره افتتاحیه؛ ضمانت اصالت و ۱۸ ماه گارانتی شرکتی</span>
+          </div>
+          
+          <h1 className="text-xl md:text-5xl font-black text-white leading-tight md:leading-snug mt-1">
+            اتصال به دنیای <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-pink-500">پرچمدارها</span>
+          </h1>
+          
+          <p className="text-slate-400 text-[11px] md:text-sm max-w-xl leading-5 md:leading-6 font-medium px-2 md:px-0">
+            برترین تکنولوژی‌های روز دنیا، لوازم جانبی اورجینال و خدمات تخصصی تعمیرات موبایل را در سیب‌شاپ تجربه کنید.
+          </p>
+          
+          <div className="mt-1 md:mt-4 flex flex-wrap justify-center md:justify-start gap-4 w-full md:w-auto">
+            <button className="w-full md:w-auto justify-center bg-white text-slate-900 px-6 py-2.5 md:py-3 rounded-xl md:rounded-2xl text-xs font-black shadow-lg hover:bg-slate-100 transition duration-200 flex items-center gap-2">
+              <span>مشاهده محصولات</span>
+              <span className="scale-x-[-1] md:scale-x-1">←</span>
+            </button>
+          </div>
+          
+          <div className="mt-4 md:mt-8 flex items-center justify-center md:justify-start gap-5 text-slate-500 text-[9px] md:text-xs font-bold border-t border-slate-800/80 pt-3 w-full">
+            <div className="flex items-center gap-1">
+              <span>🛡️</span>
+              <span>۱۸ ماه گارانتی</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span>🚀</span>
+              <span>ارسال سریع</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }

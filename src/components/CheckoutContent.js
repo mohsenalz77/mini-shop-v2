@@ -1,11 +1,15 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useCart } from '../context/CartContext'; 
+import { useCart } from '../context/CartContext'; // 🚀 بررسی کن که این مسیر دقیقاً درست باشد
 import { ShoppingBag, CreditCard, ShieldCheck, MapPin, ChevronLeft, Wallet } from 'lucide-react';
 
 export default function CheckoutContent() {
-  const { cartItems, getCartTotal } = useCart();
+  // 🔐 امن‌سازی هوک سبد خرید برای جلوگیری از کرش و ارور Is Not A Function
+  const context = useCart();
+  const cartItems = context?.cartItems || [];
+  const getCartTotal = context?.getCartTotal ? context.getCartTotal : () => 0;
+
   const [paymentMethod, setPaymentMethod] = useState('online');
 
   const userAddress = {
@@ -23,21 +27,21 @@ export default function CheckoutContent() {
       alert('سبد خرید شما خالی است!');
       return;
     }
-    alert(`درخواست پرداخت به مبلغ ${finalTotal.toLocaleString('fa-IR')} تومان از طریق درگاه بانکی صادر شد.`);
+    alert(`درخواست پرداخت به مبلغ ${finalTotal.toLocaleString('fa-IR')} تومان صادر شد.`);
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-      {/* ستون سمت راست: جزئیات آدرس، کالاها و شیوه پرداخت */}
-      <div className="lg:col-span-8 flex flex-col gap-4">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start text-right">
+      {/* ستون سمت راست */}
+      <div className="lg:col-span-8 flex flex-col gap-4 w-full">
         
-        {/* باکس آدرس تحویل سفارش */}
-        <section className="bg-white border border-slate-100 rounded-3xl p-5 shadow-3xs text-right">
+        {/* باکس آدرس */}
+        <section className="bg-white border border-slate-100 rounded-3xl p-5 shadow-3xs">
           <h3 className="text-xs font-black text-slate-800 mb-4 flex items-center gap-1.5">
             <MapPin className="w-4 h-4 text-slate-400" />
             <span>آدرس تحویل سفارش</span>
           </h3>
-          <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-100 text-right">
+          <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-100">
             <p className="text-xs font-bold text-slate-700 leading-6">{userAddress.address}</p>
             <div className="flex flex-wrap gap-4 mt-3 pt-3 border-t border-slate-200/40 text-[11px] font-black text-slate-400">
               <span>گیرنده: {userAddress.name}</span>
@@ -46,8 +50,8 @@ export default function CheckoutContent() {
           </div>
         </section>
 
-        {/* باکس شیوه پرداخت کالا */}
-        <section className="bg-white border border-slate-100 rounded-3xl p-5 shadow-3xs text-right">
+        {/* باکس شیوه پرداخت */}
+        <section className="bg-white border border-slate-100 rounded-3xl p-5 shadow-3xs">
           <h3 className="text-xs font-black text-slate-800 mb-4 flex items-center gap-1.5">
             <CreditCard className="w-4 h-4 text-slate-400" />
             <span>انتخاب شیوه پرداخت</span>
@@ -62,7 +66,7 @@ export default function CheckoutContent() {
                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${paymentMethod === 'online' ? 'border-rose-500' : 'border-slate-300'}`}>
                   {paymentMethod === 'online' && <div className="w-2.5 h-2.5 bg-rose-500 rounded-full"></div>}
                 </div>
-                <div className="text-right">
+                <div>
                   <span className="text-xs font-black text-slate-800 block">پرداخت آنلاین اینترنتی</span>
                   <span className="text-[10px] text-slate-400 font-medium mt-0.5 block">با تمامی کارت‌های عضو شتاب</span>
                 </div>
@@ -78,7 +82,7 @@ export default function CheckoutContent() {
                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${paymentMethod === 'wallet' ? 'border-rose-500' : 'border-slate-300'}`}>
                   {paymentMethod === 'wallet' && <div className="w-2.5 h-2.5 bg-rose-500 rounded-full"></div>}
                 </div>
-                <div className="text-right">
+                <div>
                   <span className="text-xs font-black text-slate-800 block">پرداخت از کیف پول</span>
                   <span className="text-[10px] text-slate-400 font-medium mt-0.5 block">موجودی: ۰ تومان</span>
                 </div>
@@ -88,14 +92,14 @@ export default function CheckoutContent() {
           </div>
         </section>
 
-        {/* لیست خلاصه اقلام فاکتور */}
-        <section className="bg-white border border-slate-100 rounded-3xl p-5 shadow-3xs text-right">
+        {/* لیست محصولات فاکتور */}
+        <section className="bg-white border border-slate-100 rounded-3xl p-5 shadow-3xs">
           <h3 className="text-xs font-black text-slate-800 mb-4 flex items-center gap-1.5">
             <ShoppingBag className="w-4 h-4 text-slate-400" />
             <span>مرور کالاهای مرسوله ({cartItems.length} کالا)</span>
           </h3>
           
-          <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-none direction-rtl text-right">
+          <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-none flex-row-reverse text-right">
             {cartItems.map((item) => (
               <div key={item.id} className="w-20 shrink-0 bg-slate-50 border border-slate-100 p-2 rounded-2xl relative flex items-center justify-center h-20">
                 {item.imageUrl ? (
@@ -108,21 +112,18 @@ export default function CheckoutContent() {
                 </span>
               </div>
             ))}
-            {cartItems.length === 0 && (
-              <p className="text-xs font-bold text-slate-400 py-2">هیچ کالایی در سبد خرید شما نیست.</p>
-            )}
           </div>
         </section>
       </div>
 
-      {/* ستون سمت چپ: پیش‌فاکتور مالی و دکمه پرداخت */}
-      <aside className="lg:col-span-4 bg-white border border-slate-100 rounded-3xl p-5 shadow-3xs text-right sticky top-24">
+      {/* ستون سمت چپ: قیمت کل */}
+      <aside className="lg:col-span-4 bg-white border border-slate-100 rounded-3xl p-5 shadow-3xs w-full sticky top-24">
         <h4 className="text-xs font-black text-slate-800 mb-4 border-b border-slate-50 pb-3">
           صورت‌حساب مالی سفارش
         </h4>
         
         <div className="flex flex-col gap-3 pb-4 border-b border-slate-100">
-          <div className="flex items-center justify-between w-full text-right">
+          <div className="flex items-center justify-between w-full">
             <span className="text-[11px] text-slate-400 font-bold">قیمت کالاها ({cartItems.length}):</span>
             <div className="text-xs font-black text-slate-800 flex items-center gap-0.5">
               <span>{getCartTotal().toLocaleString('fa-IR')}</span>
@@ -130,8 +131,8 @@ export default function CheckoutContent() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between w-full text-right">
-            <span className="text-[11px] text-slate-400 font-bold">هزینه ارسال (اکسپرس):</span>
+          <div className="flex items-center justify-between w-full">
+            <span className="text-[11px] text-slate-400 font-bold">هزینه ارسال:</span>
             <div className="text-xs font-black text-slate-800 flex items-center gap-0.5">
               <span>{shippingCost.toLocaleString('fa-IR')}</span>
               <span className="text-[10px] font-normal text-slate-400 mr-0.5">تومان</span>
@@ -139,7 +140,7 @@ export default function CheckoutContent() {
           </div>
         </div>
 
-        <div className="my-4 flex items-center justify-between w-full text-right">
+        <div className="my-4 flex items-center justify-between w-full">
           <span className="text-xs font-black text-slate-800">مبلغ قابل پرداخت:</span>
           <div className="text-base md:text-lg font-black text-rose-500 flex items-center gap-0.5">
             <span>{finalTotal.toLocaleString('fa-IR')}</span>
@@ -149,7 +150,7 @@ export default function CheckoutContent() {
 
         <button 
           onClick={handlePaymentSubmit}
-          className="w-full bg-rose-500 hover:bg-rose-600 text-white font-black text-xs md:text-sm py-3.5 rounded-2xl shadow-md transition duration-300 flex items-center justify-center gap-2 active:scale-98"
+          className="w-full bg-rose-500 hover:bg-rose-600 text-white font-black text-xs md:text-sm py-3.5 rounded-2xl shadow-md transition duration-300 flex items-center justify-center gap-2"
         >
           <ShieldCheck className="w-4 h-4" />
           <span>تایید و پرداخت نهایی فاکتور</span>

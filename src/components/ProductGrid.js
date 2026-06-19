@@ -3,8 +3,10 @@
 import React from 'react';
 import { ArrowLeft, Star, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
+import { useCart } from '../../context/CartContext'; // 🚀 ۱. وارد کردن هوک متمرکز سبد خرید
 
 export default function ProductGrid({ products }) {
+  const { addToCart } = useCart(); // 🚀 ۲. بیرون کشیدن تابع افزودن به سبد
   
   if (!products || products.length === 0) {
     return (
@@ -41,12 +43,19 @@ export default function ProductGrid({ products }) {
         {products.map((product) => {
           const { title, price, oldPrice, slug, image } = product.attributes;
           
-          // 🚀 اصلاح بنیادی: خواندن آدرس پایه از دامنه امن متغیر محیطی ورسل
           const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || "https://b.dr-sib.xyz";
           const hasImage = image?.data?.attributes?.url;
           const imageUrl = hasImage 
             ? `${strapiUrl}${image.data.attributes.url}`
             : null;
+          
+          // 🚀 ۳. آماده‌سازی پکیج اطلاعات محصول برای ارسال استاندارد به سبد
+          const cleanProductData = {
+            id: product.id,
+            name: title,
+            price: Number(price), // ذخیره به صورت عدد برای محاسبات فاکتور
+            imageUrl: imageUrl
+          };
           
           return (
             <Link 
@@ -75,10 +84,12 @@ export default function ProductGrid({ products }) {
                       جدید
                     </span>
 
+                    {/* دکمه دسکتاپ: افزودن به سبد خرید */}
                     <div className="absolute inset-x-2 bottom-2 translate-y-14 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out z-20 hidden md:block">
                       <button 
                         onClick={(e) => {
-                          e.preventDefault();
+                          e.preventDefault(); // 🛡️ مانع جابه‌جایی مرورگر به صفحه محصول می‌شود
+                          addToCart(cleanProductData); // 🛒 تزریق دیتای محصول به کلید اصلی سبد خرید
                         }}
                         className="w-full bg-slate-950 hover:bg-rose-500 text-white py-2.5 rounded-xl text-xs font-black shadow-md transition duration-200 flex items-center justify-center gap-1.5"
                       >
@@ -113,8 +124,12 @@ export default function ProductGrid({ products }) {
                       <span className="text-[9px] md:text-[10px] font-normal text-slate-400">تومان</span>
                     </div>
                     
+                    {/* دکمه موبایل: افزودن به سبد خرید */}
                     <button 
-                      onClick={(e) => e.preventDefault()}
+                      onClick={(e) => {
+                        e.preventDefault(); // 🛡️ مانع باز شدن لینک کالا در موبایل می‌شود
+                        addToCart(cleanProductData); // 🛒 تزریق محصول به سبد خرید کلاینت
+                      }}
                       className="md:hidden bg-slate-50 text-slate-600 border border-slate-100 w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs hover:bg-rose-500 hover:text-white transition duration-200 shadow-3xs"
                     >
                       ＋

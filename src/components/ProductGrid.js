@@ -3,7 +3,7 @@
 import React from 'react';
 import { ArrowLeft, Star, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
-import { useCart } from '../../context/CartContext'; // 🚀 ۱. وارد کردن هوک متمرکز سبد خرید
+import { useCart } from '../context/CartContext'; // 🚀 ۱. وارد کردن هوک متمرکز سبد خرید
 
 export default function ProductGrid({ products }) {
   const { addToCart } = useCart(); // 🚀 ۲. بیرون کشیدن تابع افزودن به سبد

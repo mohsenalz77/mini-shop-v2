@@ -43,11 +43,11 @@ export default async function ProductDetailPage({ params }) {
   // استخراج مشخصات اصلی از دیتای استراپی
   const { title, price, oldPrice, description, image } = apiProduct.attributes;
 
-  // 🛡️ ساخت و ایمن‌سازی آدرس عکس مستقیم با آی‌پی سرور اوبونتو همینجا در سرور ساید
-  const hasImage = image?.data?.attributes?.url;
-  const safeImageUrl = hasImage 
-    ? `http://95.182.85.212:1337${image.data.attributes.url}`
-    : null;
+// ✅ کد اصلاح‌شده و ضد انسداد:
+const hasImage = image?.data?.attributes?.url;
+const safeImageUrl = hasImage 
+  ? `//95.182.85.212:1337${image.data.attributes.url}`
+  : null;
 
   // آماده‌سازی دیتای تمیز و ایمن برای تحویل به قالب فرانت‌اَند شما
   const productData = {

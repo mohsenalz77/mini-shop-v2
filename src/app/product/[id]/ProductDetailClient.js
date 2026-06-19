@@ -43,12 +43,13 @@ export default function ProductDetailClient({ productData }) {
               </button>
             </div>
             
-            {/* 🛡️ رندر کاملاً هوشمند بر اساس آدرس ایمن ساخته شده در سرور */}
+            {/* 🛡️ اصلاح طلایی: رندر مستقیم آدرس ایمن سرور ساید بدون وابستگی به ساختار خام استراپی */}
             <div className="flex-1 flex items-center justify-center w-full h-full">
               {productData.imageUrl ? (
                 <img 
                   src={productData.imageUrl} 
                   alt={productData.name}
+                  referrerPolicy="no-referrer-when-downgrade" // 🚀 دور زدن قوانین محدودکننده Mixed Content در مرورگرها
                   className="max-h-[260px] md:max-h-[380px] object-contain filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.08)] select-none"
                 />
               ) : (

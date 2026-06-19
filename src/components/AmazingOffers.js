@@ -3,22 +3,39 @@
 import { useState, useEffect, useRef } from 'react';
 import { Flame, ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link'; 
-
-const amazingProducts = [
-  { id: 101, name: 'آیفون ۱۳ پرو مکس - ۱۲۸ گیگابایت (استوک کارهای عالی)', mainPrice: '۴۸,۹۰۰,۰۰۰', discountPrice: '۴۴,۵۰۰,۰۰۰', percent: '۹', image: '📱' },
-  { id: 102, name: 'ساعت هوشمند اپل واچ سری ۹ مدل Aluminum 45mm', mainPrice: '۲۱,۵۰۰,۰۰۰', discountPrice: '۱۸,۹۰۰,۰۰۰', percent: '۱۲', image: '⌚' },
-  { id: 103, name: 'ایرپاد پرو نسل ۲ مدل Type-C اورجینال', mainPrice: '۱۱,۲۰۰,۰۰۰', discountPrice: '۹,۶۰۰,۰۰۰', percent: '۱۴', image: '🎧' },
-  { id: 104, name: 'پاوربانک بیسوس ۲۰ هزار وات فست شارژ', mainPrice: '۲,۴۰۰,۰۰۰', discountPrice: '۱,۸۵۰,۰۰۰', percent: '۲۳', image: '🔌' },
-  { id: 105, name: 'گوشی موبایل اپل مدل iPhone 15 Pro ظرفیت ۱۲۸ گیگابایت', mainPrice: '۵۴,۹۰۰,۰۰۰', discountPrice: '۵۱,۲۰۰,۰۰۰', percent: '۷', image: '📱' },
-  { id: 106, name: 'گوشی موبایل سامسونگ گلکسی S24 ظرفیت ۲۵۶ گیگابایت', mainPrice: '۴۳,۵۰۰,۰۰۰', discountPrice: '۳۹,۹۰۰,۰۰۰', percent: '۸', image: '📱' },
-  { id: 107, name: 'مچ‌بند هوشمند شیائومی مدل Mi Band 8 Global Version', mainPrice: '۲,۱۰۰,۰۰۰', discountPrice: '۱,۶۵۰,۰۰۰', percent: '۲۱', image: '⌚' },
-  { id: 108, name: 'قاب محافظ مگ‌سیف نیلکین مناسب برای آیفون ۱۵ پرو مکس', mainPrice: '۱,۴۵۰,۰۰۰', discountPrice: '۹۸۰,۰۰۰', percent: '۳۲', image: '🛡️' },
-];
+import { useCart } from '../../context/CartContext'; // 🚀 ۱. وارد کردن مغز سبد خرید
 
 export default function AmazingOffers() {
+  const { addToCart } = useCart(); // 🚀 ۲. استخراج متد افزودن به سبد
+  const [products, setProducts] = useState([]); // ذخیره محصولات داینامیک بک‌اَند
+  const [isLoading, setIsLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState({ hours: 6, minutes: 42, seconds: 0 });
-  const scrollRef = useRef(null); // این متغیر اینجا تعریف شده است
+  const scrollRef = useRef(null);
 
+  // 🚀 ۳. فچ کردن زنده کالاهای تخفیف‌دار از بک‌اَند استراپی
+  useEffect(() => {
+    async function fetchAmazingProducts() {
+      try {
+        const strapiApi = process.env.NEXT_PUBLIC_API_URL || "https://b.dr-sib.xyz/api";
+        // فچ کردن کالاها و فیلتر کردن مواردی که قیمت قدیمی (oldPrice) دارند
+        const res = await fetch(`${strapiApi}/products?populate=*&filters[oldPrice][$notNull]=true&pagination[limit]=8`, {
+          cache: 'no-store'
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          setProducts(data.data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching amazing offers:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchAmazingProducts();
+  }, []);
+
+  // تایمر معکوس شگفت‌انگیز
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -46,6 +63,17 @@ export default function AmazingOffers() {
   };
 
   const formatTime = (num) => String(num).padStart(2, '۰');
+
+  if (isLoading) {
+    return (
+      <div className="w-full text-center py-8 text-rose-500 font-medium">
+        در حال بارگذاری تخفیف‌های داغ روز...
+      </div>
+    );
+  }
+
+  // اگر محصول تخفیف‌داری در بک‌اَند نبود، کادر شگفت‌انگیز پنهان شود
+  if (products.length === 0) return null;
 
   return (
     <div className="w-full px-4 md:px-8 my-8 md:my-12 relative block z-10">
@@ -116,47 +144,83 @@ export default function AmazingOffers() {
           <ArrowLeft className="w-5 h-5" />
         </button>
 
-        {/* ۳. ریل اسکرول محصولات (اتصال ۱۰۰٪ دقیق و تست‌شده کامپوننت Link) */}
+        {/* ۳. ریل اسکرول داینامیک محصولات متصل به استراپی و سبد خرید */}
         <div 
-          ref={scrollRef}
+          scrollref={scrollRef}
           className="flex-1 w-full flex gap-3 md:gap-4 overflow-x-auto pb-1 md:pb-3 scrollbar-none snap-x z-10 scroll-smooth px-1 md:px-0"
         >
-          {amazingProducts.map((prod) => (
-            <Link 
-              href={`/product/${prod.id}`}
-              key={prod.id} 
-              className="flex-shrink-0 w-[145px] md:w-52 xl:w-56 snap-center bg-white rounded-2xl p-3 md:p-4 flex flex-col justify-between group cursor-pointer hover:shadow-2xl transition-all duration-300 relative border border-white block"
-            >
-              <div className="w-full h-full flex flex-col justify-between">
-                <div className="relative">
-                  <span className="absolute top-0 right-0 bg-rose-500 text-white text-[9px] md:text-[10px] font-black px-1.5 md:px-2 py-0.5 rounded-lg z-10">
-                    %{prod.percent}
-                  </span>
-                  
-                  <div className="w-full bg-slate-50 rounded-xl h-24 md:h-36 flex items-center justify-center text-3xl md:text-5xl mb-2 md:mb-3 overflow-hidden">
-                    <span className="group-hover:scale-110 transition duration-300 select-none">{prod.image}</span>
-                  </div>
-                  
-                  <h3 className="text-[11px] md:text-xs font-bold text-slate-700 leading-4 md:leading-5 line-clamp-2 h-8 md:h-10 mb-1 md:mb-2 text-right">
-                    {prod.name}
-                  </h3>
-                </div>
-                
-                <div className="mt-1 md:mt-2 pt-2 border-t border-slate-50 flex flex-col gap-1 md:gap-1.5">
-                  <span className="text-[9px] md:text-[10px] text-slate-400 font-medium line-through text-right pr-1">
-                    {prod.mainPrice}
-                  </span>
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center gap-0.5 text-slate-950 font-black text-[11px] md:text-sm">
-                      <span>{prod.discountPrice}</span>
-                      <span className="text-[9px] font-normal text-slate-400">تومان</span>
+          {products.map((prod) => {
+            const { title, price, oldPrice, slug, image } = prod.attributes;
+            const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || "https://b.dr-sib.xyz";
+            const hasImage = image?.data?.attributes?.url;
+            const imageUrl = hasImage ? `${strapiUrl}${image.data.attributes.url}` : null;
+
+            // محاسبه درصد تخفیف به صورت ریاضی و داینامیک
+            const percent = oldPrice ? Math.round(((Number(oldPrice) - Number(price)) / Number(oldPrice)) * 100) : 0;
+
+            // پکیج اطلاعات تمیز محصول برای ارسال فاکتور به سبد خرید
+            const cleanProductData = {
+              id: prod.id,
+              name: title,
+              price: Number(price),
+              imageUrl: imageUrl
+            };
+
+            return (
+              <Link 
+                href={`/product/${slug}`}
+                key={prod.id} 
+                className="flex-shrink-0 w-[145px] md:w-52 xl:w-56 snap-center bg-white rounded-2xl p-3 md:p-4 flex flex-col justify-between group cursor-pointer hover:shadow-2xl transition-all duration-300 relative border border-white block"
+              >
+                <div className="w-full h-full flex flex-col justify-between">
+                  <div className="relative">
+                    {percent > 0 && (
+                      <span className="absolute top-0 right-0 bg-rose-500 text-white text-[9px] md:text-[10px] font-black px-1.5 md:px-2 py-0.5 rounded-lg z-10">
+                        %{percent.toLocaleString('fa-IR')}
+                      </span>
+                    )}
+                    
+                    <div className="w-full bg-slate-50 rounded-xl h-24 md:h-36 flex items-center justify-center mb-2 md:mb-3 overflow-hidden border border-slate-100/50">
+                      {imageUrl ? (
+                        <img src={imageUrl} alt={title} className="w-full h-full object-contain p-2 group-hover:scale-105 transition duration-300 select-none" />
+                      ) : (
+                        <span className="text-3xl md:text-5xl group-hover:scale-110 transition duration-300 select-none">📱</span>
+                      )}
                     </div>
-                    <button className="bg-slate-50 text-slate-600 w-6 h-6 md:w-7 md:h-7 rounded-lg flex items-center justify-center font-bold text-xs hover:bg-rose-500 hover:text-white transition duration-200">＋</button>
+                    
+                    <h3 className="text-[11px] md:text-xs font-bold text-slate-700 leading-4 md:leading-5 line-clamp-2 h-8 md:h-10 mb-1 md:mb-2 text-right">
+                      {title}
+                    </h3>
+                  </div>
+                  
+                  <div className="mt-1 md:mt-2 pt-2 border-t border-slate-50 flex flex-col gap-1">
+                    {oldPrice && (
+                      <span className="text-[9px] md:text-[10px] text-slate-400 font-medium line-through text-right pr-1">
+                        {Number(oldPrice).toLocaleString('fa-IR')}
+                      </span>
+                    )}
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-0.5 text-slate-950 font-black text-[11px] md:text-sm">
+                        <span>{Number(price).toLocaleString('fa-IR')}</span>
+                        <span className="text-[9px] font-normal text-slate-400">تومان</span>
+                      </div>
+                      
+                      {/* 🛒 زنده کردن دکمه پلاس برای ارسال به سبد خرید */}
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault(); // مانع باز شدن لینک صفحه محصول می‌شود
+                          addToCart(cleanProductData); // ارسال داده به فاکتور
+                        }}
+                        className="bg-slate-50 text-slate-600 w-6 h-6 md:w-7 md:h-7 rounded-lg flex items-center justify-center font-bold text-xs hover:bg-rose-500 hover:text-white transition duration-200 shadow-3xs"
+                      >
+                        ＋
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
 
         {/* ۴. مینی بنر کلوپ مشتریان */}

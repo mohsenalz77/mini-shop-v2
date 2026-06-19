@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Flame, ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link'; 
-import { useCart } from '../../context/CartContext'; // 🚀 ۱. وارد کردن مغز سبد خرید
+import { useCart } from '../context/CartContext'; // 🚀 ۱. وارد کردن مغز سبد خرید
 
 export default function AmazingOffers() {
   const { addToCart } = useCart(); // 🚀 ۲. استخراج متد افزودن به سبد

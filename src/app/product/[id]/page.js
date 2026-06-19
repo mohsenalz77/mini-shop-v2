@@ -2,19 +2,17 @@ import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
 import ProductDetailClient from './ProductDetailClient';
 
-// 🚀 تابع فچ کردن اطلاعات تک محصول از استراپی بر اساس اسلاگ
+// تابع فچ کردن اطلاعات تک محصول از استراپی بر اساس اسلاگ
 async function getSingleProductBySlug(slug) {
   try {
-    // استفاده از فیلترهای استراپی برای پیدا کردن محصول بر اساس فیلد slug
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products?filters[slug][$eq]=${slug}&populate=*`, {
-      cache: 'no-store' // برای جلوگیری از کش شدن قیمت‌ها
+      cache: 'no-store'
     });
 
     if (!res.ok) return null;
     
     const data = await res.json();
     
-    // چون فیلتر خروجی آرایه می‌دهد، اگر محصولی پیدا شد اولین عضو [0] را برمی‌گردانیم
     if (data.data && data.data.length > 0) {
       return data.data[0];
     }
@@ -27,7 +25,6 @@ async function getSingleProductBySlug(slug) {
 }
 
 export default async function ProductDetailPage({ params }) {
-  // در اینجا چون اسم پوشه [id] است، ورودی را از params می‌گیریم ولی به عنوان اسلاگ استفاده می‌کنیم
   const { id: slug } = params;
   
   // گرفتن دیتای واقعی از استراپی بر اساس اسلاگ کالا
@@ -46,11 +43,18 @@ export default async function ProductDetailPage({ params }) {
   // استخراج مشخصات اصلی از دیتای استراپی
   const { title, price, oldPrice, description, image } = apiProduct.attributes;
 
-  // آماده‌سازی دیتای تمیز برای تحویل به قالب فرانت‌اَند شما
+  // 🛡️ ساخت و ایمن‌سازی آدرس عکس مستقیم با آی‌پی سرور اوبونتو همینجا در سرور ساید
+  const hasImage = image?.data?.attributes?.url;
+  const safeImageUrl = hasImage 
+    ? `http://95.182.85.212:1337${image.data.attributes.url}`
+    : null;
+
+  // آماده‌سازی دیتای تمیز و ایمن برای تحویل به قالب فرانت‌اَند شما
   const productData = {
     id: apiProduct.id,
     name: title,
-    rawImage: image, // پاس دادن آبجکت کامل عکس برای پردازش در کلاینت
+    // 🚀 تغییر اصلی: فرستادن مستقیم آدرس ساخته شده به جای دیتای خام
+    imageUrl: safeImageUrl, 
     englishName: 'Apple Flagship Device', 
     price: Number(price).toLocaleString('fa-IR'),
     oldPrice: oldPrice ? Number(oldPrice).toLocaleString('fa-IR') : null,

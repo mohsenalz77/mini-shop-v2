@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import Header '../../../components/Header';
+import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
 import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2 } from 'lucide-react';
 import { useCart } from '../../../context/CartContext'; // 🚀 ۱. ورود هوک متمرکز سبد خرید

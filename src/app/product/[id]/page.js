@@ -43,17 +43,17 @@ export default async function ProductDetailPage({ params }) {
   // استخراج مشخصات اصلی از دیتای استراپی
   const { title, price, oldPrice, description, image } = apiProduct.attributes;
 
-// ✅ کد اصلاح‌شده و ضد انسداد:
-const hasImage = image?.data?.attributes?.url;
-const safeImageUrl = hasImage 
-  ? `//95.182.85.212:1337${image.data.attributes.url}`
-  : null;
+  // 🚀 اصلاح بنیادی: خواندن آدرس پایه از دامنه امن متغیر محیطی ورسل به جای آی‌پی قدیمی
+  const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || "https://b.dr-sib.xyz";
+  const hasImage = image?.data?.attributes?.url;
+  const safeImageUrl = hasImage 
+    ? `${strapiUrl}${image.data.attributes.url}`
+    : null;
 
   // آماده‌سازی دیتای تمیز و ایمن برای تحویل به قالب فرانت‌اَند شما
   const productData = {
     id: apiProduct.id,
     name: title,
-    // 🚀 تغییر اصلی: فرستادن مستقیم آدرس ساخته شده به جای دیتای خام
     imageUrl: safeImageUrl, 
     englishName: 'Apple Flagship Device', 
     price: Number(price).toLocaleString('fa-IR'),

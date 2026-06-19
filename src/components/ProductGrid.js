@@ -2,12 +2,11 @@
 
 import React from 'react';
 import { ArrowLeft, Star, ShoppingBag } from 'lucide-react';
-// ۱. ایمپورت کامپوننت Link از نکست‌جی‌آس
 import Link from 'next/link';
 
 export default function ProductGrid({ products }) {
   
-  // اگر دیتایی از سرور نیامده باشد، برای جلوگیری از کرش کادر خالی یا لودینگ نشان می‌دهیم
+  // اگر دیتایی از سرور نیامده باشد، برای جلوگیری از کرش کادر لودینگ نشان می‌دهیم
   if (!products || products.length === 0) {
     return (
       <div className="w-full text-center py-12 text-slate-400 font-medium">
@@ -15,6 +14,9 @@ export default function ProductGrid({ products }) {
       </div>
     );
   }
+
+  // تنظیم آدرس پایه سرور استراپی
+  const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || "http://95.182.85.212:1337";
 
   return (
     <div className="w-full px-4 md:px-8 my-10 md:my-16 relative z-10 direction-rtl">
@@ -38,16 +40,21 @@ export default function ProductGrid({ products }) {
         </button>
       </div>
 
-      {/* گرید ۲ ستونه در موبایل و ۴ ستونه در دسکتاپ */}
+      {/* گرید محصولات */}
       <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
         {products.map((product) => {
-          // استخراج مشخصات از ساختار دیتای استراپی v4 (اضافه کردن image)
           const { title, price, oldPrice, slug, image } = product.attributes;
           
+          // 🛡️ راه‌حل طلایی ضد کرش: استفاده از ?. برای بررسی وجود تصویر
+          const hasImage = image?.data?.attributes?.url;
+          const imageUrl = hasImage 
+            ? `${strapiUrl.replace(/\/$/, '')}${image.data.attributes.url}`
+            : null;
+          
           return (
-            // تغییر تگ div اصلی به کامپوننت Link به همراه آدرس‌دهی داینامیک محصول بر اساس ID استراپی
+            // تغییر مسیر به slug جهت زیبایی و سئو استاندارد صفحات
             <Link 
-              href={`/product/${product.id}`}
+              href={`/product/${slug || product.id}`}
               key={product.id} 
               className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-4 border border-slate-100 hover:shadow-[0_24px_48px_rgba(0,0,0,0.04)] hover:border-slate-200 transition-all duration-300 flex flex-col justify-between group cursor-pointer relative overflow-hidden block"
             >
@@ -56,10 +63,9 @@ export default function ProductGrid({ products }) {
                   {/* باکس تصویر محصول */}
                   <div className="bg-slate-50 rounded-xl md:rounded-2xl h-28 md:h-44 flex items-center justify-center relative overflow-hidden mb-3 border border-slate-100/50">
                     
-                    {/* 🚀 تغییر طلایی: رندر هوشمند تصویر آنلاین استراپی یا اموجی به عنوان جایگزین */}
-                    {image?.data ? (
+                    {imageUrl ? (
                       <img 
-                        src={`${process.env.NEXT_PUBLIC_STRAPI_URL}${image.data.attributes.url}`} 
+                        src={imageUrl} 
                         alt={title}
                         className="w-full h-full object-contain p-2 group-hover:scale-105 transition duration-500 select-none"
                       />
@@ -78,8 +84,7 @@ export default function ProductGrid({ products }) {
                     <div className="absolute inset-x-2 bottom-2 translate-y-14 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out z-20 hidden md:block">
                       <button 
                         onClick={(e) => {
-                          e.preventDefault(); // جلوگیری از رفتن به صفحه محصول هنگام کلیک روی دکمه سبد خرید
-                          // کد اضافه کردن به سبد خرید بعداً اینجا می‌آید
+                          e.preventDefault(); // جلوگیری از باز شدن صفحه محصول هنگام کلیک روی سبد خرید
                         }}
                         className="w-full bg-slate-950 hover:bg-rose-500 text-white py-2.5 rounded-xl text-xs font-black shadow-md transition duration-200 flex items-center justify-center gap-1.5"
                       >
@@ -103,7 +108,6 @@ export default function ProductGrid({ products }) {
 
                 {/* بخش قیمت‌ها در کف کارت */}
                 <div className="mt-1 pt-2 md:pt-3 border-t border-slate-100 flex flex-col gap-0.5 text-right">
-                  {/* قیمت قبلی */}
                   {oldPrice ? (
                     <span className="text-[9px] md:text-[11px] text-slate-400 font-medium line-through pr-1">
                       {Number(oldPrice).toLocaleString('fa-IR')} <span className="text-[8px] md:text-[9px] font-normal no-underline">تومان</span>
@@ -121,10 +125,7 @@ export default function ProductGrid({ products }) {
                     
                     {/* دکمه پلاس موبایل */}
                     <button 
-                      onClick={(e) => {
-                        e.preventDefault();
-                        // کد سبد خرید موبایل
-                      }}
+                      onClick={(e) => e.preventDefault()}
                       className="md:hidden bg-slate-50 text-slate-600 border border-slate-100 w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs hover:bg-rose-500 hover:text-white transition duration-200 shadow-3xs"
                     >
                       ＋

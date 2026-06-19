@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic'; // 🚀 ورود ابزار حل باگ پیش‌رندرینگ Next.js
+import React, { useState } from 'react';
+import dynamic from 'next/dynamic'; 
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { useCart } from '../../context/CartContext'; 
 import { ShoppingBag, CreditCard, ShieldCheck, MapPin, Truck, ChevronLeft, Wallet } from 'lucide-react';
 import Link from 'next/link';
 
-// ۱. تفکیک منطق فاکتور در یک کامپوننت داخلی کلاینتی
+// ۱. کامپوننت داخلی فاکتور (نام مجزا برای جلوگیری از تداخل توابع ری‌اکت)
 function CheckoutContent() {
   const { cartItems, getCartTotal } = useCart();
   const [paymentMethod, setPaymentMethod] = useState('online');
@@ -138,6 +138,7 @@ function CheckoutContent() {
           <div className="flex items-center justify-between w-full text-right">
             <span className="text-[11px] text-slate-400 font-bold">هزینه ارسال (اکسپرس):</span>
             <div className="text-xs font-black text-slate-800 flex items-center gap-0.5">
+              <span>shippingCost.toLocaleString('fa-IR')</span>
               <span>{shippingCost.toLocaleString('fa-IR')}</span>
               <span className="text-[10px] font-normal text-slate-400 mr-0.5">تومان</span>
             </div>
@@ -168,12 +169,13 @@ function CheckoutContent() {
   );
 }
 
-// ۲. لود پویا و غیرفعال کردن SSR برای عبور موفق از سد فرآیند Prerendering کامپایلر Next.js
+// ۲. لود داینامیک کامپوننت بالا (تفکیک رندر با قابلیت ssr: false)
 const DynamicCheckoutContent = dynamic(() => Promise.resolve(CheckoutContent), {
   ssr: false,
   loading: () => <div className="w-full text-center py-10 text-xs font-bold text-slate-400">در حال آماده‌سازی پیش‌فاکتور امن...</div>
 });
 
+// ۳. کامپوننت اصلی که اکسپورت پیش‌فرض می‌شود
 export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 direction-rtl antialiased flex flex-col justify-between">
@@ -189,7 +191,7 @@ export default function CheckoutPage() {
           <span className="text-[11px] md:text-xs font-bold text-slate-400">۳. پرداخت نهایی</span>
         </div>
 
-        {/* فراخوانی کامپوننت امن کلاینتی */}
+        {/* فراخوانی کامپوننت تفکیک‌شده کلاینتی بدون تداخل نام */}
         <DynamicCheckoutContent />
       </main>
 

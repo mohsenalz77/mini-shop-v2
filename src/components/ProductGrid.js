@@ -6,7 +6,6 @@ import Link from 'next/link';
 
 export default function ProductGrid({ products }) {
   
-  // اگر دیتایی از سرور نیامده باشد، برای جلوگیری از کرش کادر لودینگ نشان می‌دهیم
   if (!products || products.length === 0) {
     return (
       <div className="w-full text-center py-12 text-slate-400 font-medium">
@@ -14,9 +13,6 @@ export default function ProductGrid({ products }) {
       </div>
     );
   }
-
-  // تنظیم آدرس پایه سرور استراپی
-  const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || "http://95.182.85.212:1337";
 
   return (
     <div className="w-full px-4 md:px-8 my-10 md:my-16 relative z-10 direction-rtl">
@@ -45,16 +41,16 @@ export default function ProductGrid({ products }) {
         {products.map((product) => {
           const { title, price, oldPrice, slug, image } = product.attributes;
           
-          // 🛡️ راه‌حل طلایی ضد کرش: استفاده از ?. برای بررسی وجود تصویر
+          // 🚀 تزریق مستقیم آی‌پی سرور اوبونتو برای حل قطعی لود نشدن تصویر
           const hasImage = image?.data?.attributes?.url;
           const imageUrl = hasImage 
-            ? `${strapiUrl.replace(/\/$/, '')}${image.data.attributes.url}`
+            ? `http://95.182.85.212:1337${image.data.attributes.url}`
             : null;
           
           return (
-            // تغییر مسیر به slug جهت زیبایی و سئو استاندارد صفحات
+            // 🔗 لینک‌دهی مستقیم و قطعی بر اساس اسلاگ تعریف‌شده در استراپی
             <Link 
-              href={`/product/${slug || product.id}`}
+              href={`/product/${slug}`}
               key={product.id} 
               className="bg-white rounded-2xl md:rounded-3xl p-3 md:p-4 border border-slate-100 hover:shadow-[0_24px_48px_rgba(0,0,0,0.04)] hover:border-slate-200 transition-all duration-300 flex flex-col justify-between group cursor-pointer relative overflow-hidden block"
             >
@@ -75,16 +71,14 @@ export default function ProductGrid({ products }) {
                       </span>
                     )}
                     
-                    {/* تگ کالا */}
                     <span className="absolute top-2 right-2 bg-slate-950/90 backdrop-blur-xs text-white text-[8px] md:text-[9px] font-black px-1.5 py-0.5 rounded-md md:rounded-lg shadow-xs">
                       جدید
                     </span>
 
-                    {/* دکمه سبد خرید دسکتاپ */}
                     <div className="absolute inset-x-2 bottom-2 translate-y-14 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out z-20 hidden md:block">
                       <button 
                         onClick={(e) => {
-                          e.preventDefault(); // جلوگیری از باز شدن صفحه محصول هنگام کلیک روی سبد خرید
+                          e.preventDefault();
                         }}
                         className="w-full bg-slate-950 hover:bg-rose-500 text-white py-2.5 rounded-xl text-xs font-black shadow-md transition duration-200 flex items-center justify-center gap-1.5"
                       >
@@ -94,19 +88,16 @@ export default function ProductGrid({ products }) {
                     </div>
                   </div>
                   
-                  {/* ریتینگ ستاره ثابت */}
                   <div className="flex items-center gap-1 mb-1.5 justify-start pr-0.5">
                     <Star className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
                     <span className="text-[9px] md:text-[10px] font-black text-slate-500">۴.۹</span>
                   </div>
 
-                  {/* عنوان کالا */}
                   <h3 className="text-[11px] md:text-sm font-bold text-slate-800 leading-5 md:leading-6 line-clamp-2 h-10 md:h-12 mb-3 text-right pr-0.5">
                     {title}
                   </h3>
                 </div>
 
-                {/* بخش قیمت‌ها در کف کارت */}
                 <div className="mt-1 pt-2 md:pt-3 border-t border-slate-100 flex flex-col gap-0.5 text-right">
                   {oldPrice ? (
                     <span className="text-[9px] md:text-[11px] text-slate-400 font-medium line-through pr-1">
@@ -117,13 +108,11 @@ export default function ProductGrid({ products }) {
                   )}
 
                   <div className="flex items-center justify-between w-full mt-0.5">
-                    {/* قیمت نهایی */}
                     <div className="text-xs md:text-base font-black text-slate-950 flex items-center gap-0.5">
                       <span>{Number(price).toLocaleString('fa-IR')}</span>
                       <span className="text-[9px] md:text-[10px] font-normal text-slate-400">تومان</span>
                     </div>
                     
-                    {/* دکمه پلاس موبایل */}
                     <button 
                       onClick={(e) => e.preventDefault()}
                       className="md:hidden bg-slate-50 text-slate-600 border border-slate-100 w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs hover:bg-rose-500 hover:text-white transition duration-200 shadow-3xs"

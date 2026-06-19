@@ -2,52 +2,55 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Smartphone, Lock, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { Smartphone, ShieldCheck, MessageSquareCode, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [password, setPassword] = useState('');
-  const [step, setStep] = useState(1);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [step, setStep] = useState(1); // ۱ برای شماره موبایل، ۲ برای کد پیامک
 
   const handleNextStep = (e) => {
     e.preventDefault();
-    if (phoneNumber.length >= 10) {
+    // بررسی ولیدیشن ساده شماره موبایل ایران
+    if (phoneNumber.length === 11 && phoneNumber.startsWith('09')) {
       setStep(2);
     } else {
-      alert('لطفاً شماره موبایل معتبر وارد کنید.');
+      alert('لطفاً یک شماره موبایل معتبر ۱۱ رقمی (مثال: ۰۹۱۲۳۴۵۶۷۸۹) وارد کنید.');
     }
   };
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
-    alert('درخواست ورود فرستاده شد!');
+    if (verificationCode.length === 5) {
+      alert('کد تایید بررسی شد! ورود با موفقیت انجام شد.');
+    } else {
+      alert('لطفاً کد تایید ۵ رقمی را به طور کامل وارد کنید.');
+    }
   };
 
   return (
-    /* 🎨 تغییر به بکگراند روشن، ابریشمی و بسیار ملایم جهت تراز شدن با صفحات سبد خرید و پروفایل */
-    <div className="min-h-screen bg-gradient-to-tr from-slate-100 via-slate-50 to-rose-50/40 flex items-center justify-center relative overflow-hidden px-4 direction-rtl antialiased">
+    <div className="min-h-screen bg-gradient-to-tr from-slate-100 via-slate-50 to-rose-50/40 flex items-center justify-center relative overflow-hidden px-4 md:px-6 direction-rtl antialiased">
       
-      {/* هاله‌های نوری پاستلی و ملایم در پشت صحنه */}
+      {/* هاله‌های نوری پاستلی ملایم در پس‌زمینه */}
       <div className="absolute top-[-5%] right-[-5%] w-[450px] h-[450px] bg-rose-400/[0.15] blur-[130px] rounded-full pointer-events-none"></div>
       <div className="absolute bottom-[-5%] left-[-5%] w-[450px] h-[450px] bg-pink-300/[0.12] blur-[130px] rounded-full pointer-events-none"></div>
 
-      {/* باکس شیشه‌ای روشن (Glassmorphism Light) با سایهٔ عمیق و لوکس */}
-      <div className="w-full max-w-md bg-white/60 backdrop-blur-2xl border border-white/80 p-6 md:p-8 rounded-3xl shadow-[0_24px_50px_rgba(0,0,0,0.04)] relative z-10 text-right">
+      {/* باکس فرم ورود - کاملاً ریسپانسیو و بهینه برای موبایل */}
+      <div className="w-full max-w-md bg-white/70 backdrop-blur-2xl border border-white/80 p-5 sm:p-6 md:p-8 rounded-3xl shadow-[0_24px_50px_rgba(0,0,0,0.04)] relative z-10 text-right my-auto">
         
-        {/* لوگو و سربرگ */}
-        <div className="flex flex-col items-center text-center mb-8">
-          <Link href="/" className="flex items-center gap-1.5 mb-3 group">
-            <span className="text-2xl select-none filter drop-shadow-sm group-hover:scale-110 transition duration-300">📱</span>
-            <span className="text-xl font-black text-slate-900 tracking-tight">
+        {/* لوگو و سربرگ (بدون استیکر موبایل) */}
+        <div className="flex flex-col items-center text-center mb-6 md:mb-8">
+          <Link href="/" className="flex items-center gap-1.5 mb-2 group">
+            <span className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
               سیب‌<span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-600">شاپ</span>
             </span>
           </Link>
-          <h2 className="text-sm font-black text-slate-800 mt-1">به کلوپ سیب‌شاپ خوش آمدید</h2>
-          <p className="text-[11px] text-slate-400 font-medium mt-1">جهت ثبت سفارش یا پیگیری خرید، وارد حساب خود شوید</p>
+          <h2 className="text-xs font-black text-slate-800 mt-1">ورود یا ثبت‌نام</h2>
+          <p className="text-[10px] md:text-[11px] text-slate-400 font-medium mt-1">سلام! لطفا شماره موبایل خود را وارد کنید</p>
         </div>
 
         {step === 1 ? (
-          /* مرحله اول: ورود شماره موبایل */
+          /* 📱 مرحله اول: ورود شماره موبایل */
           <form onSubmit={handleNextStep} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-black text-slate-500 mr-1">شماره موبایل</label>
@@ -57,55 +60,59 @@ export default function LoginPage() {
                   type="tel" 
                   maxLength={11}
                   value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder="مثال: ۰۹۱۲۳۴۵۶۷۸۹" 
-                  className="bg-transparent text-xs w-full focus:outline-none text-slate-800 text-left font-sans font-bold placeholder:text-slate-300"
+                  onChange={(e) => setPhoneNumber(e.target.value.replace(/[^\d]/g, ''))} // فقط قبول کردن عدد
+                  placeholder="۰۹۱۲۳۴۵۶۷۸۹" 
+                  className="bg-transparent text-xs md:text-sm w-full focus:outline-none text-slate-800 text-left font-sans font-bold placeholder:text-slate-300 tracking-wider"
                 />
               </div>
             </div>
 
             <button 
               type="submit"
-              className="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-black text-xs py-4 rounded-2xl shadow-md shadow-rose-500/10 transition duration-300 flex items-center justify-center gap-1.5 mt-2 active:scale-98"
+              className="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-black text-xs md:text-sm py-3.5 md:py-4 rounded-2xl shadow-md shadow-rose-500/10 transition duration-300 flex items-center justify-center gap-1.5 mt-1 active:scale-98"
             >
-              <span>ادامه فرآیند</span>
-              <ArrowRight className="w-4 h-4 rotate-180" />
+              <span>ورود با کد تایید</span>
             </button>
           </form>
         ) : (
-          /* مرحله دوم: ورود رمز عبور */
+          /* ✉️ مرحله دوم: ورود کد تایید پیامکی (SMS) */
           <form onSubmit={handleLoginSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between px-1">
-                <label className="text-[11px] font-black text-slate-500">رمز عبور حساب</label>
-                <button type="button" onClick={() => setStep(1)} className="text-[10px] font-black text-rose-500 hover:underline">تغییر شماره</button>
+                <label className="text-[11px] font-black text-slate-500">کد تایید فرستاده شده</label>
+                <button type="button" onClick={() => setStep(1)} className="text-[10px] font-black text-rose-500 hover:underline flex items-center gap-0.5">
+                  <ArrowRight className="w-3 h-3" />
+                  <span>ویرایش شماره</span>
+                </button>
               </div>
+              
               <div className="w-full flex items-center bg-slate-50/60 border border-slate-200/60 rounded-2xl p-3 focus-within:border-rose-500/40 focus-within:bg-white transition duration-200">
-                <Lock className="w-4 h-4 text-slate-400 ml-2 shrink-0" />
+                <MessageSquareCode className="w-4 h-4 text-slate-400 ml-2 shrink-0" />
                 <input 
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••" 
-                  className="bg-transparent text-xs w-full focus:outline-none text-slate-800 text-left font-sans font-bold placeholder:text-slate-300"
+                  type="text" 
+                  maxLength={5}
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value.replace(/[^\d]/g, ''))}
+                  placeholder="کد ۵ رقمی" 
+                  className="bg-transparent text-xs md:text-sm w-full focus:outline-none text-slate-800 text-center font-sans font-black placeholder:text-slate-300 tracking-widest"
                 />
               </div>
+              <p className="text-[10px] text-slate-400 mr-1 mt-0.5">کد تایید برای شماره {phoneNumber} پیامک شد.</p>
             </div>
 
             <button 
               type="submit"
-              className="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-black text-xs py-4 rounded-2xl shadow-md shadow-rose-500/10 transition duration-300 flex items-center justify-center gap-1.5 mt-2 active:scale-98"
+              className="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-black text-xs md:text-sm py-3.5 md:py-4 rounded-2xl shadow-md shadow-rose-500/10 transition duration-300 flex items-center justify-center gap-1.5 mt-1 active:scale-98"
             >
-              <Sparkles className="w-4 h-4 text-amber-300 fill-amber-300" />
-              <span>تایید و ورود به سایت</span>
+              <span>تایید و ورود به سیب‌شاپ</span>
             </button>
           </form>
         )}
 
-        {/* پانویس فرم امنیتی */}
-        <div className="mt-8 pt-4 border-t border-slate-100 flex items-center justify-center gap-1.5 text-[10px] text-slate-400 font-bold">
-          <ShieldCheck className="w-4 h-4 text-slate-400" />
-          <span>حفاظت امنیتی دو مرحله‌ای پروتکل سیب‌شاپ</span>
+        {/* پانویس مینیمال امنیتی سایت */}
+        <div className="mt-6 md:mt-8 pt-4 border-t border-slate-100 flex items-center justify-center gap-1.5 text-[9px] md:text-[10px] text-slate-400 font-bold">
+          <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+          <span>ورود امن و حفاظت‌شده به حساب کاربری</span>
         </div>
 
       </div>

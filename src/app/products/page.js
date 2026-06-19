@@ -42,12 +42,21 @@ export default function ProductsPage() {
     <div className="min-h-screen bg-slate-50 text-slate-900 direction-rtl antialiased flex flex-col justify-between">
       <Header />
 
-      {/* 🌌 هیرو بنر ظریف مخصوص صفحه آرشیو محصولات (توی موبایل کوچک‌تر و فشرده‌تر) */}
-      <div className="relative bg-slate-950 text-white py-8 md:py-14 overflow-hidden">
-        <div className="absolute top-0 right-1/4 w-[300px] h-[300px] bg-rose-500/10 blur-[100px] rounded-full pointer-events-none"></div>
-        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10 text-right">
-          <span className="text-rose-500 font-black text-[10px] md:text-xs uppercase bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">فروشگاه آنلاین</span>
-          <h1 className="text-xl md:text-3xl font-black mt-2 bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">بررسی و خرید انواع گوشی موبایل</h1>
+     {/* 🌌 بنر کادربندی‌شده و مدرن مخصوص بالای محصولات (سازگار با پهنای سایت) */}
+      <div className="max-w-7xl mx-auto w-full px-4 md:px-8 mt-4 md:mt-6">
+        <div className="relative bg-gradient-to-l from-slate-950 to-slate-900 text-white py-8 md:py-12 px-6 md:px-10 overflow-hidden rounded-3xl border border-slate-900 shadow-lg text-right">
+          <div className="absolute top-0 right-1/4 w-[250px] h-[250px] bg-rose-500/10 blur-[90px] rounded-full pointer-events-none"></div>
+          <div className="relative z-10">
+            <span className="text-rose-500 font-black text-[10px] md:text-xs uppercase bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">
+              فروشگاه آنلاین
+            </span>
+            <h1 className="text-xl md:text-3xl font-black mt-2.5 bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+              بررسی و خرید انواع گوشی موبایل
+            </h1>
+            <p className="hidden md:block text-xs text-slate-400 mt-2 max-w-xl font-medium leading-6">
+              جدیدترین پرچمداران و میان‌رده‌های بازار را با گارانتی معتبر شرکتی و ارسال اکسپرس از سیب‌شاپ تهیه کنید.
+            </p>
+          </div>
         </div>
       </div>
 

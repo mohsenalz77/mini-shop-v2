@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
-import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2, Award, MessageSquare } from 'lucide-react';
+import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2 } from 'lucide-react';
 
 export default function ProductDetailClient({ productData }) {
   const [selectedColor, setSelectedColor] = useState(0);
@@ -43,11 +43,11 @@ export default function ProductDetailClient({ productData }) {
               </button>
             </div>
             
-            {/* کادر رندر عکس زنده از استراپی یا اموجی پیش‌فرض */}
+            {/* 🛡️ رندر کاملاً هوشمند بر اساس آدرس ایمن ساخته شده در سرور */}
             <div className="flex-1 flex items-center justify-center w-full h-full">
-              {productData.rawImage?.data ? (
+              {productData.imageUrl ? (
                 <img 
-                  src={`${process.env.NEXT_PUBLIC_STRAPI_URL}${productData.rawImage.data.attributes.url}`} 
+                  src={productData.imageUrl} 
                   alt={productData.name}
                   className="max-h-[260px] md:max-h-[380px] object-contain filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.08)] select-none"
                 />

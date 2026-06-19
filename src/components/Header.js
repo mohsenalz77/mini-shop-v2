@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-// 🚀 تغییر طلایی ۱: ایمپورت هوک سبد خرید برای داینامیک کردن تعداد
 import { useCart } from "../context/CartContext";
 
 export default function Header() {
@@ -16,7 +15,6 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   
-  // 🚀 تغییر طلایی ۲: بیرون کشیدن تعداد کل کالاهای سبد خرید
   const { cartCount } = useCart();
 
   useEffect(() => {
@@ -35,7 +33,6 @@ export default function Header() {
     return () => window.removeEventListener('scroll', controlNavbar);
   }, [lastScrollY]);
 
-  // فیکس خودکار: بسته شدن کشوی موبایل با تغییر صفحه
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
@@ -73,15 +70,19 @@ export default function Header() {
           </div>
 
           <div className="flex items-center gap-4 shrink-0 pointer-events-auto">
-            <button className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-slate-900 border border-slate-200 hover:bg-slate-50/80 px-4 py-2.5 rounded-xl transition duration-200">
+            {/* 🚀 اتصال طلایی دکمه ورود دسکتاپ به صفحه لاگین */}
+            <Link 
+              href="/login" 
+              className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-slate-900 border border-slate-200 hover:bg-slate-50/80 px-4 py-2.5 rounded-xl transition duration-200"
+            >
               <User className="w-4 h-4 stroke-[2.5]" />
               <span>ورود | ثبت‌نام</span>
-            </button>
+            </Link>
+            
             <div className="h-6 w-[1px] bg-slate-200/60"></div>
             
             <Link href="/cart" className="flex items-center justify-center p-2.5 text-slate-700 hover:bg-slate-50/80 rounded-xl transition duration-200 relative">
               <ShoppingBag className="w-5 h-5 stroke-[2.5]" />
-              {/* 🚀 تغییر طلایی ۳: رندر هوشمند تعداد واقعی اقلام در دسکتاپ تنها در صورت وجود کالا */}
               {cartCount > 0 && (
                 <span className="absolute -top-0.5 -left-0.5 bg-rose-500 text-white text-[10px] font-sans font-black w-5 h-5 rounded-full flex items-center justify-center shadow-xs animate-fade-in">
                   {cartCount.toLocaleString('fa-IR')}
@@ -180,7 +181,7 @@ export default function Header() {
       <div className="w-full h-[120px] md:h-40 block shrink-0"></div>
 
       {/* ========================================================================= */}
-      {/* ۴. ناوبری پایین موبایل (نسخه کاملاً فیکس شده بصری و دکمه‌ای) */}
+      {/* ۴. ناوبری پایین موبایل */}
       {/* ========================================================================= */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] z-50 px-4 py-2 rounded-t-2xl">
         <div className="flex items-center justify-around text-slate-400">
@@ -216,7 +217,6 @@ export default function Header() {
           >
             <div className="w-6 h-6 flex items-center justify-center relative">
               <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
-              {/* 🚀 تغییر طلایی ۴: رندر تعداد کاملاً زنده در ناوبری موبایل */}
               {cartCount > 0 && (
                 <span className="absolute -top-1.5 -left-1.5 bg-rose-500 text-white text-[9px] font-sans font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white shadow-xs leading-none">
                   {cartCount}
@@ -226,15 +226,16 @@ export default function Header() {
             <span className="text-[10px] tracking-tight">سبد خرید</span>
           </Link>
 
-          {/* دکمه پروفایل */}
-          <button 
+          {/* 🚀 اتصال طلایی دکمه پروفایل موبایل به صفحه لاگین */}
+          <Link 
+            href="/login" 
             className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${
-              pathname === '/profile' && !isMobileMenuOpen ? 'text-rose-500 font-bold' : 'text-slate-400 font-medium hover:text-slate-700'
+              pathname === '/login' && !isMobileMenuOpen ? 'text-rose-500 font-bold' : 'text-slate-400 font-medium hover:text-slate-700'
             }`}
           >
             <User className="w-5 h-5 stroke-[2.2]" />
             <span className="text-[10px] tracking-tight">پروفایل</span>
-          </button>
+          </Link>
         </div>
       </nav>
 

@@ -33,8 +33,8 @@ export default function ProductsPage() {
     <div className="min-h-screen bg-slate-50 text-slate-900 direction-rtl antialiased flex flex-col justify-between">
       <Header />
 
-      {/* 🌌 بنر کادربندی‌شده و مدرن بالای محصولات */}
-      <div className="max-w-7xl mx-auto w-full px-4 md:px-8 mt-4 md:mt-6">
+      {/* 🌌 بنر کادربندی‌شده و مدرن بالای محصولات (هماهنگ با پهنای هدر) */}
+      <div className="w-full max-w-[1450px] mx-auto px-4 md:px-8 mt-4 md:mt-6">
         <div className="relative bg-gradient-to-l from-slate-950 to-slate-900 text-white py-8 md:py-12 px-6 md:px-10 overflow-hidden rounded-3xl border border-slate-900 shadow-lg text-right">
           <div className="absolute top-0 right-1/4 w-[250px] h-[250px] bg-rose-500/10 blur-[90px] rounded-full pointer-events-none"></div>
           <div className="relative z-10">
@@ -51,8 +51,8 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      {/* 🏪 بخش اصلی فروشگاه */}
-      <main className="max-w-7xl mx-auto w-full px-4 md:px-8 py-4 md:py-8 flex-1">
+      {/* 🏪 بخش اصلی فروشگاه (باز شده تا ۱۴۵۰ پیکسل) */}
+      <main className="w-full max-w-[1450px] mx-auto px-4 md:px-8 py-4 md:py-8 flex-1">
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
           
@@ -97,10 +97,10 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            {/* 🛍️ گرید محصولات: موبایل ۲ ستونه، دسکتاپ ۴ ستونه منسجم (lg:grid-cols-4) */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
+            {/* 🛍️ گرید محصولات: موبایل ۲ ستونه، دسکتاپ عریض ۴ ستونه فشرده و تراز */}
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
               {isLoading ? (
-                /* 🚀 اسکلتون لودینگ (کارت‌های فرضی متحرک دیجی‌کالایی به جای متن زشت) */
+                /* 🚀 اسکلتون لودینگ (کارت‌های موجی متحرک شیک به جای متن زشت) */
                 Array(8).fill(0).map((_, idx) => (
                   <div key={idx} className="bg-white border border-slate-100 rounded-xl md:rounded-3xl p-3 flex flex-col gap-3 animate-pulse">
                     <div className="w-full h-24 md:h-40 bg-slate-100 rounded-lg md:rounded-2xl"></div>

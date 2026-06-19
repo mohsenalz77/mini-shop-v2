@@ -41,14 +41,13 @@ export default function ProductGrid({ products }) {
         {products.map((product) => {
           const { title, price, oldPrice, slug, image } = product.attributes;
           
-          // 🚀 تزریق مستقیم آی‌پی سرور اوبونتو برای حل قطعی لود نشدن تصویر
+          // 🚀 اصلاح نهایی: حذف http: و تبدیل به آدرس نسبی جهت دور زدن بلوک امنیتی Mixed Content
           const hasImage = image?.data?.attributes?.url;
           const imageUrl = hasImage 
-            ? `http://95.182.85.212:1337${image.data.attributes.url}`
+            ? `//95.182.85.212:1337${image.data.attributes.url}`
             : null;
           
           return (
-            // 🔗 لینک‌دهی مستقیم و قطعی بر اساس اسلاگ تعریف‌شده در استراپی
             <Link 
               href={`/product/${slug}`}
               key={product.id} 
@@ -63,6 +62,7 @@ export default function ProductGrid({ products }) {
                       <img 
                         src={imageUrl} 
                         alt={title}
+                        referrerPolicy="no-referrer-when-downgrade" // 🛡️ لایه کمکی برای مرورگر
                         className="w-full h-full object-contain p-2 group-hover:scale-105 transition duration-500 select-none"
                       />
                     ) : (

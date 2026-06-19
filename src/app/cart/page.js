@@ -11,8 +11,7 @@ export default function CartPage() {
     cartItems, 
     addToCart, 
     removeFromCart, 
-    clearItem, 
-    cartTotalPrice 
+    clearItem 
   } = useCart();
 
   const [couponCode, setCouponCode] = useState('');
@@ -20,6 +19,9 @@ export default function CartPage() {
   const [suggestedProducts, setSuggestedProducts] = useState([]);
 
   const formattedPrice = (num) => num.toLocaleString('fa-IR');
+
+  // 🚀 محاسبه قیمت کل سبد خرید بر اساس دیتای ارسالی از ویترین
+  const cartTotalPrice = cartItems.reduce((total, item) => total + (Number(item.price) * item.quantity), 0);
 
   // 🚀 فچ کردن زنده محصولات از استراپی برای بخش پیشنهادهای ویژه
   useEffect(() => {
@@ -48,7 +50,7 @@ export default function CartPage() {
           <div className="w-1.5 h-5 bg-rose-500 rounded-full animate-pulse"></div>
           <h1 className="text-base md:text-xl font-black text-slate-900">سبد خرید شما</h1>
           <span className="text-[10px] md:text-xs font-bold text-slate-400 bg-slate-200/60 border border-slate-200/20 px-2 py-0.5 rounded-md mr-1">
-            {cartItems.length.toLocaleString('fa-IR')} کالا
+            {cartItems.reduce((total, item) => total + item.quantity, 0).toLocaleString('fa-IR')} کالا
           </span>
         </div>
 
@@ -58,7 +60,7 @@ export default function CartPage() {
               <ShoppingBag className="w-7 h-7" />
             </div>
             <h2 className="text-sm md:text-base font-black text-slate-800 mb-1">سبد خرید شما فعلاً خالی است!</h2>
-            <p className="text-[11px] md:text-xs text-slate-400 font-medium mb-6">می‌توانید برای مشاهده و انتخاب گجت‌ها به فروشگاه بازگردید.</p>
+            <p className="text-[11px] md:text-xs text-slate-400 font-medium mb-6">می‌آوانید برای مشاهده و انتخاب گجت‌ها به فروشگاه بازگردید.</p>
             <a href="/" className="bg-slate-900 hover:bg-rose-500 text-white font-black text-xs px-6 py-3 rounded-xl shadow-md transition duration-200">
               بازگشت به سیب‌شاپ
             </a>
@@ -77,15 +79,17 @@ export default function CartPage() {
                   >
                     <div className="flex items-center gap-3.5 w-full sm:w-auto">
                       <div className="w-16 h-16 md:w-20 md:h-20 bg-slate-50 border border-slate-100/70 rounded-xl flex items-center justify-center overflow-hidden shrink-0 select-none">
-                        {item.image ? (
-                          <img src={item.image} alt={item.title} className="w-full h-full object-contain p-1.5" />
+                        {/* 🚀 اصلاح اول: هماهنگ‌سازی با فیلد imageUrl فرستاده شده از ویترین */}
+                        {item.imageUrl ? (
+                          <img src={item.imageUrl} alt={item.name} className="w-full h-full object-contain p-1.5" />
                         ) : (
                           <span className="text-3xl md:text-4xl">📱</span>
                         )}
                       </div>
                       <div className="flex flex-col gap-1 text-right">
+                        {/* 🚀 اصلاح دوم: هماهنگ‌سازی با فیلد item.name فرستاده شده از ویترین */}
                         <h3 className="text-xs md:text-sm font-bold text-slate-800 leading-5 md:leading-6 max-w-md line-clamp-2">
-                          {item.title}
+                          {item.name}
                         </h3>
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white shadow-3xs"></span>
@@ -97,7 +101,7 @@ export default function CartPage() {
                     {/* کپسول‌های کنترل قیمت */}
                     <div className="flex items-center justify-between sm:justify-end gap-4 md:gap-6 w-full sm:w-auto border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-50 mt-1 sm:mt-0">
                       <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl px-2 py-1 gap-2.5">
-                        <button onClick={() => addToCart(item, 1)} className="text-slate-500 hover:text-rose-500 transition w-5 h-5 flex items-center justify-center font-bold text-xs"><Plus className="w-3.5 h-3.5 stroke-[2.2]" /></button>
+                        <button onClick={() => addToCart(item)} className="text-slate-500 hover:text-rose-500 transition w-5 h-5 flex items-center justify-center font-bold text-xs"><Plus className="w-3.5 h-3.5 stroke-[2.2]" /></button>
                         <span className="text-xs font-black text-slate-900 w-4 text-center">{item.quantity.toLocaleString('fa-IR')}</span>
                         <button onClick={() => removeFromCart(item.id)} className="text-slate-500 hover:text-rose-500 transition w-5 h-5 flex items-center justify-center font-bold text-xs"><Minus className="w-3.5 h-3.5 stroke-[2.2]" /></button>
                       </div>
@@ -109,7 +113,7 @@ export default function CartPage() {
                         </div>
                       </div>
 
-                      <button onClick={() => clearItem(item.id)} className="text-slate-300 hover:text-rose-500 transition p-1.5 bg-slate-50 hover:bg-rose-50 border border-slate-100 rounded-lg">
+                      <button onClick={() => clearItem ? clearItem(item.id) : removeFromCart(item.id)} className="text-slate-300 hover:text-rose-500 transition p-1.5 bg-slate-50 hover:bg-rose-50 border border-slate-100 rounded-lg">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -117,7 +121,7 @@ export default function CartPage() {
                 ))}
               </div>
 
-              {/* 🚀 محصولات مکمل پیشنهادی کاملاً زنده و متصل به استراپی */}
+              {/* محصولات مکمل پیشنهادی کاملاً زنده و متصل به استراپی */}
               {suggestedProducts.length > 0 && (
                 <div className="w-full text-right mt-2">
                   <div className="flex items-center gap-1.5 mb-4">
@@ -127,7 +131,8 @@ export default function CartPage() {
                   <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-none snap-x px-0.5">
                     {suggestedProducts.map((product) => {
                       const { title, price, image } = product.attributes;
-                      const imageUrl = image?.data ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${image.data.attributes.url}` : null;
+                      const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || "https://b.dr-sib.xyz";
+                      const imageUrl = image?.data ? `${strapiUrl}${image.data.attributes.url}` : null;
 
                       return (
                         <div key={product.id} className="flex-shrink-0 w-36 md:w-48 snap-center bg-white border border-slate-100 rounded-2xl p-3 flex flex-col justify-between group cursor-pointer shadow-3xs hover:shadow-xs transition duration-200">
@@ -138,7 +143,7 @@ export default function CartPage() {
                               <span className="text-2xl md:text-3xl select-none">📱</span>
                             )}
                           </div>
-                          <h4 className="text-[10px] md:text-xs font-bold text-slate-700 leading-4 md:leading-5 line-clamp-2 h-8 md:h-10 mb-2">{title}</h4>
+                          <h4 className="text-[10px] md:text Red-xs font-bold text-slate-700 leading-4 md:leading-5 line-clamp-2 h-8 md:h-10 mb-2">{title}</h4>
                           <div className="flex items-center justify-between border-t border-slate-50 pt-1.5 w-full">
                             <div className="text-[10px] md:text-xs font-black text-slate-900 flex items-center gap-0.5">
                               <span>{Number(price).toLocaleString('fa-IR')}</span>
@@ -147,9 +152,9 @@ export default function CartPage() {
                             <button 
                               onClick={() => addToCart({
                                 id: product.id,
-                                title: title,
+                                name: title,
                                 price: price,
-                                image: imageUrl
+                                imageUrl: imageUrl
                               })}
                               className="bg-slate-900 text-white w-5 h-5 rounded-md flex items-center justify-center font-bold text-xs hover:bg-rose-500 transition"
                             >
@@ -249,7 +254,7 @@ export default function CartPage() {
         </div>
       )}
 
-      <Footer />
+      <footer />
     </div>
   );
 }

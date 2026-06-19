@@ -33,9 +33,9 @@ export default function ProductsPage() {
     <div className="min-h-screen bg-slate-50 text-slate-900 direction-rtl antialiased flex flex-col justify-between">
       <Header />
 
-      {/* 🌌 بنر کادربندی‌شده و مدرن بالای محصولات (هماهنگ با پهنای هدر) */}
-      <div className="w-full max-w-[1450px] mx-auto px-4 md:px-8 mt-4 md:mt-6">
-        <div className="relative bg-gradient-to-l from-slate-950 to-slate-900 text-white py-8 md:py-12 px-6 md:px-10 overflow-hidden rounded-3xl border border-slate-900 shadow-lg text-right">
+      {/* 🌌 بنر بالای محصولات - کاملاً هم‌تراز با سایز چپ و راست هیرو باکس اصلی سایت */}
+      <div className="w-full px-4 md:px-8 mt-3 md:my-6">
+        <div className="relative bg-gradient-to-l from-slate-950 to-slate-900 text-white py-8 md:py-12 px-6 md:px-10 overflow-hidden rounded-3xl border border-slate-800/50 shadow-2xl text-right">
           <div className="absolute top-0 right-1/4 w-[250px] h-[250px] bg-rose-500/10 blur-[90px] rounded-full pointer-events-none"></div>
           <div className="relative z-10">
             <span className="text-rose-500 font-black text-[10px] md:text-xs uppercase bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">
@@ -51,8 +51,8 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      {/* 🏪 بخش اصلی فروشگاه (باز شده تا ۱۴۵۰ پیکسل) */}
-      <main className="w-full max-w-[1450px] mx-auto px-4 md:px-8 py-4 md:py-8 flex-1">
+      {/* 🏪 بخش اصلی فروشگاه - با پدینگ و متد دقیق همسان با هیرو باکس شما */}
+      <main className="w-full px-4 md:px-8 py-4 md:py-6 flex-1">
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
           
@@ -97,10 +97,9 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            {/* 🛍️ گرید محصولات: موبایل ۲ ستونه، دسکتاپ عریض ۴ ستونه فشرده و تراز */}
+            {/* 🛍️ گرید محصولات: در مانیتورها کاملاً پهن و متناسب با هیرو باکس باز می‌شود */}
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
               {isLoading ? (
-                /* 🚀 اسکلتون لودینگ (کارت‌های موجی متحرک شیک به جای متن زشت) */
                 Array(8).fill(0).map((_, idx) => (
                   <div key={idx} className="bg-white border border-slate-100 rounded-xl md:rounded-3xl p-3 flex flex-col gap-3 animate-pulse">
                     <div className="w-full h-24 md:h-40 bg-slate-100 rounded-lg md:rounded-2xl"></div>
@@ -113,7 +112,6 @@ export default function ProductsPage() {
                   </div>
                 ))
               ) : (
-                /* لود دیتای اصلی پس از دریافت از استراپی */
                 products.map((item) => {
                   const id = item.id;
                   const attr = item.attributes || {};

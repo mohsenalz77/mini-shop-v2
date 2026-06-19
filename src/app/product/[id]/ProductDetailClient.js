@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import Header from '../../../components/Header';
+import Header from '../../../components/Header'; // ✅ مشکل سینتکس وب‌پک برطرف شد
 import Footer from '../../../components/Footer';
 import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2 } from 'lucide-react';
 import { useCart } from '../../../context/CartContext'; // 🚀 ۱. ورود هوک متمرکز سبد خرید
@@ -13,12 +13,18 @@ export default function ProductDetailClient({ productData }) {
   const [isLiked, setIsLiked] = useState(false);
   const [activeTab, setActiveTab] = useState('review');
 
-  // 🚀 ۳. فرمت کردن دیتای کالا برای ارسال بدون باگ به فاکتور نهایی سبد خرید
+  // 🚀 ۳. فرمت کردن و تبدیل هوشمند اعداد فارسی به انگلیسی برای حل مشکل قیمت صفر در سبد خرید
   const handleAddToCart = () => {
-    // تبدیل قیمت خرد شده و فرمت‌شده‌ی فارسی به عدد خالص جهت محاسبات ریاضی
-    const rawPrice = productData.price 
-      ? Number(productData.price.replace(/[^\d]/g, '')) 
-      : 0;
+    // تابع داخلی برای تبدیل ارقام فارسی/عربی به انگلیسی
+    const p2e = s => s.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+
+    // پاکسازی کامل متن قیمت، تبدیل به عدد انگلیسی و حذف کاماها
+    const cleanPriceString = productData.price 
+      ? p2e(productData.price.toString()).replace(/[^\d]/g, '') 
+      : '0';
+
+    // تبدیل نهایی به متغیر عددی خالص
+    const rawPrice = Number(cleanPriceString);
 
     addToCart({
       id: productData.id,
@@ -129,7 +135,7 @@ export default function ProductDetailClient({ productData }) {
           </div>
 
           {/* ستون سوم: باکس خرید دسکتاپ */}
-          <div className="lg:col-span-3 bg-slate-900 border border-slate-950 rounded-3xl p-5 flex flex-col justify-between h-[350px] md:h-[490px] shadow-xl text-white relative overflow-hidden">
+          <div className="lg:col-span-3 bg-slate-900 border border-slate-950 text-white rounded-3xl p-5 flex flex-col justify-between h-[350px] md:h-[490px] shadow-xl relative overflow-hidden">
             <div className="flex flex-col gap-3 z-10">
               <span className="text-[11px] font-black text-slate-400 border-b border-white/5 pb-2 block text-right">فروشنده: سیب‌شاپ</span>
               <div className="flex items-start gap-2.5 text-right">
@@ -150,7 +156,7 @@ export default function ProductDetailClient({ productData }) {
                   <div className="text-base md:text-xl font-black text-white flex items-center gap-0.5 mt-0.5"><span>{productData.price}</span><span className="text-[10px] font-normal text-slate-400 mr-0.5">تومان</span></div>
                 </div>
               </div>
-              {/* 🛒 اتصال دکمه دسکتاپ به سبد خرید متمرکز */}
+              {/* 🛒 اتصال دکمه دسکتاپ به متد اصلاح‌شده */}
               <button 
                 onClick={handleAddToCart}
                 className="w-full bg-rose-500 hover:bg-rose-600 text-white font-black text-xs md:text-sm py-3.5 rounded-2xl shadow-lg transition duration-300 flex items-center justify-center gap-2 active:scale-98"
@@ -186,7 +192,7 @@ export default function ProductDetailClient({ productData }) {
             <span className="text-[9px] font-normal text-slate-400">تومان</span>
           </div>
         </div>
-        {/* 🛒 اتصال دکمه نسخه موبایل به سبد خرید متمرکز */}
+        {/* 🛒 اتصال دکمه نسخه موبایل به متد اصلاح‌شده */}
         <button 
           onClick={handleAddToCart}
           className="bg-rose-500 text-white font-black text-xs px-5 py-2.5 rounded-xl flex items-center gap-1.5 active:scale-95 transition-all duration-150"

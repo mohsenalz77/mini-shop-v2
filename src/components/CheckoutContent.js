@@ -2,12 +2,11 @@
 
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext'; 
-import { ShoppingBag, CreditCard, ShieldCheck, MapPin, ChevronLeft, Wallet } from 'lucide-react';
+import { ShoppingBag, CreditCard, ShieldCheck, MapPin, Wallet } from 'lucide-react';
 
 export default function CheckoutContent() {
   const context = useCart();
   const cartItems = context?.cartItems || [];
-  const getCartTotal = context?.getCartTotal ? context.getCartTotal : () => 0;
 
   const [paymentMethod, setPaymentMethod] = useState('online');
 
@@ -18,7 +17,13 @@ export default function CheckoutContent() {
   };
 
   const shippingCost = 45000;
-  const cartTotalPrice = getCartTotal();
+
+  // 🚀 فرمول مستقیم و دقیق محاسبه قیمت کل (عینا مشابه منطق تست‌شده سبد خرید شما)
+  const cartTotalPrice = cartItems.reduce((total, item) => total + (Number(item.price) * item.quantity), 0);
+  
+  // 🚀 محاسبه تعداد کل گجت‌های موجود در مرسوله به صورت کاملاً دقیق
+  const totalItemsCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+
   const finalTotal = cartTotalPrice + shippingCost;
 
   const handlePaymentSubmit = (e) => {
@@ -59,7 +64,6 @@ export default function CheckoutContent() {
           </h3>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* گزینه اول: درگاه آنلاین شتاب */}
             <label 
               onClick={() => setPaymentMethod('online')}
               className={`flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition ${paymentMethod === 'online' ? 'border-rose-500 bg-rose-50/20' : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50'}`}
@@ -76,7 +80,6 @@ export default function CheckoutContent() {
               <Wallet className="w-4 h-4 text-slate-400" />
             </label>
 
-            {/* گزینه دوم: کیف پول شارژ حساب */}
             <label 
               onClick={() => setPaymentMethod('wallet')}
               className={`flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition ${paymentMethod === 'wallet' ? 'border-rose-500 bg-rose-50/20' : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50'}`}
@@ -99,7 +102,7 @@ export default function CheckoutContent() {
         <section className="bg-white border border-slate-100 rounded-3xl p-5 shadow-3xs">
           <h3 className="text-xs font-black text-slate-800 mb-4 flex items-center gap-1.5">
             <ShoppingBag className="w-4 h-4 text-slate-400" />
-            <span>مرور کالاهای مرسوله ({cartItems.length} کالا)</span>
+            <span>مرور کالاهای مرسوله ({totalItemsCount.toLocaleString('fa-IR')} کالا)</span>
           </h3>
           
           <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none text-right flex-row-reverse justify-end">
@@ -119,7 +122,7 @@ export default function CheckoutContent() {
         </section>
       </div>
 
-      {/* 🔹 ستون سمت چپ: پیش‌فاکتور مالی دارک (کاملاً هماهنگ با استایل سبد خرید شما) */}
+      {/* 🔹 ستون سمت چپ: پیش‌فاکتور مالی دارک */}
       <aside className="lg:col-span-4 bg-slate-900 border border-slate-950 text-white rounded-3xl p-5 flex flex-col justify-between min-h-[360px] md:min-h-[400px] shadow-xl relative overflow-hidden w-full lg:sticky lg:top-24">
         <div className="absolute -top-10 -left-10 w-32 h-32 bg-rose-500/10 blur-2xl rounded-full pointer-events-none"></div>
         
@@ -127,10 +130,10 @@ export default function CheckoutContent() {
           <h3 className="text-[11px] font-black text-slate-400 border-b border-white/5 pb-2.5">خلاصه فاکتور خرید</h3>
           
           <div className="flex items-center justify-between text-xs font-bold text-slate-300">
-            <span>قیمت کالاها ({cartItems.reduce((total, item) => total + item.quantity, 0).toLocaleString('fa-IR')})</span>
+            <span>قیمت کالاها ({totalItemsCount.toLocaleString('fa-IR')})</span>
             <div className="flex items-center gap-0.5">
               <span>{cartTotalPrice.toLocaleString('fa-IR')}</span>
-              <span className="text-[9px] font-normal text-slate-500">تومان</span>
+              <span className="text-[9px] font-normal text-slate-400">تومان</span>
             </div>
           </div>
 
@@ -138,7 +141,7 @@ export default function CheckoutContent() {
             <span>هزینه ارسال (اکسپرس)</span>
             <div className="flex items-center gap-0.5">
               <span>{shippingCost.toLocaleString('fa-IR')}</span>
-              <span className="text-[9px] font-normal text-slate-500">تومان</span>
+              <span className="text-[9px] font-normal text-slate-400">تومان</span>
             </div>
           </div>
 

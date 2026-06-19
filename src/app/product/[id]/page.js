@@ -2,28 +2,36 @@ import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
 import ProductDetailClient from './ProductDetailClient';
 
-// 🚀 تابع فچ کردن اطلاعات تک محصول از استراپی آنلاین رندر
-async function getSingleProduct(id) {
+// 🚀 تابع فچ کردن اطلاعات تک محصول از استراپی بر اساس اسلاگ
+async function getSingleProductBySlug(slug) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${id}?populate=*`, {
+    // استفاده از فیلترهای استراپی برای پیدا کردن محصول بر اساس فیلد slug
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products?filters[slug][$eq]=${slug}&populate=*`, {
       cache: 'no-store' // برای جلوگیری از کش شدن قیمت‌ها
     });
 
     if (!res.ok) return null;
     
     const data = await res.json();
-    return data.data;
+    
+    // چون فیلتر خروجی آرایه می‌دهد، اگر محصولی پیدا شد اولین عضو [0] را برمی‌گردانیم
+    if (data.data && data.data.length > 0) {
+      return data.data[0];
+    }
+    
+    return null;
   } catch (error) {
-    console.error("Error fetching single product:", error);
+    console.error("Error fetching single product by slug:", error);
     return null;
   }
 }
 
 export default async function ProductDetailPage({ params }) {
-  const { id } = params;
+  // در اینجا چون اسم پوشه [id] است، ورودی را از params می‌گیریم ولی به عنوان اسلاگ استفاده می‌کنیم
+  const { id: slug } = params;
   
-  // گرفتن دیتای واقعی از استراپی
-  const apiProduct = await getSingleProduct(id);
+  // گرفتن دیتای واقعی از استراپی بر اساس اسلاگ کالا
+  const apiProduct = await getSingleProductBySlug(slug);
 
   if (!apiProduct) {
     return (
@@ -67,7 +75,7 @@ export default async function ProductDetailPage({ params }) {
       { id: 3, name: 'هدفون بی‌سیم اپل مدل AirPods Pro 2', price: '۱۰,۴۰۰,۰۰۰', image: '🎧' },
     ],
     comments: [
-      { id: 1, user: 'سیب‌شاپ بوت‌کمپ', date: 'امروز', rating: 5, text: 'این دیتا مستقیماً و به صورت داینامیک بر اساس آدرس ID از دیتابیس استراپی لود شده است!', badge: 'توسعه‌دهنده' },
+      { id: 1, user: 'سیب‌شاپ بوت‌کمپ', date: 'امروز', rating: 5, text: 'این دیتا مستقیماً و به صورت داینامیک بر اساس آدرس اسلاگ از دیتابیس استراپی لود شده است!', badge: 'توسعه‌دهنده' },
     ]
   };
 

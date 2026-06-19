@@ -5,6 +5,7 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { Trash2, Plus, Minus, CreditCard, ShieldCheck, ShoppingBag, Percent, Sparkles } from 'lucide-react';
 import { useCart } from "../../context/CartContext";
+import Link from 'next/link'; // 🚀 اضافه شدن ابزار ناوبری استاندارد نکست‌جی
 
 export default function CartPage() {
   const { 
@@ -20,10 +21,10 @@ export default function CartPage() {
 
   const formattedPrice = (num) => num.toLocaleString('fa-IR');
 
-  // 🚀 محاسبه قیمت کل سبد خرید بر اساس دیتای ارسالی از ویترین
+  // محاسبه قیمت کل سبد خرید بر اساس دیتای ارسالی از ویترین
   const cartTotalPrice = cartItems.reduce((total, item) => total + (Number(item.price) * item.quantity), 0);
 
-  // 🚀 فچ کردن زنده محصولات از استراپی برای بخش پیشنهادهای ویژه
+  // فچ کردن زنده محصولات از استراپی برای بخش پیشنهادهای ویژه
   useEffect(() => {
     async function fetchSuggestions() {
       try {
@@ -60,10 +61,10 @@ export default function CartPage() {
               <ShoppingBag className="w-7 h-7" />
             </div>
             <h2 className="text-sm md:text-base font-black text-slate-800 mb-1">سبد خرید شما فعلاً خالی است!</h2>
-            <p className="text-[11px] md:text-xs text-slate-400 font-medium mb-6">می‌آوانید برای مشاهده و انتخاب گجت‌ها به فروشگاه بازگردید.</p>
-            <a href="/" className="bg-slate-900 hover:bg-rose-500 text-white font-black text-xs px-6 py-3 rounded-xl shadow-md transition duration-200">
+            <p className="text-[11px] md:text-xs text-slate-400 font-medium mb-6">می‌توانید برای مشاهده و انتخاب گجت‌ها به فروشگاه بازگردید.</p>
+            <Link href="/" className="bg-slate-900 hover:bg-rose-500 text-white font-black text-xs px-6 py-3 rounded-xl shadow-md transition duration-200">
               بازگشت به سیب‌شاپ
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 items-start">
@@ -79,7 +80,6 @@ export default function CartPage() {
                   >
                     <div className="flex items-center gap-3.5 w-full sm:w-auto">
                       <div className="w-16 h-16 md:w-20 md:h-20 bg-slate-50 border border-slate-100/70 rounded-xl flex items-center justify-center overflow-hidden shrink-0 select-none">
-                        {/* 🚀 اصلاح اول: هماهنگ‌سازی با فیلد imageUrl فرستاده شده از ویترین */}
                         {item.imageUrl ? (
                           <img src={item.imageUrl} alt={item.name} className="w-full h-full object-contain p-1.5" />
                         ) : (
@@ -87,7 +87,6 @@ export default function CartPage() {
                         )}
                       </div>
                       <div className="flex flex-col gap-1 text-right">
-                        {/* 🚀 اصلاح دوم: هماهنگ‌سازی با فیلد item.name فرستاده شده از ویترین */}
                         <h3 className="text-xs md:text-sm font-bold text-slate-800 leading-5 md:leading-6 max-w-md line-clamp-2">
                           {item.name}
                         </h3>
@@ -143,7 +142,7 @@ export default function CartPage() {
                               <span className="text-2xl md:text-3xl select-none">📱</span>
                             )}
                           </div>
-                          <h4 className="text-[10px] md:text Red-xs font-bold text-slate-700 leading-4 md:leading-5 line-clamp-2 h-8 md:h-10 mb-2">{title}</h4>
+                          <h4 className="text-[10px] md:text-xs font-bold text-slate-700 leading-4 md:leading-5 line-clamp-2 h-8 md:h-10 mb-2">{title}</h4>
                           <div className="flex items-center justify-between border-t border-slate-50 pt-1.5 w-full">
                             <div className="text-[10px] md:text-xs font-black text-slate-900 flex items-center gap-0.5">
                               <span>{Number(price).toLocaleString('fa-IR')}</span>
@@ -218,11 +217,14 @@ export default function CartPage() {
                 </div>
               </div>
 
+              {/* 🚀 اتصال دکمه نسخه دسکتاپ به آدرس تسویه حساب */}
               <div className="mt-6 flex flex-col gap-3 z-10">
-                <button className="w-full bg-rose-500 hover:bg-rose-600 text-white font-black text-xs md:text-sm py-3.5 rounded-2xl shadow-lg shadow-rose-500/10 transition-all duration-300 flex items-center justify-center gap-2 group active:scale-98">
-                  <CreditCard className="w-4 h-4" />
-                  <span>ادامه فرآیند خرید</span>
-                </button>
+                <Link href="/checkout" className="w-full">
+                  <button className="w-full bg-rose-500 hover:bg-rose-600 text-white font-black text-xs md:text-sm py-3.5 rounded-2xl shadow-lg shadow-rose-500/10 transition-all duration-300 flex items-center justify-center gap-2 group active:scale-98 cursor-pointer">
+                    <CreditCard className="w-4 h-4" />
+                    <span>ادامه فرآیند خرید</span>
+                  </button>
+                </Link>
                 
                 <div className="flex items-center justify-center gap-1.5 text-[9px] md:text-[10px] text-slate-500 font-bold mt-1">
                   <ShieldCheck className="w-3.5 h-3.5 text-slate-500" />
@@ -237,7 +239,7 @@ export default function CartPage() {
 
       </main>
 
-      {/* سیستم شیشه‌ای فیکس پایین صفحه موبایل */}
+      {/* 🚀 اتصال دکمه چسبان نسخه موبایل به آدرس تسویه حساب */}
       {cartItems.length > 0 && (
         <div className="md:hidden fixed bottom-[68px] left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-200/60 p-3.5 flex items-center justify-between z-40 shadow-[0_-8px_24px_rgba(0,0,0,0.04)] rounded-t-2xl">
           <div className="flex flex-col text-right">
@@ -247,14 +249,16 @@ export default function CartPage() {
               <span className="text-[9px] font-normal text-slate-400">تومان</span>
             </div>
           </div>
-          <button className="bg-rose-500 active:bg-rose-600 text-white font-black text-xs px-6 py-3 rounded-xl flex items-center gap-1.5 shadow-md shadow-rose-500/20 active:scale-95 transition-all duration-150">
-            <CreditCard className="w-3.5 h-3.5" />
-            <span>ادامه خرید</span>
-          </button>
+          <Link href="/checkout">
+            <button className="bg-rose-500 active:bg-rose-600 text-white font-black text-xs px-6 py-3 rounded-xl flex items-center gap-1.5 shadow-md shadow-rose-500/20 active:scale-95 transition-all duration-150 cursor-pointer">
+              <CreditCard className="w-3.5 h-3.5" />
+              <span>ادامه خرید</span>
+            </button>
+          </Link>
         </div>
       )}
 
-      <footer />
+      <Footer />
     </div>
   );
 }

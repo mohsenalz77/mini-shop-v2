@@ -8,7 +8,7 @@ import { useCart } from '../../context/CartContext';
 import { ShoppingBag, CreditCard, ShieldCheck, MapPin, Truck, ChevronLeft, Wallet } from 'lucide-react';
 import Link from 'next/link';
 
-// ۱. کامپوننت داخلی فاکتور (نام مجزا برای جلوگیری از تداخل توابع ری‌اکت)
+// ۱. کامپوننت داخلی فاکتور
 function CheckoutContent() {
   const { cartItems, getCartTotal } = useCart();
   const [paymentMethod, setPaymentMethod] = useState('online');
@@ -138,7 +138,6 @@ function CheckoutContent() {
           <div className="flex items-center justify-between w-full text-right">
             <span className="text-[11px] text-slate-400 font-bold">هزینه ارسال (اکسپرس):</span>
             <div className="text-xs font-black text-slate-800 flex items-center gap-0.5">
-              <span>shippingCost.toLocaleString('fa-IR')</span>
               <span>{shippingCost.toLocaleString('fa-IR')}</span>
               <span className="text-[10px] font-normal text-slate-400 mr-0.5">تومان</span>
             </div>
@@ -169,7 +168,7 @@ function CheckoutContent() {
   );
 }
 
-// ۲. لود داینامیک کامپوننت بالا (تفکیک رندر با قابلیت ssr: false)
+// ۲. لود داینامیک کامپوننت بالا
 const DynamicCheckoutContent = dynamic(() => Promise.resolve(CheckoutContent), {
   ssr: false,
   loading: () => <div className="w-full text-center py-10 text-xs font-bold text-slate-400">در حال آماده‌سازی پیش‌فاکتور امن...</div>
@@ -191,7 +190,6 @@ export default function CheckoutPage() {
           <span className="text-[11px] md:text-xs font-bold text-slate-400">۳. پرداخت نهایی</span>
         </div>
 
-        {/* فراخوانی کامپوننت تفکیک‌شده کلاینتی بدون تداخل نام */}
         <DynamicCheckoutContent />
       </main>
 

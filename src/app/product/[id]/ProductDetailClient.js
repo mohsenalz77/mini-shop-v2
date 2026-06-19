@@ -1,15 +1,32 @@
 "use client";
 
 import React, { useState } from 'react';
-import Header from '../../../components/Header';
+import Header '../../../components/Header';
 import Footer from '../../../components/Footer';
 import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2 } from 'lucide-react';
+import { useCart } from '../../../context/CartContext'; // 🚀 ۱. ورود هوک متمرکز سبد خرید
 
 export default function ProductDetailClient({ productData }) {
+  const { addToCart } = useCart(); // 🚀 ۲. استخراج متد افزودن به سبد
   const [selectedColor, setSelectedColor] = useState(0);
   const [selectedStorage, setSelectedStorage] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
   const [activeTab, setActiveTab] = useState('review');
+
+  // 🚀 ۳. فرمت کردن دیتای کالا برای ارسال بدون باگ به فاکتور نهایی سبد خرید
+  const handleAddToCart = () => {
+    // تبدیل قیمت خرد شده و فرمت‌شده‌ی فارسی به عدد خالص جهت محاسبات ریاضی
+    const rawPrice = productData.price 
+      ? Number(productData.price.replace(/[^\d]/g, '')) 
+      : 0;
+
+    addToCart({
+      id: productData.id,
+      name: productData.name,
+      price: rawPrice,
+      imageUrl: productData.imageUrl
+    });
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 overflow-x-hidden antialiased direction-rtl pb-16 md:pb-0">
@@ -43,13 +60,12 @@ export default function ProductDetailClient({ productData }) {
               </button>
             </div>
             
-            {/* 🛡️ اصلاح طلایی: رندر مستقیم آدرس ایمن سرور ساید بدون وابستگی به ساختار خام استراپی */}
             <div className="flex-1 flex items-center justify-center w-full h-full">
               {productData.imageUrl ? (
                 <img 
                   src={productData.imageUrl} 
                   alt={productData.name}
-                  referrerPolicy="no-referrer-when-downgrade" // 🚀 دور زدن قوانین محدودکننده Mixed Content در مرورگرها
+                  referrerPolicy="no-referrer-when-downgrade"
                   className="max-h-[260px] md:max-h-[380px] object-contain filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.08)] select-none"
                 />
               ) : (
@@ -134,7 +150,11 @@ export default function ProductDetailClient({ productData }) {
                   <div className="text-base md:text-xl font-black text-white flex items-center gap-0.5 mt-0.5"><span>{productData.price}</span><span className="text-[10px] font-normal text-slate-400 mr-0.5">تومان</span></div>
                 </div>
               </div>
-              <button className="w-full bg-rose-500 hover:bg-rose-600 text-white font-black text-xs md:text-sm py-3.5 rounded-2xl shadow-lg transition duration-300 flex items-center justify-center gap-2">
+              {/* 🛒 اتصال دکمه دسکتاپ به سبد خرید متمرکز */}
+              <button 
+                onClick={handleAddToCart}
+                className="w-full bg-rose-500 hover:bg-rose-600 text-white font-black text-xs md:text-sm py-3.5 rounded-2xl shadow-lg transition duration-300 flex items-center justify-center gap-2 active:scale-98"
+              >
                 <ShoppingBag className="w-4 h-4" />
                 <span>افزودن به سبد خرید</span>
               </button>
@@ -166,7 +186,11 @@ export default function ProductDetailClient({ productData }) {
             <span className="text-[9px] font-normal text-slate-400">تومان</span>
           </div>
         </div>
-        <button className="bg-rose-500 text-white font-black text-xs px-5 py-2.5 rounded-xl flex items-center gap-1.5">
+        {/* 🛒 اتصال دکمه نسخه موبایل به سبد خرید متمرکز */}
+        <button 
+          onClick={handleAddToCart}
+          className="bg-rose-500 text-white font-black text-xs px-5 py-2.5 rounded-xl flex items-center gap-1.5 active:scale-95 transition-all duration-150"
+        >
           <ShoppingBag className="w-3.5 h-3.5" />
           <span>افزودن به سبد</span>
         </button>

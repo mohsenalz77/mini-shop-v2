@@ -41,10 +41,11 @@ export default function ProductGrid({ products }) {
         {products.map((product) => {
           const { title, price, oldPrice, slug, image } = product.attributes;
           
-          // 🚀 اصلاح نهایی: حذف http: و تبدیل به آدرس نسبی جهت دور زدن بلوک امنیتی Mixed Content
+          // 🚀 اصلاح بنیادی: خواندن آدرس پایه از دامنه امن متغیر محیطی ورسل
+          const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || "https://b.dr-sib.xyz";
           const hasImage = image?.data?.attributes?.url;
           const imageUrl = hasImage 
-            ? `//95.182.85.212:1337${image.data.attributes.url}`
+            ? `${strapiUrl}${image.data.attributes.url}`
             : null;
           
           return (
@@ -62,7 +63,6 @@ export default function ProductGrid({ products }) {
                       <img 
                         src={imageUrl} 
                         alt={title}
-                        referrerPolicy="no-referrer-when-downgrade" // 🛡️ لایه کمکی برای مرورگر
                         className="w-full h-full object-contain p-2 group-hover:scale-105 transition duration-500 select-none"
                       />
                     ) : (

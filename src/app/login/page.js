@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Smartphone, ShieldCheck, MessageSquareCode, ArrowRight } from 'lucide-react';
+import { Smartphone, ShieldCheck, MessageSquareCode, ArrowRight, X } from 'lucide-react'; // 🚀 اضافه شدن آیکون X
 
 export default function LoginPage() {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -11,7 +11,6 @@ export default function LoginPage() {
 
   const handleNextStep = (e) => {
     e.preventDefault();
-    // بررسی ولیدیشن ساده شماره موبایل ایران
     if (phoneNumber.length === 11 && phoneNumber.startsWith('09')) {
       setStep(2);
     } else {
@@ -38,8 +37,17 @@ export default function LoginPage() {
       {/* باکس فرم ورود - کاملاً ریسپانسیو و بهینه برای موبایل */}
       <div className="w-full max-w-md bg-white/70 backdrop-blur-2xl border border-white/80 p-5 sm:p-6 md:p-8 rounded-3xl shadow-[0_24px_50px_rgba(0,0,0,0.04)] relative z-10 text-right my-auto">
         
-        {/* لوگو و سربرگ (بدون استیکر موبایل) */}
-        <div className="flex flex-col items-center text-center mb-6 md:mb-8">
+        {/* 🚀 دکمه خروج و بازگشت به صفحه اصلی سایت (ضربدر) */}
+        <Link 
+          href="/" 
+          className="absolute top-4 left-4 md:top-5 md:left-5 text-slate-400 hover:text-slate-800 bg-slate-100/50 hover:bg-slate-200/60 p-1.5 rounded-xl transition-all duration-200 group"
+          title="بازگشت به صفحه اصلی"
+        >
+          <X className="w-4 h-4 transition-transform group-hover:rotate-90 duration-300" />
+        </Link>
+        
+        {/* لوگو و سربرگ */}
+        <div className="flex flex-col items-center text-center mb-6 md:mb-8 mt-2">
           <Link href="/" className="flex items-center gap-1.5 mb-2 group">
             <span className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
               سیب‌<span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-600">شاپ</span>
@@ -60,7 +68,7 @@ export default function LoginPage() {
                   type="tel" 
                   maxLength={11}
                   value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value.replace(/[^\d]/g, ''))} // فقط قبول کردن عدد
+                  onChange={(e) => setPhoneNumber(e.target.value.replace(/[^\d]/g, ''))}
                   placeholder="۰۹۱۲۳۴۵۶۷۸۹" 
                   className="bg-transparent text-xs md:text-sm w-full focus:outline-none text-slate-800 text-left font-sans font-bold placeholder:text-slate-300 tracking-wider"
                 />
@@ -79,7 +87,7 @@ export default function LoginPage() {
           <form onSubmit={handleLoginSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between px-1">
-                <label className="text-[11px] font-black text-slate-500">کد تایید فرستاده شده</label>
+                <label className="text-[11px] font-black text-slate-500">ککد تایید فرستاده شده</label>
                 <button type="button" onClick={() => setStep(1)} className="text-[10px] font-black text-rose-500 hover:underline flex items-center gap-0.5">
                   <ArrowRight className="w-3 h-3" />
                   <span>ویرایش شماره</span>

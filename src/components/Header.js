@@ -3,20 +3,31 @@
 import { useState, useEffect } from 'react';
 import { 
   Search, ShoppingBag, User, ChevronDown, Menu, 
-  Smartphone, Laptop, Headphones, Home, Grid, X, Bell
+  Smartphone, Laptop, Headphones, Home, Grid, X, Bell, Trash2, ArrowRight
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useCart } from "../context/CartContext";
 
 export default function Header() {
   const [isMenuVisible, setIsMenuVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const pathname = usePathname();
   
+  // 🔍 استیت‌های پیشرفته بخش مگامودال سرچ زنده
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [recentSearches, setRecentSearches] = useState([
+    'خارپاشنه', 'گلدان سفالی', 'هیدروپونیک', 'گلدان مدل هیدروپونیک', 'گلدان دو جداره'
+  ]);
+
+  const popularSearches = ['s26 ultra', 'ps5', 'گوشی موبایل', 'a36', 'توپ فوتبال'];
+
+  const pathname = usePathname();
+  const router = useRouter();
   const { cartCount } = useCart();
 
+  // کنترل اسکرول هدر
   useEffect(() => {
     const controlNavbar = () => {
       if (typeof window !== 'undefined') {
@@ -33,9 +44,35 @@ export default function Header() {
     return () => window.removeEventListener('scroll', controlNavbar);
   }, [lastScrollY]);
 
+  // بسته‌شدن خودکار کشو و مودال با تغییر صفحه
   useEffect(() => {
     setIsMobileMenuOpen(false);
+    setIsSearchModalOpen(false);
   }, [pathname]);
+
+  // اکشن اجرای سرچ و ثبت در تاریخچه
+  const executeSearch = (queryText) => {
+    const trimmed = queryText.trim();
+    if (!trimmed) return;
+
+    // اضافه کردن به تاریخچه اخیر (بدون تکرار)
+    if (!recentSearches.includes(trimmed)) {
+      setRecentSearches(prev => [trimmed, ...prev.slice(0, 5)]);
+    }
+
+    setIsSearchModalOpen(false);
+    router.push(`/products?search=${encodeURIComponent(trimmed)}`);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      executeSearch(searchQuery);
+    }
+  };
+
+  const clearRecentSearches = () => {
+    setRecentSearches([]);
+  };
 
   return (
     <>
@@ -44,11 +81,7 @@ export default function Header() {
       {/* ========================================================================= */}
       <header className="hidden md:flex w-full fixed top-0 left-0 right-0 z-50 flex-col pointer-events-none bg-transparent">
         {/* بنر اعلان دسکتاپ */}
-        <div 
-          className={`w-full bg-gradient-to-r from-rose-500 to-pink-600 text-white text-center text-xs font-bold shadow-inner pointer-events-auto transition-all duration-300 ease-in-out z-50 select-none overflow-hidden flex items-center justify-center ${
-            isMenuVisible ? 'h-9 py-2 px-4' : 'h-0 py-0 px-0'
-          }`}
-        >
+        <div className={`w-full bg-gradient-to-r from-rose-500 to-pink-600 text-white text-center text-xs font-bold shadow-inner pointer-events-auto transition-all duration-300 ease-in-out z-50 select-none overflow-hidden flex items-center justify-center ${isMenuVisible ? 'h-9 py-2 px-4' : 'h-0 py-0 px-0'}`}>
           <span>جشنواره شگفت‌انگیز سیب‌شاپ؛ تا ۴۰٪ تخفیف روی لوازم جانبی موبایل ⚡</span>
         </div>
 
@@ -60,27 +93,24 @@ export default function Header() {
             </span>
           </Link>
 
+          {/* فیلد ورودی سرچ دسکتاپ (کلیک روی این، مودال را باز می‌کند) */}
           <div className="flex items-center flex-1 max-w-2xl relative group pointer-events-auto">
-            <Search className="absolute right-4 w-5 h-5 text-slate-400 group-focus-within:text-rose-500 transition duration-200" />
+            <Search className="absolute right-4 w-5 h-5 text-slate-400" />
             <input
               type="text"
+              readOnly
+              onClick={() => setIsSearchModalOpen(true)}
               placeholder="جستجو در سیب‌شاپ..."
-              className="w-full bg-slate-100/60 text-sm font-medium pr-12 pl-4 py-3 rounded-2xl border border-transparent focus:outline-none focus:border-slate-200 focus:bg-white focus:ring-4 focus:ring-slate-100 transition duration-200"
+              className="w-full bg-slate-100/60 text-sm font-medium pr-12 pl-4 py-3 rounded-2xl border border-transparent focus:outline-none cursor-pointer hover:bg-slate-100 transition duration-150"
             />
           </div>
 
           <div className="flex items-center gap-4 shrink-0 pointer-events-auto">
-            {/* 🚀 اتصال طلایی دکمه ورود دسکتاپ به صفحه لاگین */}
-            <Link 
-              href="/login" 
-              className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-slate-900 border border-slate-200 hover:bg-slate-50/80 px-4 py-2.5 rounded-xl transition duration-200"
-            >
+            <Link href="/login" className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-slate-900 border border-slate-200 hover:bg-slate-50/80 px-4 py-2.5 rounded-xl transition duration-200">
               <User className="w-4 h-4 stroke-[2.5]" />
               <span>ورود | ثبت‌نام</span>
             </Link>
-            
             <div className="h-6 w-[1px] bg-slate-200/60"></div>
-            
             <Link href="/cart" className="flex items-center justify-center p-2.5 text-slate-700 hover:bg-slate-50/80 rounded-xl transition duration-200 relative">
               <ShoppingBag className="w-5 h-5 stroke-[2.5]" />
               {cartCount > 0 && (
@@ -93,18 +123,13 @@ export default function Header() {
         </div>
 
         {/* ردیف دوم دسکتاپ */}
-        <div 
-          className={`border-b border-slate-100/60 bg-white/75 backdrop-blur-2xl w-full h-12 transition-all duration-300 ease-in-out pointer-events-auto relative z-40 transform ${
-            isMenuVisible ? 'translate-y-0 opacity-100' : '-translate-y-20 opacity-0 pointer-events-none'
-          }`}
-        >
+        <div className={`border-b border-slate-100/60 bg-white/75 backdrop-blur-2xl w-full h-12 transition-all duration-300 ease-in-out pointer-events-auto relative z-40 transform ${isMenuVisible ? 'translate-y-0 opacity-100' : '-translate-y-20 opacity-0 pointer-events-none'}`}>
           <div className="w-full px-4 md:px-8 h-12 flex items-center">
             <nav className="flex items-center gap-8 text-sm font-semibold text-slate-600">
               <div className="relative group/menu py-3 cursor-pointer text-slate-800 hover:text-rose-500 flex items-center gap-1.5 transition">
                 <Menu className="w-4 h-4 text-slate-500 group-hover/menu:text-rose-500 transition" />
                 <span className="font-bold">دسته‌بندی محصولات</span>
                 <ChevronDown className="w-3 h-3 text-slate-400 group-hover/menu:rotate-180 transition duration-300" />
-
                 <div className="absolute top-full right-0 w-[700px] bg-white border border-slate-100 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.08)] rounded-3xl p-6 grid grid-cols-3 gap-6 opacity-0 pointer-events-none group-hover/menu:opacity-100 group-hover/menu:pointer-events-auto transition-all duration-300 transform translate-y-2 group-hover/menu:translate-y-0 z-50">
                   <div>
                     <div className="flex items-center gap-1.5 text-slate-900 font-bold mb-3 text-sm">
@@ -158,7 +183,6 @@ export default function Header() {
               سیب<span className="text-rose-500">‌شاپ</span>
             </span>
           </Link>
-
           <div className="flex items-center gap-2">
             <button className="p-2 text-slate-600 hover:bg-slate-50 rounded-full relative transition">
               <Bell className="w-5 h-5 stroke-[2.2]" />
@@ -167,102 +191,176 @@ export default function Header() {
           </div>
         </div>
 
-        <div className="w-full relative flex items-center">
+        {/* باکس شبیه‌ساز سرچ در موبایل */}
+        <div 
+          onClick={() => setIsSearchModalOpen(true)}
+          className="w-full relative flex items-center bg-slate-100 text-slate-400 text-sm font-medium pr-11 pl-4 py-3 rounded-xl cursor-pointer select-none"
+        >
           <Search className="absolute right-4 w-5 h-5 text-slate-400" />
-          <input
-            type="text"
-            placeholder="جستجو در سیب‌شاپ..."
-            className="w-full bg-slate-100 text-sm font-medium pr-11 pl-4 py-3 rounded-xl border border-transparent focus:outline-none focus:bg-slate-50 transition duration-150"
-          />
+          <span>جستجو در کالاها...</span>
         </div>
       </header>
 
-      {/* ۳. دایو شبیه‌ساز ارتفاع */}
       <div className="w-full h-[120px] md:h-40 block shrink-0"></div>
 
       {/* ========================================================================= */}
-      {/* ۴. ناوبری پایین موبایل */}
+      {/* 🚀 پیاده‌سازی مگامودال سرچ پیشرفته (دسکتاپ و موبایل کاملاً مطابق تصاویر) */}
       {/* ========================================================================= */}
+      {isSearchModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-[100] flex justify-center md:items-start md:pt-6 direction-rtl antialiased">
+          
+          {/* محفظه اصلی مگامودال */}
+          <div className="w-full h-full md:h-auto md:max-w-3xl bg-white md:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-fade-in">
+            
+            {/* ردیف بالای فیلد سرچ اصلی */}
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-3">
+              {/* دکمه بازگشت در نسخه موبایل */}
+              <button 
+                onClick={() => setIsSearchModalOpen(false)} 
+                className="md:hidden p-1 text-slate-700 hover:bg-slate-100 rounded-full transition"
+              >
+                <ArrowRight className="w-5 h-5" />
+              </button>
+
+              <div className="relative flex-1 flex items-center">
+                <Search className="absolute right-4 w-5 h-5 text-rose-500" />
+                <input
+                  type="text"
+                  autoFocus
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="جستجو در همه کالاها..."
+                  className="w-full bg-slate-50 text-sm font-bold text-slate-800 pr-12 pl-10 py-3.5 rounded-2xl border-2 border-rose-500/10 focus:outline-none focus:border-rose-500 focus:bg-white transition"
+                />
+                {searchQuery && (
+                  <button 
+                    onClick={() => setSearchQuery('')}
+                    className="absolute left-4 p-1 text-slate-400 hover:text-slate-600 transition"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* دکمه بستن در دسکتاپ */}
+              <button 
+                onClick={() => setIsSearchModalOpen(false)}
+                className="hidden md:flex p-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-500 rounded-xl transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* بدنه محتوایی لایو سرچ */}
+            <div className="p-6 flex-1 overflow-y-auto max-h-[75vh] flex flex-col gap-6 text-right">
+              
+              {/* بخش اول: جستجوهای اخیر */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-black text-slate-800">جستجوهای اخیر</span>
+                  {recentSearches.length > 0 && (
+                    <button 
+                      onClick={clearRecentSearches}
+                      className="text-[10px] font-bold text-slate-400 hover:text-rose-500 transition px-2 py-1 rounded-md"
+                    >
+                      پاک کردن
+                    </button>
+                  )}
+                </div>
+
+                {recentSearches.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {recentSearches.map((search, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => executeSearch(search)}
+                        className="bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs font-bold px-3.5 py-2 rounded-xl border border-slate-100 transition"
+                      >
+                        {search}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-slate-400 font-medium">هیچ تاریخچه جستجویی وجود ندارد.</p>
+                )}
+              </div>
+
+              {/* بخش دوم: جستجوهای پرطرفدار */}
+              <div>
+                <span className="text-xs font-black text-slate-800 block mb-3">جستجوهای پرطرفدار</span>
+                <div className="flex flex-wrap gap-2">
+                  {popularSearches.map((pop, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => executeSearch(pop)}
+                      className="bg-white hover:bg-rose-50/40 text-slate-700 text-xs font-black px-4 py-2 rounded-xl border border-slate-200/70 shadow-3xs flex items-center gap-1.5 transition"
+                    >
+                      <span className="text-slate-300 text-[10px]">↗</span>
+                      <span>{pop}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* بخش سوم: بنر هوشمند تبلیغاتی (مخصوص دسکتاپ عینا مشابه اسکرین‌شات اول شما) */}
+              <div className="hidden md:block w-full mt-2">
+                <div className="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 rounded-2xl p-5 text-white relative overflow-hidden flex items-center justify-between shadow-sm select-none">
+                  <div className="z-10 flex flex-col gap-1.5">
+                    <span className="text-xs font-black bg-white/20 px-2.5 py-1 rounded-full w-max">این تابستون انجامش بدیم! ☀️</span>
+                    <p className="text-[11px] font-bold text-white/90">برای هر چیزی که تو این تابستون لازم داری روی سیب‌شاپ حساب کن</p>
+                  </div>
+                  <button 
+                    onClick={() => executeSearch('جانبی موبایل')}
+                    className="bg-slate-950/90 text-white text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-slate-950 transition z-10 shadow-xs"
+                  >
+                    شروع خرید شگفت‌انگیز
+                  </button>
+                  <div className="absolute -right-10 -bottom-10 w-28 h-28 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ناوبری پایین موبایل */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] z-50 px-4 py-2 rounded-t-2xl">
         <div className="flex items-center justify-around text-slate-400">
-          
-          {/* دکمه خانه */}
-          <Link 
-            href="/" 
-            className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${
-              pathname === '/' && !isMobileMenuOpen ? 'text-rose-500 font-bold scale-102' : 'text-slate-400 font-medium hover:text-slate-700'
-            }`}
-          >
+          <Link href="/" className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${pathname === '/' && !isMobileMenuOpen ? 'text-rose-500 font-bold scale-102' : 'text-slate-400 font-medium hover:text-slate-700'}`}>
             <Home className="w-5 h-5 stroke-[2.3]" />
             <span className="text-[10px] tracking-tight">خانه</span>
           </Link>
-
-          {/* دکمه دسته‌بندی */}
-          <button 
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className={`flex flex-col items-center gap-1 font-semibold min-w-[60px] py-1 transition duration-200 ${
-              isMobileMenuOpen ? 'text-rose-500 font-bold scale-102' : 'text-slate-400 hover:text-slate-700'
-            }`}
-          >
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className={`flex flex-col items-center gap-1 font-semibold min-w-[60px] py-1 transition duration-200 ${isMobileMenuOpen ? 'text-rose-500 font-bold scale-102' : 'text-slate-400 hover:text-slate-700'}`}>
             <Grid className="w-5 h-5 stroke-[2.2]" />
             <span className="text-[10px] tracking-tight">دسته‌بندی</span>
           </button>
-
-          {/* دکمه سبد خرید */}
-          <Link 
-            href="/cart" 
-            className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${
-              pathname === '/cart' && !isMobileMenuOpen ? 'text-rose-500 font-bold scale-102' : 'text-slate-400 font-medium hover:text-slate-700'
-            }`}
-          >
+          <Link href="/cart" className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${pathname === '/cart' && !isMobileMenuOpen ? 'text-rose-500 font-bold scale-102' : 'text-slate-400 font-medium hover:text-slate-700'}`}>
             <div className="w-6 h-6 flex items-center justify-center relative">
               <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
               {cartCount > 0 && (
-                <span className="absolute -top-1.5 -left-1.5 bg-rose-500 text-white text-[9px] font-sans font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white shadow-xs leading-none">
-                  {cartCount}
-                </span>
+                <span className="absolute -top-1.5 -left-1.5 bg-rose-500 text-white text-[9px] font-sans font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white shadow-xs leading-none">{cartCount}</span>
               )}
             </div>
             <span className="text-[10px] tracking-tight">سبد خرید</span>
           </Link>
-
-          {/* 🚀 اتصال طلایی دکمه پروفایل موبایل به صفحه لاگین */}
-          <Link 
-            href="/login" 
-            className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${
-              pathname === '/login' && !isMobileMenuOpen ? 'text-rose-500 font-bold' : 'text-slate-400 font-medium hover:text-slate-700'
-            }`}
-          >
+          <Link href="/login" className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${pathname === '/login' && !isMobileMenuOpen ? 'text-rose-500 font-bold' : 'text-slate-400 font-medium hover:text-slate-700'}`}>
             <User className="w-5 h-5 stroke-[2.2]" />
             <span className="text-[10px] tracking-tight">پروفایل</span>
           </Link>
         </div>
       </nav>
 
-      {/* ========================================================================= */}
-      {/* ۵. منوی کشویی دسته‌بندی موبایل (Bottom Drawer) */}
-      {/* ========================================================================= */}
-      <div 
-        className={`fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 transition-opacity duration-300 md:hidden ${
-          isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
-        onClick={() => setIsMobileMenuOpen(false)}
-      >
-        <div 
-          className={`fixed bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] p-6 max-h-[85vh] overflow-y-auto transition-transform duration-300 ease-out transform shadow-[0_-10px_40px_rgba(0,0,0,0.12)] ${
-            isMobileMenuOpen ? 'translate-y-0' : 'translate-y-full'
-          }`}
-          onClick={(e) => e.stopPropagation()}
-        >
+      {/* منوی کشویی دسته‌بندی موبایل */}
+      <div className={`fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 transition-opacity duration-300 md:hidden ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMobileMenuOpen(false)}>
+        <div className={`fixed bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] p-6 max-h-[85vh] overflow-y-auto transition-transform duration-300 ease-out transform shadow-[0_-10px_40px_rgba(0,0,0,0.12)] ${isMobileMenuOpen ? 'translate-y-0' : 'translate-y-full'}`} onClick={(e) => e.stopPropagation()}>
           <div className="w-14 h-1.5 bg-slate-200 rounded-full mx-auto mb-5 cursor-pointer" onClick={() => setIsMobileMenuOpen(false)}></div>
-          
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-base font-black text-slate-800">دسته‌بندی محصولات سیب‌شاپ</h3>
-            <button onClick={() => setIsMobileMenuOpen(false)} className="p-1.5 bg-slate-100 text-slate-500 rounded-full hover:bg-slate-200 transition">
-              <X className="w-4 h-4" />
-            </button>
+            <button onClick={() => setIsMobileMenuOpen(false)} className="p-1.5 bg-slate-100 text-slate-500 rounded-full hover:bg-slate-200 transition"><X className="w-4 h-4" /></button>
           </div>
-          
           <div className="space-y-5 pb-8">
             <div className="bg-slate-50/60 p-4 rounded-2xl border border-slate-100">
               <div className="flex items-center gap-2 text-slate-900 font-bold mb-3 text-sm">
@@ -275,31 +373,7 @@ export default function Header() {
                 <span className="bg-white text-slate-700 text-xs font-medium px-3 py-2 rounded-xl border border-slate-100 shadow-2xs">شیائومی (Xiaomi)</span>
               </div>
             </div>
-
-            <div className="bg-slate-50/60 p-4 rounded-2xl border border-slate-100">
-              <div className="flex items-center gap-2 text-slate-900 font-bold mb-3 text-sm">
-                <Laptop className="w-5 h-5 text-blue-500" />
-                <span>لوازم جانبی</span>
-              </div>
-              <div className="flex flex-wrap gap-2 pr-1">
-                <span className="bg-white text-slate-700 text-xs font-medium px-3 py-2 rounded-xl border border-slate-100 shadow-2xs">قاب و کاور گوشی</span>
-                <span className="bg-white text-slate-700 text-xs font-medium px-3 py-2 rounded-xl border border-slate-100 shadow-2xs">کابل و شارژر</span>
-                <span className="bg-white text-slate-700 text-xs font-medium px-3 py-2 rounded-xl border border-slate-100 shadow-2xs">پاوربانک</span>
-              </div>
-            </div>
-
-            <div className="bg-slate-50/60 p-4 rounded-2xl border border-slate-100">
-              <div className="flex items-center gap-2 text-slate-900 font-bold mb-3 text-sm">
-                <Headphones className="w-5 h-5 text-emerald-500" />
-                <span>صوتی و پوشیدنی</span>
-              </div>
-              <div className="flex flex-wrap gap-2 pr-1">
-                <span className="bg-white text-slate-700 text-xs font-medium px-3 py-2 rounded-xl border border-slate-100 shadow-2xs">ایرپاد و هندزفری</span>
-                <span className="bg-white text-slate-700 text-xs font-medium px-3 py-2 rounded-xl border border-slate-100 shadow-2xs">ساعت هوشمند</span>
-              </div>
-            </div>
           </div>
-
         </div>
       </div>
     </>

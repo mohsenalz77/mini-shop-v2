@@ -1,38 +1,91 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { User, MapPin, ShoppingBag, Truck, CheckCircle, XCircle, LogOut, ChevronLeft, Edit3, Check } from 'lucide-react';
 
 export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState('dashboard'); // مدیریت تب‌های سایدبار
-  const [isEditing, setIsEditing] = useState(false); // وضعیت ویرایش اطلاعات
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
-  // دیتای کاربری با فیلدهای تکمیلی پستی
+  // دیتای کاربری پیش‌فرض زنده
   const [user, setUser] = useState({
-    name: "محسن عزیز",
-    phone: "09123456789",
-    province: "تهران",
-    city: "تهران",
-    address: "خیابان آزادی، کوچه درخشان، پلاک ۱۲، واحد ۳",
-    postalCode: "1234567890"
+    name: "کاربر سیب‌شاپ",
+    phone: "",
+    province: "",
+    city: "",
+    address: "",
+    postalCode: ""
   });
 
-  // نگهدارنده موقت اطلاعات در حین ویرایش
   const [editForm, setEditForm] = useState({ ...user });
 
+  // ⏱️ بررسی وضعیت لاگین بودن کاربر هنگام ورود به صفحه پروفایل
+  useEffect(() => {
+    const token = localStorage.getItem('sibshop_token');
+    const localUserData = localStorage.getItem('sibshop_user');
+
+    if (!token || !localUserData) {
+      alert('لطفا ابتدا وارد حساب کاربری خود شوید.');
+      router.push('/login'); // ریدایرکت به لاگین در صورت لود نشدن توکن
+      return;
+    }
+
+    const parsedUser = JSON.parse(localUserData);
+    
+    // پر کردن اطلاعات از روی لوکال استوریج (بعدا می‌توانید از فچ استراپی بخوانید)
+    const updatedUserData = {
+      name: parsedUser.name || "محسن عزیز",
+      phone: parsedUser.username || "۰۹xxxxxxxxx",
+      province: localStorage.getItem('user_province') || "ثبت نشده",
+      city: localStorage.getItem('user_city') || "ثبت نشده",
+      address: localStorage.getItem('user_address') || "نشانی خود را وارد کنید",
+      postalCode: localStorage.getItem('user_postal') || "--------"
+    };
+
+    setUser(updatedUserData);
+    setEditForm(updatedUserData);
+    setIsLoading(false);
+  }, [router]);
+
+  // ذخیره اطلاعات جدید در مرورگر (و آماده‌سازی برای آپدیت در استراپی)
   const handleSave = () => {
     setUser({ ...editForm });
+    
+    // موقتا ذخیره در لوکال برای مانیتور زنده
+    localStorage.setItem('user_province', editForm.province);
+    localStorage.setItem('user_city', editForm.city);
+    localStorage.setItem('user_address', editForm.address);
+    localStorage.setItem('user_postal', editForm.postalCode);
+
     setIsEditing(false);
     alert('تغییرات با موفقیت در پروفایل شما ثبت شد.');
   };
+
+  // 🚪 منطق خروج کامل از حساب کاربری
+  const handleLogout = () => {
+    localStorage.removeItem('sibshop_token');
+    localStorage.removeItem('sibshop_user');
+    alert('از حساب خود خارج شدید.');
+    window.location.href = '/';
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 font-bold text-xs text-slate-500">
+        در حال بارگذاری پروفایل سیب‌شاپ...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 direction-rtl antialiased flex flex-col justify-between">
       <Header />
 
-      {/* 🏪 بدنه اصلی پروفایل - کاملاً هم‌تراز با پدینگ و عرض آزاد هیرو باکس اصلی سایت */}
       <main className="w-full px-4 md:px-8 py-4 md:py-6 flex-1">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
           
@@ -48,7 +101,6 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* گزینه‌های منو متصل به استیت زنده */}
             <nav className="flex flex-col gap-1">
               <button 
                 onClick={() => setActiveTab('dashboard')}
@@ -72,7 +124,11 @@ export default function ProfilePage() {
                 <ChevronLeft className="w-3.5 h-3.5" />
               </button>
 
-              <button className="w-full flex items-center justify-between px-3 py-3 rounded-xl text-slate-600 hover:bg-slate-50 font-bold text-xs transition border-t border-slate-50 mt-2 text-rose-500">
+              {/* 🚀 دکمه خروج به تابع هندلر متصل شد */}
+              <button 
+                onClick={handleLogout}
+                className="w-full flex items-center justify-between px-3 py-3 rounded-xl text-rose-500 hover:bg-rose-50/50 font-bold text-xs transition border-t border-slate-50 mt-2"
+              >
                 <div className="flex items-center gap-2">
                   <LogOut className="w-4 h-4" />
                   <span>خروج از حساب</span>
@@ -85,7 +141,6 @@ export default function ProfilePage() {
           <div className="lg:col-span-9 w-full flex flex-col gap-4 md:gap-5">
             
             {activeTab === 'dashboard' && (
-              /* 📊 بخش اول: داشبورد و خلاصه وضعیت سفارش‌ها */
               <section className="bg-white border border-slate-100 rounded-3xl p-5 shadow-3xs text-right animate-fadeIn">
                 <h4 className="text-xs font-black text-slate-800 mb-4 flex items-center gap-1.5">
                   <ShoppingBag className="w-4 h-4 text-slate-500" />
@@ -114,14 +169,12 @@ export default function ProfilePage() {
               </section>
             )}
 
-            {/* 📝 بخش دوم: اطلاعات حساب و تحویل سفارش (در هر دو تب یا به صورت مجزا کاربرد دارد) */}
             <section className="bg-white border border-slate-100 rounded-3xl p-5 shadow-3xs text-right">
               <div className="flex items-center justify-between border-b border-slate-50 pb-3 mb-4">
                 <h4 className="text-xs font-black text-slate-800">
                   {activeTab === 'address' ? 'جزئیات نشانی و ارسال کالا' : 'اطلاعات حساب کاربری'}
                 </h4>
                 
-                {/* دکمه سوئیچ ادیتور هوشمند */}
                 {!isEditing ? (
                   <button 
                     onClick={() => setIsEditing(true)} 
@@ -142,7 +195,6 @@ export default function ProfilePage() {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* فیلد نام */}
                 <div className="flex flex-col gap-1.5">
                   <span className="text-[11px] font-bold text-slate-400 mr-1">نام و نام خانوادگی گیرنده</span>
                   {isEditing ? (
@@ -157,7 +209,6 @@ export default function ProfilePage() {
                   )}
                 </div>
 
-                {/* فیلد تلفن */}
                 <div className="flex flex-col gap-1.5">
                   <span className="text-[11px] font-bold text-slate-400 mr-1">شماره تماس اضطراری</span>
                   {isEditing ? (
@@ -173,7 +224,6 @@ export default function ProfilePage() {
                   )}
                 </div>
 
-                {/* فیلد استان */}
                 <div className="flex flex-col gap-1.5">
                   <span className="text-[11px] font-bold text-slate-400 mr-1">استان</span>
                   {isEditing ? (
@@ -188,7 +238,6 @@ export default function ProfilePage() {
                   )}
                 </div>
 
-                {/* فیلد شهر */}
                 <div className="flex flex-col gap-1.5">
                   <span className="text-[11px] font-bold text-slate-400 mr-1">شهر</span>
                   {isEditing ? (
@@ -203,7 +252,6 @@ export default function ProfilePage() {
                   )}
                 </div>
 
-                {/* فیلد آدرس پستی */}
                 <div className="md:col-span-2 flex flex-col gap-1.5">
                   <span className="text-[11px] font-bold text-slate-400 mr-1">نشانی دقیق پستی</span>
                   {isEditing ? (
@@ -218,7 +266,6 @@ export default function ProfilePage() {
                   )}
                 </div>
 
-                {/* فیلد کد پستی ۱۰ رقمی */}
                 <div className="md:col-span-2 flex flex-col gap-1.5">
                   <span className="text-[11px] font-bold text-slate-400 mr-1">کد پستی ۱۰ رقمی</span>
                   {isEditing ? (

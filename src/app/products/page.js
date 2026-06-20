@@ -5,7 +5,7 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation'; // 🚀 اضافه شدن هوک دریافت پارامتر سرچ
+import { useSearchParams } from 'next/navigation'; 
 import { useCart } from '../../context/CartContext'; 
 
 // ۱. کامپوننت اصلی محتوای محصولات
@@ -14,7 +14,7 @@ function ProductsContent() {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 🚀 دریافت کلمه سرچ شده از URL سایت
+  // دریافت کلمه سرچ شده از URL سایت
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
 
@@ -22,12 +22,11 @@ function ProductsContent() {
     async function fetchProducts() {
       setIsLoading(true);
       try {
-        // ساخت آدرس داینامیک استراپی بر اساس فیلتر سرچ
         let strapiEndpoint = 'https://b.dr-sib.xyz/api/products?populate=*';
 
         if (searchQuery) {
-          // فیلتر هوشمند روی فیلد name (بدون حساسیت به حروف کوچک و بزرگ با containsi)
-          strapiEndpoint += `&filters[name][$containsi]=${encodeURIComponent(searchQuery)}`;
+          // 🚀 فیکس شد: تغییر فیلتر از name به title بر اساس دیتابیس استراپی شما
+          strapiEndpoint += `&filters[title][$containsi]=${encodeURIComponent(searchQuery)}`;
         }
 
         const res = await fetch(strapiEndpoint, { cache: 'no-store' });
@@ -42,7 +41,7 @@ function ProductsContent() {
       }
     }
     fetchProducts();
-  }, [searchQuery]); // 🚀 با هر بار سرچ جدید، این افکت دوباره اجرا می‌شود
+  }, [searchQuery]); 
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
@@ -107,7 +106,8 @@ function ProductsContent() {
               const id = item.id;
               const attr = item.attributes || {};
               
-              const name = attr.name || "محصول سیب‌شاپ";
+              // 🚀 فیکس شد: خواندن نام کالا از فیلد صحیح title در استراپی
+              const name = attr.title || "محصول سیب‌شاپ";
               const priceNum = attr.price || 0;
               const oldPriceNum = attr.oldPrice || null;
               

@@ -11,10 +11,12 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsLoadingSaving] = useState(false);
   
-  // دیتای کاربری پیش‌فرض زنده
+  // استیت دیتای واقعی کاربر متصل به سرور
   const [user, setUser] = useState({
-    name: "کاربر سیب‌شاپ",
+    id: "",
+    name: "محسن عزیز",
     phone: "",
     province: "",
     city: "",
@@ -24,60 +26,114 @@ export default function ProfilePage() {
 
   const [editForm, setEditForm] = useState({ ...user });
 
-  // ⏱️ بررسی وضعیت لاگین بودن کاربر هنگام ورود به صفحه پروفایل
+  // ⏱️ لود کردن اطلاعات زنده کاربر از دیتابیس استراپی به محض ورود به صفحه
   useEffect(() => {
-    const token = localStorage.getItem('sibshop_token');
-    const localUserData = localStorage.getItem('sibshop_user');
+    async function fetchUserProfile() {
+      const token = localStorage.getItem('sibshop_token');
+      if (!token) {
+        alert('لطفا ابتدا وارد حساب کاربری خود شوید.');
+        router.push('/login');
+        return;
+      }
 
-    if (!token || !localUserData) {
-      alert('لطفا ابتدا وارد حساب کاربری خود شوید.');
-      router.push('/login'); // ریدایرکت به لاگین در صورت لود نشدن توکن
-      return;
+      try {
+        // فچ کردن اطلاعات پستی و کاربری مستقیم از متد /users/me استراپی
+        const res = await fetch('https://b.dr-sib.xyz/api/users/me', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          
+          const loadedUser = {
+            id: data.id,
+            name: data.name || "محسن عزیز",
+            phone: data.username || "",
+            province: data.province || "",
+            city: data.city || "",
+            address: data.address || "",
+            postalCode: data.postalCode || ""
+          };
+
+          setUser(loadedUser);
+          setEditForm(loadedUser);
+        } else {
+          // اگر توکن منقضی شده بود، هدایت به لاگین
+          localStorage.removeItem('sibshop_token');
+          router.push('/login');
+        }
+      } catch (error) {
+        console.error("Fetch profile error:", error);
+      } finally {
+        setIsLoading(false);
+      }
     }
 
-    const parsedUser = JSON.parse(localUserData);
-    
-    // پر کردن اطلاعات از روی لوکال استوریج (بعدا می‌توانید از فچ استراپی بخوانید)
-    const updatedUserData = {
-      name: parsedUser.name || "محسن عزیز",
-      phone: parsedUser.username || "۰۹xxxxxxxxx",
-      province: localStorage.getItem('user_province') || "ثبت نشده",
-      city: localStorage.getItem('user_city') || "ثبت نشده",
-      address: localStorage.getItem('user_address') || "نشانی خود را وارد کنید",
-      postalCode: localStorage.getItem('user_postal') || "--------"
-    };
-
-    setUser(updatedUserData);
-    setEditForm(updatedUserData);
-    setIsLoading(false);
+    fetchUserProfile();
   }, [router]);
 
-  // ذخیره اطلاعات جدید در مرورگر (و آماده‌سازی برای آپدیت در استراپی)
-  const handleSave = () => {
-    setUser({ ...editForm });
-    
-    // موقتا ذخیره در لوکال برای مانیتور زنده
-    localStorage.setItem('user_province', editForm.province);
-    localStorage.setItem('user_city', editForm.city);
-    localStorage.setItem('user_address', editForm.address);
-    localStorage.setItem('user_postal', editForm.postalCode);
+  // 🚀 ذخیره دیتای جدید روی هارد دیتابیس سرور استراپی
+  const handleSave = async () => {
+    const token = localStorage.getItem('sibshop_token');
+    setIsLoadingSaving(true);
 
-    setIsEditing(false);
-    alert('تغییرات با موفقیت در پروفایل شما ثبت شد.');
+    try {
+      // ارسال درخواست پوت به استراپی برای آپدیت سطر همین کاربر
+      const res = await fetch(`https://b.dr-sib.xyz/api/users/${user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: editForm.name,
+          province: editForm.province,
+          city: editForm.city,
+          address: editForm.address,
+          postalCode: editForm.postalCode
+        })
+      });
+
+      if (res.ok) {
+        const updatedData = await res.json();
+        
+        setUser({
+          ...user,
+          name: updatedData.name,
+          province: updatedData.province,
+          city: updatedData.city,
+          address: updatedData.address,
+          postalCode: updatedData.postalCode
+        });
+
+        setIsEditing(false);
+        alert('تغییرات با موفقیت روی سرور سیب‌شاپ ذخیره شد. ⚡');
+      } else {
+        alert('خطا در ذخیره‌سازی اطلاعات روی سرور.');
+      }
+    } catch (error) {
+      console.error("Update profile error:", error);
+      alert('ارتباط با سرور برقرار نشد.');
+    } finally {
+      setIsLoadingSaving(false);
+    }
   };
 
-  // 🚪 منطق خروج کامل از حساب کاربری
+  // 🚪 خروج کامل از حساب
   const handleLogout = () => {
     localStorage.removeItem('sibshop_token');
     localStorage.removeItem('sibshop_user');
-    alert('از حساب خود خارج شدید.');
     window.location.href = '/';
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 font-bold text-xs text-slate-500">
-        در حال بارگذاری پروفایل سیب‌شاپ...
+        در حال دریافت اطلاعات از سرور سیب‌شاپ...
       </div>
     );
   }
@@ -124,7 +180,6 @@ export default function ProfilePage() {
                 <ChevronLeft className="w-3.5 h-3.5" />
               </button>
 
-              {/* 🚀 دکمه خروج به تابع هندلر متصل شد */}
               <button 
                 onClick={handleLogout}
                 className="w-full flex items-center justify-between px-3 py-3 rounded-xl text-rose-500 hover:bg-rose-50/50 font-bold text-xs transition border-t border-slate-50 mt-2"
@@ -186,10 +241,11 @@ export default function ProfilePage() {
                 ) : (
                   <button 
                     onClick={handleSave} 
-                    className="flex items-center gap-1 text-[11px] font-black text-white bg-emerald-500 hover:bg-emerald-600 px-3 py-1.5 rounded-xl transition"
+                    disabled={isSaving}
+                    className="flex items-center gap-1 text-[11px] font-black text-white bg-emerald-500 hover:bg-emerald-600 px-3 py-1.5 rounded-xl transition disabled:opacity-50"
                   >
                     <Check className="w-3.5 h-3.5" />
-                    <span>ذخیره تغییرات</span>
+                    <span>{isSaving ? 'در حال ذخیره...' : 'ذخیره تغییرات'}</span>
                   </button>
                 )}
               </div>
@@ -205,23 +261,13 @@ export default function ProfilePage() {
                       className="bg-slate-50 border border-slate-200 focus:border-rose-500/40 focus:bg-white rounded-xl px-4 py-2.5 text-xs font-black focus:outline-none w-full"
                     />
                   ) : (
-                    <div className="bg-slate-50/80 px-4 py-3 rounded-xl border border-slate-100 text-xs font-black text-slate-700">{user.name}</div>
+                    <div className="bg-slate-50/80 px-4 py-3 rounded-xl border border-slate-100 text-xs font-black text-slate-700">{user.name || "ثبت نشده"}</div>
                   )}
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <span className="text-[11px] font-bold text-slate-400 mr-1">شماره تماس اضطراری</span>
-                  {isEditing ? (
-                    <input 
-                      type="tel" 
-                      maxLength={11}
-                      value={editForm.phone} 
-                      onChange={(e) => setEditForm({ ...editForm, phone: e.target.value.replace(/[^\d]/g, '') })}
-                      className="bg-slate-50 border border-slate-200 focus:border-rose-500/40 focus:bg-white rounded-xl px-4 py-2.5 text-xs font-bold font-sans focus:outline-none text-left direction-ltr w-full"
-                    />
-                  ) : (
-                    <div className="bg-slate-50/80 px-4 py-3 rounded-xl border border-slate-100 text-xs font-bold font-sans text-slate-700 text-left direction-ltr">{user.phone}</div>
-                  )}
+                  <span className="text-[11px] font-bold text-slate-400 mr-1">شماره تماس گیرنده</span>
+                  <div className="bg-slate-50/80 px-4 py-3 rounded-xl border border-slate-100 text-xs font-bold font-sans text-slate-400 text-left direction-ltr select-none">{user.phone}</div>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
@@ -234,7 +280,7 @@ export default function ProfilePage() {
                       className="bg-slate-50 border border-slate-200 focus:border-rose-500/40 focus:bg-white rounded-xl px-4 py-2.5 text-xs font-black focus:outline-none w-full"
                     />
                   ) : (
-                    <div className="bg-slate-50/80 px-4 py-3 rounded-xl border border-slate-100 text-xs font-black text-slate-700">{user.province}</div>
+                    <div className="bg-slate-50/80 px-4 py-3 rounded-xl border border-slate-100 text-xs font-black text-slate-700">{user.province || "ثبت نشده"}</div>
                   )}
                 </div>
 
@@ -248,7 +294,7 @@ export default function ProfilePage() {
                       className="bg-slate-50 border border-slate-200 focus:border-rose-500/40 focus:bg-white rounded-xl px-4 py-2.5 text-xs font-black focus:outline-none w-full"
                     />
                   ) : (
-                    <div className="bg-slate-50/80 px-4 py-3 rounded-xl border border-slate-100 text-xs font-black text-slate-700">{user.city}</div>
+                    <div className="bg-slate-50/80 px-4 py-3 rounded-xl border border-slate-100 text-xs font-black text-slate-700">{user.city || "ثبت نشده"}</div>
                   )}
                 </div>
 
@@ -262,7 +308,7 @@ export default function ProfilePage() {
                       className="bg-slate-50 border border-slate-200 focus:border-rose-500/40 focus:bg-white rounded-xl px-4 py-2.5 text-xs font-bold focus:outline-none w-full resize-none leading-6"
                     />
                   ) : (
-                    <div className="bg-slate-50/80 px-4 py-3 rounded-xl border border-slate-100 text-xs font-bold text-slate-700 leading-6">{user.address}</div>
+                    <div className="bg-slate-50/80 px-4 py-3 rounded-xl border border-slate-100 text-xs font-bold text-slate-700 leading-6">{user.address || "آدرسی ثبت نشده است."}</div>
                   )}
                 </div>
 
@@ -277,7 +323,7 @@ export default function ProfilePage() {
                       className="bg-slate-50 border border-slate-200 focus:border-rose-500/40 focus:bg-white rounded-xl px-4 py-2.5 text-xs font-bold font-sans focus:outline-none tracking-wider w-full"
                     />
                   ) : (
-                    <div className="bg-slate-50/80 px-4 py-3 rounded-xl border border-slate-100 text-xs font-bold font-sans text-slate-700 tracking-wider">{user.postalCode}</div>
+                    <div className="bg-slate-50/80 px-4 py-3 rounded-xl border border-slate-100 text-xs font-bold font-sans text-slate-700 tracking-wider">{user.postalCode || "--------"}</div>
                   )}
                 </div>
               </div>

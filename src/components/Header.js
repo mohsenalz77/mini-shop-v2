@@ -34,6 +34,9 @@ export default function Header() {
       } catch (e) {
         console.error("خطا در لود تاریخچه:", e);
       }
+    } else {
+      setRecentSearches(['آیفون ۱۳', 'شارژر سامسونگ', 'قاب ایفون', 'پاوربانک']);
+    } // 🚀 فیکس شد: کروشه و آکاردئون این بخش به درستی بسته شد
   }, []);
 
   // ۲. افکت ذخیره خودکار در مرورگر به محض اضافه شدن کلمه جدید
@@ -250,11 +253,9 @@ export default function Header() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="جستجو در همه کالاها..."
-                  /* 🚀 فیکس شد: استفاده از text-base (حداقل 16px) در موبایل جهت جلوگیری از زوم خودکار مرورگر */
                   className="w-full bg-slate-50 text-base md:text-sm font-bold text-slate-800 pr-12 pl-12 py-3 md:py-3.5 rounded-2xl border-2 border-rose-500/10 focus:outline-none focus:border-rose-500 focus:bg-white transition"
                 />
                 {searchQuery && (
-                  /* 🚀 فیکس شد: هم‌ترازی دقیق دکمه حذف متن با اینپوت جدید */
                   <button 
                     onClick={() => setSearchQuery('')}
                     className="absolute left-4 p-1 text-slate-400 hover:text-slate-600 transition"
@@ -324,7 +325,7 @@ export default function Header() {
                 </div>
               </div>
 
-              {/* 🚀 فیکس شد: نمایش بنر هوشمند تبلیغاتی در دسکتاپ و موبایل با طراحی کاملاً واکنش‌گرا */}
+              {/* بخش سوم: بنر هوشمند تبلیغاتی */}
               <div className="w-full mt-2">
                 <div className="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 rounded-2xl p-4 md:p-5 text-white relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm select-none">
                   <div className="z-10 flex flex-col gap-1">

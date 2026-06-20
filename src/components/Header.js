@@ -19,7 +19,7 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [recentSearches, setRecentSearches] = useState([]);
 
-  const popularSearches = ['s26 ultra', 'ps5', 'گوشی موبایل', 'a36', ];
+  const popularSearches = ['s26 ultra', 'ps5', 'گوشی موبایل', 'a36', 'توپ فوتبال'];
 
   const pathname = usePathname();
   const router = useRouter();
@@ -34,6 +34,9 @@ export default function Header() {
       } catch (e) {
         console.error("خطا در لود تاریخچه:", e);
       }
+    } else {
+      setRecentSearches(['آیفون ۱۳', 'شارژر سامسونگ', 'قاب ایفون', 'پاوربانک']);
+    }
   }, []);
 
   // ۲. افکت ذخیره خودکار در مرورگر به محض اضافه شدن کلمه جدید
@@ -112,7 +115,7 @@ export default function Header() {
             </span>
           </Link>
 
-          {/* فیلد ورودی سرچ دسکتاپ (کلیک روی این، مودال را باز می‌کند) */}
+          {/* فیلد ورودی سرچ دسکتاپ */}
           <div className="flex items-center flex-1 max-w-2xl relative group pointer-events-auto">
             <Search className="absolute right-4 w-5 h-5 text-slate-400" />
             <input
@@ -226,19 +229,19 @@ export default function Header() {
       {/* ۳. پیاده‌سازی مگامودال سرچ پیشرفته (دسکتاپ و موبایل کاملاً مطابق تصاویر) */}
       {/* ========================================================================= */}
       {isSearchModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-[100] flex justify-center md:items-start md:pt-6 direction-rtl antialiased">
+        <div className="fixed inset-0 bg-white md:bg-slate-900/40 md:backdrop-blur-xs z-[100] flex justify-center md:items-start md:pt-6 direction-rtl antialiased">
           
           {/* محفظه اصلی مگامودال */}
-          <div className="w-full h-full md:h-auto md:max-w-3xl bg-white md:rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-fade-in">
+          <div className="w-full h-full md:h-auto md:max-w-3xl bg-white md:rounded-3xl md:shadow-2xl flex flex-col overflow-hidden">
             
             {/* ردیف بالای فیلد سرچ اصلی */}
-            <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-3">
+            <div className="px-4 py-3 md:px-5 md:py-4 border-b border-slate-100 flex items-center gap-3">
               {/* دکمه بازگشت در نسخه موبایل */}
               <button 
                 onClick={() => setIsSearchModalOpen(false)} 
-                className="md:hidden p-1 text-slate-700 hover:bg-slate-100 rounded-full transition"
+                className="md:hidden p-1.5 text-slate-700 hover:bg-slate-100 rounded-full transition shrink-0"
               >
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-6 h-6" />
               </button>
 
               <div className="relative flex-1 flex items-center">
@@ -250,9 +253,11 @@ export default function Header() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="جستجو در همه کالاها..."
-                  className="w-full bg-slate-50 text-sm font-bold text-slate-800 pr-12 pl-10 py-3.5 rounded-2xl border-2 border-rose-500/10 focus:outline-none focus:border-rose-500 focus:bg-white transition"
+                  /* 🚀 فیکس شد: استفاده از text-base (حداقل 16px) در موبایل جهت جلوگیری از زوم خودکار مرورگر */
+                  className="w-full bg-slate-50 text-base md:text-sm font-bold text-slate-800 pr-12 pl-12 py-3 md:py-3.5 rounded-2xl border-2 border-rose-500/10 focus:outline-none focus:border-rose-500 focus:bg-white transition"
                 />
                 {searchQuery && (
+                  /* 🚀 فیکس شد: هم‌ترازی دقیق دکمه حذف متن با اینپوت جدید */
                   <button 
                     onClick={() => setSearchQuery('')}
                     className="absolute left-4 p-1 text-slate-400 hover:text-slate-600 transition"
@@ -272,7 +277,7 @@ export default function Header() {
             </div>
 
             {/* بدنه محتوایی لایو سرچ */}
-            <div className="p-6 flex-1 overflow-y-auto max-h-[75vh] flex flex-col gap-6 text-right">
+            <div className="p-5 md:p-6 flex-1 overflow-y-auto max-h-[calc(100vh-80px)] md:max-h-[75vh] flex flex-col gap-6 text-right">
               
               {/* بخش اول: جستجوهای اخیر */}
               <div>
@@ -322,16 +327,16 @@ export default function Header() {
                 </div>
               </div>
 
-              {/* بخش سوم: بنر هوشمند تبلیغاتی */}
-              <div className="hidden md:block w-full mt-2">
-                <div className="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 rounded-2xl p-5 text-white relative overflow-hidden flex items-center justify-between shadow-sm select-none">
-                  <div className="z-10 flex flex-col gap-1.5">
-                    <span className="text-xs font-black bg-white/20 px-2.5 py-1 rounded-full w-max">این تابستون انجامش بدیم! ☀️</span>
-                    <p className="text-[11px] font-bold text-white/90">برای هر چیزی که تو این تابستون لازم داری روی سیب‌شاپ حساب کن</p>
+              {/* 🚀 فیکس شد: نمایش بنر هوشمند تبلیغاتی در دسکتاپ و موبایل با طراحی کاملاً واکنش‌گرا */}
+              <div className="w-full mt-2">
+                <div className="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 rounded-2xl p-4 md:p-5 text-white relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm select-none">
+                  <div className="z-10 flex flex-col gap-1">
+                    <span className="text-[9px] md:text-xs font-black bg-white/20 px-2.5 py-1 rounded-full w-max">این تابستون انجامش بدیم! ☀️</span>
+                    <p className="text-[10px] md:text-[11px] font-bold text-white/90">برای هر چیزی که تو این تابستون لازم داری روی سیب‌شاپ حساب کن</p>
                   </div>
                   <button 
                     onClick={() => executeSearch('جانبی موبایل')}
-                    className="bg-slate-950/90 text-white text-[10px] font-black px-4 py-2.5 rounded-xl hover:bg-slate-950 transition z-10 shadow-xs"
+                    className="bg-slate-950/90 text-white text-[9px] md:text-[10px] font-black px-3.5 py-2 md:py-2.5 rounded-xl hover:bg-slate-950 transition z-10 shadow-xs shrink-0"
                   >
                     شروع خرید شگفت‌انگیز
                   </button>
@@ -345,9 +350,7 @@ export default function Header() {
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* ۴. ناوبری پایین موبایل */}
-      {/* ========================================================================= */}
+      {/* ناوبری پایین موبایل */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] z-50 px-4 py-2 rounded-t-2xl">
         <div className="flex items-center justify-around text-slate-400">
           <Link href="/" className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${pathname === '/' && !isMobileMenuOpen ? 'text-rose-500 font-bold scale-102' : 'text-slate-400 font-medium hover:text-slate-700'}`}>

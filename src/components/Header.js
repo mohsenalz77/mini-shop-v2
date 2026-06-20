@@ -19,7 +19,7 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [recentSearches, setRecentSearches] = useState([]);
 
-  const popularSearches = ['s26 ultra', 'ps5', 'گوشی موبایل', 'a36', 'توپ فوتبال'];
+  const popularSearches = ['s26 ultra', 'ps5', 'گوشی موبایل', 'a36', ];
 
   const pathname = usePathname();
   const router = useRouter();
@@ -34,9 +34,6 @@ export default function Header() {
       } catch (e) {
         console.error("خطا در لود تاریخچه:", e);
       }
-    } else {
-  setRecentSearches(['آیفون ۱۳', 'شارژر سامسونگ', 'قاب ایفون', 'پاوربانک']);
-}
   }, []);
 
   // ۲. افکت ذخیره خودکار در مرورگر به محض اضافه شدن کلمه جدید

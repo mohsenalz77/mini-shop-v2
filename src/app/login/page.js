@@ -2,26 +2,73 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Smartphone, ShieldCheck, MessageSquareCode, ArrowRight, X } from 'lucide-react'; // 🚀 اضافه شدن آیکون X
+import { Smartphone, ShieldCheck, MessageSquareCode, ArrowRight, X } from 'lucide-react';
 
 export default function LoginPage() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [step, setStep] = useState(1); // ۱ برای شماره موبایل، ۲ برای کد پیامک
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleNextStep = (e) => {
+  // 🚀 ارسال شماره موبایل به شبیه‌ساز استراپی
+  const handleNextStep = async (e) => {
     e.preventDefault();
     if (phoneNumber.length === 11 && phoneNumber.startsWith('09')) {
-      setStep(2);
+      setIsLoading(true);
+      try {
+        const res = await fetch('https://b.dr-sib.xyz/api/auth/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: phoneNumber }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          alert(`${data.message}\nکد دمو (جهت تست): ${data.demoCode}`);
+          setStep(2);
+        } else {
+          alert(data.error || 'خطایی در ارسال کد رخ داد.');
+        }
+      } catch (error) {
+        console.error("OTP Error:", error);
+        alert('ارتباط با سرور برقرار نشد.');
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       alert('لطفاً یک شماره موبایل معتبر ۱۱ رقمی (مثال: ۰۹۱۲۳۴۵۶۷۸۹) وارد کنید.');
     }
   };
 
-  const handleLoginSubmit = (e) => {
+  // 🚀 تایید کد و ورود نهایی به حساب
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     if (verificationCode.length === 5) {
-      alert('کد تایید بررسی شد! ورود با موفقیت انجام شد.');
+      setIsLoading(true);
+      try {
+        const res = await fetch('https://b.dr-sib.xyz/api/auth/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: phoneNumber, code: verificationCode }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          alert(data.message);
+          // اینجا می‌توانید توکن را ذخیره کنید و کاربر را ریدایرکت کنید
+          // localStorage.setItem('token', data.token);
+          window.location.href = '/';
+        } else {
+          alert(data.error || 'کد تایید اشتباه است.');
+        }
+      } catch (error) {
+        console.error("Verify Error:", error);
+        alert('خطا در تایید کد.');
+      } finally {
+        setIsLoading(false);
+      }
     } else {
       alert('لطفاً کد تایید ۵ رقمی را به طور کامل وارد کنید.');
     }
@@ -30,14 +77,14 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-tr from-slate-100 via-slate-50 to-rose-50/40 flex items-center justify-center relative overflow-hidden px-4 md:px-6 direction-rtl antialiased">
       
-      {/* هاله‌های نوری پاستلی ملایم در پس‌زمینه */}
+      {/* هاله‌های نوری پس‌زمینه */}
       <div className="absolute top-[-5%] right-[-5%] w-[450px] h-[450px] bg-rose-400/[0.15] blur-[130px] rounded-full pointer-events-none"></div>
       <div className="absolute bottom-[-5%] left-[-5%] w-[450px] h-[450px] bg-pink-300/[0.12] blur-[130px] rounded-full pointer-events-none"></div>
 
-      {/* باکس فرم ورود - کاملاً ریسپانسیو و بهینه برای موبایل */}
+      {/* باکس فرم ورود */}
       <div className="w-full max-w-md bg-white/70 backdrop-blur-2xl border border-white/80 p-5 sm:p-6 md:p-8 rounded-3xl shadow-[0_24px_50px_rgba(0,0,0,0.04)] relative z-10 text-right my-auto">
         
-        {/* 🚀 دکمه خروج و بازگشت به صفحه اصلی سایت (ضربدر) */}
+        {/* دکمه خروج و بازگشت */}
         <Link 
           href="/" 
           className="absolute top-4 left-4 md:top-5 md:left-5 text-slate-400 hover:text-slate-800 bg-slate-100/50 hover:bg-slate-200/60 p-1.5 rounded-xl transition-all duration-200 group"
@@ -68,18 +115,21 @@ export default function LoginPage() {
                   type="tel" 
                   maxLength={11}
                   value={phoneNumber}
+                  disabled={isLoading}
                   onChange={(e) => setPhoneNumber(e.target.value.replace(/[^\d]/g, ''))}
                   placeholder="۰۹۱۲۳۴۵۶۷۸۹" 
-                  className="bg-transparent text-xs md:text-sm w-full focus:outline-none text-slate-800 text-left font-sans font-bold placeholder:text-slate-300 tracking-wider"
+                  /* 🚀 فیکس شد: استفاده از text-base در موبایل جلوی زوم خودکار کیبورد گوشی را می‌گیرد */
+                  className="bg-transparent text-base md:text-sm w-full focus:outline-none text-slate-800 text-left font-sans font-bold placeholder:text-slate-300 tracking-wider"
                 />
               </div>
             </div>
 
             <button 
               type="submit"
-              className="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-black text-xs md:text-sm py-3.5 md:py-4 rounded-2xl shadow-md shadow-rose-500/10 transition duration-300 flex items-center justify-center gap-1.5 mt-1 active:scale-98"
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-black text-xs md:text-sm py-3.5 md:py-4 rounded-2xl shadow-md shadow-rose-500/10 transition duration-300 flex items-center justify-center gap-1.5 mt-1 active:scale-98 disabled:opacity-50"
             >
-              <span>ورود با کد تایید</span>
+              <span>{isLoading ? 'در حال ارسال...' : 'ورود با کد تایید'}</span>
             </button>
           </form>
         ) : (
@@ -87,7 +137,7 @@ export default function LoginPage() {
           <form onSubmit={handleLoginSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between px-1">
-                <label className="text-[11px] font-black text-slate-500">ککد تایید فرستاده شده</label>
+                <label className="text-[11px] font-black text-slate-500">کد تایید فرستاده شده</label>
                 <button type="button" onClick={() => setStep(1)} className="text-[10px] font-black text-rose-500 hover:underline flex items-center gap-0.5">
                   <ArrowRight className="w-3 h-3" />
                   <span>ویرایش شماره</span>
@@ -100,9 +150,11 @@ export default function LoginPage() {
                   type="text" 
                   maxLength={5}
                   value={verificationCode}
+                  disabled={isLoading}
                   onChange={(e) => setVerificationCode(e.target.value.replace(/[^\d]/g, ''))}
                   placeholder="کد ۵ رقمی" 
-                  className="bg-transparent text-xs md:text-sm w-full focus:outline-none text-slate-800 text-center font-sans font-black placeholder:text-slate-300 tracking-widest"
+                  /* 🚀 فیکس شد: اینجا هم برای لغو زوم ناخواسته موبایل text-base گذاشته شد */
+                  className="bg-transparent text-base md:text-sm w-full focus:outline-none text-slate-800 text-center font-sans font-black placeholder:text-slate-300 tracking-widest"
                 />
               </div>
               <p className="text-[10px] text-slate-400 mr-1 mt-0.5">کد تایید برای شماره {phoneNumber} پیامک شد.</p>
@@ -110,14 +162,15 @@ export default function LoginPage() {
 
             <button 
               type="submit"
-              className="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-black text-xs md:text-sm py-3.5 md:py-4 rounded-2xl shadow-md shadow-rose-500/10 transition duration-300 flex items-center justify-center gap-1.5 mt-1 active:scale-98"
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-black text-xs md:text-sm py-3.5 md:py-4 rounded-2xl shadow-md shadow-rose-500/10 transition duration-300 flex items-center justify-center gap-1.5 mt-1 active:scale-98 disabled:opacity-50"
             >
-              <span>تایید و ورود به سیب‌شاپ</span>
+              <span>{isLoading ? 'در حال بررسی...' : 'تایید و ورود به سیب‌شاپ'}</span>
             </button>
           </form>
         )}
 
-        {/* پانویس مینیمال امنیتی سایت */}
+        {/* پانویس امنیتی */}
         <div className="mt-6 md:mt-8 pt-4 border-t border-slate-100 flex items-center justify-center gap-1.5 text-[9px] md:text-[10px] text-slate-400 font-bold">
           <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
           <span>ورود امن و حفاظت‌شده به حساب کاربری</span>

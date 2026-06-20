@@ -13,10 +13,10 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsLoadingSaving] = useState(false);
   
-  // استیت دیتای واقعی کاربر متصل به سرور
+  // 🚀 فیکس شد: استیت اولیه کاملاً خنثی و بدون هاردکد نام فرضی
   const [user, setUser] = useState({
     id: "",
-    name: "محسن عزیز",
+    name: "",
     phone: "",
     province: "",
     city: "",
@@ -51,7 +51,8 @@ export default function ProfilePage() {
           
           const loadedUser = {
             id: data.id,
-            name: data.name || "محسن عزیز",
+            // 🚀 فیکس شد: اگر نام در دیتابیس خالی بود، فیلد متنی را خالی می‌گذارد تا مقدار جایگزینِ زیبای ما لود شود
+            name: data.name || "", 
             phone: data.username || "",
             province: data.province || "",
             city: data.city || "",
@@ -62,7 +63,6 @@ export default function ProfilePage() {
           setUser(loadedUser);
           setEditForm(loadedUser);
         } else {
-          // اگر توکن منقضی شده بود، هدایت به لاگین
           localStorage.removeItem('sibshop_token');
           localStorage.removeItem('sibshop_user');
           router.push('/login');
@@ -83,7 +83,6 @@ export default function ProfilePage() {
     setIsLoadingSaving(true);
 
     try {
-      // ارسال درخواست پوت به استراپی برای آپدیت سطر همین کاربر
       const res = await fetch(`https://b.dr-sib.xyz/api/users/${user.id}`, {
         method: 'PUT',
         headers: {
@@ -104,11 +103,11 @@ export default function ProfilePage() {
         
         const finalUserData = {
           ...user,
-          name: updatedData.name,
-          province: updatedData.province,
-          city: updatedData.city,
-          address: updatedData.address,
-          postalCode: updatedData.postalCode
+          name: updatedData.name || "",
+          province: updatedData.province || "",
+          city: updatedData.city || "",
+          address: updatedData.address || "",
+          postalCode: updatedData.postalCode || ""
         };
 
         setUser(finalUserData);
@@ -117,14 +116,13 @@ export default function ProfilePage() {
         const currentLocalUser = localStorage.getItem('sibshop_user');
         if (currentLocalUser) {
           const parsedLocalUser = JSON.parse(currentLocalUser);
-          parsedLocalUser.name = updatedData.name; 
+          parsedLocalUser.name = updatedData.name || ""; 
           localStorage.setItem('sibshop_user', JSON.stringify(parsedLocalUser));
         }
 
         setIsEditing(false);
         alert('تغییرات با موفقیت روی سرور سیب‌شاپ ذخیره شد. ⚡');
         
-        // رفرش سبک برای اعمال یکپارچه تغییرات در کل دکمه‌های هدر
         window.location.reload();
       } else {
         alert('خطا در ذخیره‌سازی اطلاعات روی سرور.');
@@ -137,7 +135,6 @@ export default function ProfilePage() {
     }
   };
 
-  // 🚪 خروج کامل از حساب
   const handleLogout = () => {
     localStorage.removeItem('sibshop_token');
     localStorage.removeItem('sibshop_user');
@@ -166,7 +163,10 @@ export default function ProfilePage() {
                 📱
               </div>
               <div className="truncate">
-                <h3 className="text-sm font-black text-slate-800 truncate">{user.name}</h3>
+                {/* 🚀 فیکس دیزاین: اگر نام خالی بود عبارت شکیل کاربر سیب‌شاپ را رندر کن */}
+                <h3 className="text-sm font-black text-slate-800 truncate">
+                  {user.name ? `${user.name} عزیز` : "کاربر سیب‌شاپ"}
+                </h3>
                 <p className="text-[11px] text-slate-400 font-sans font-bold mt-0.5">{user.phone}</p>
               </div>
             </div>
@@ -272,10 +272,14 @@ export default function ProfilePage() {
                       type="text" 
                       value={editForm.name} 
                       onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                      placeholder="مثال: محسن عبداله زاده"
                       className="bg-slate-50 border border-slate-200 focus:border-rose-500/40 focus:bg-white rounded-xl px-4 py-2.5 text-xs font-black focus:outline-none w-full"
                     />
                   ) : (
-                    <div className="bg-slate-50/80 px-4 py-3 rounded-xl border border-slate-100 text-xs font-black text-slate-700">{user.name || "ثبت نشده"}</div>
+                    /* 🚀 فیکس دیزاین باکس اصلی: این بخش هم اگر خالی بود عبارت تمیز کاربر سیب‌شاپ را رندر می‌کند */
+                    <div className="bg-slate-50/80 px-4 py-3 rounded-xl border border-slate-100 text-xs font-black text-slate-700">
+                      {user.name || "کاربر سیب‌شاپ"}
+                    </div>
                   )}
                 </div>
 

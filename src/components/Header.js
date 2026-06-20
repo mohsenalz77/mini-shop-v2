@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { 
   Search, ShoppingBag, User, ChevronDown, Menu, 
-  Smartphone, Laptop, Headphones, Home, Grid, X, Bell, ArrowRight
+  Smartphone, Laptop, Headphones, Home, Grid, X, Bell, ArrowRight, UserCheck
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -19,6 +19,10 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [recentSearches, setRecentSearches] = useState([]);
   
+  // 🔑 استیت‌های وضعیت لاگین کاربر متصل به سرور استراپی
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData, setUserData] = useState(null);
+
   // 🚀 استیت کمکی برای اعمال انیمیشن ورود نرم
   const [animateModal, setAnimateModal] = useState(false);
 
@@ -37,8 +41,9 @@ export default function Header() {
     }
   }, [isSearchModalOpen]);
 
-  // ۱. افکت لود کردن داده‌ها از مرورگر (localStorage) در اولین اجرای صفحه
+  // ۱. افکت لود کردن داده‌های سرچ و بررسی وضعیت احراز هویت کاربر
   useEffect(() => {
+    // الف) لود تاریخچه سرچ
     const saved = localStorage.getItem('sibshop_recent_searches');
     if (saved) {
       try {
@@ -49,7 +54,23 @@ export default function Header() {
     } else {
       setRecentSearches([]);
     } 
-  }, []);
+
+    // ب) بررسی توکن و دیتای لاگین یوزر استراپی
+    const token = localStorage.getItem('sibshop_token');
+    const savedUser = localStorage.getItem('sibshop_user');
+    if (token && savedUser) {
+      try {
+        setIsLoggedIn(true);
+        setUserData(JSON.parse(savedUser));
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+        setIsLoggedIn(false);
+      }
+    } else {
+      setIsLoggedIn(false);
+      setUserData(null);
+    }
+  }, [pathname]); // با تغییر هر صفحه دوباره بررسی کن تا اگر کاربر لایه خروج را زد، هدر آنی آپدیت شود
 
   // ۲. افکت ذخیره خودکار در مرورگر به محض اضافه شدن کلمه جدید
   useEffect(() => {
@@ -140,10 +161,19 @@ export default function Header() {
           </div>
 
           <div className="flex items-center gap-4 shrink-0 pointer-events-auto">
-            <Link href="/login" className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-slate-900 border border-slate-200 hover:bg-slate-50/80 px-4 py-2.5 rounded-xl transition duration-200">
-              <User className="w-4 h-4 stroke-[2.5]" />
-              <span>ورود | ثبت‌نام</span>
-            </Link>
+            {/* 🚀 فیکس دسکتاپ: تغییر دکمه لاگین به پروفایل هوشمند همراه با اسم شخصی کاربر */}
+            {isLoggedIn ? (
+              <Link href="/profile" className="flex items-center gap-2 text-sm font-black text-rose-600 border border-rose-100 bg-rose-50/60 hover:bg-rose-50 px-4 py-2.5 rounded-xl transition duration-200">
+                <UserCheck className="w-4 h-4 stroke-[2.5]" />
+                <span>{userData?.name || userData?.username || "حساب کاربری"}</span>
+              </Link>
+            ) : (
+              <Link href="/login" className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-slate-900 border border-slate-200 hover:bg-slate-50/80 px-4 py-2.5 rounded-xl transition duration-200">
+                <User className="w-4 h-4 stroke-[2.5]" />
+                <span>ورود | ثبت‌نام</span>
+              </Link>
+            )}
+
             <div className="h-6 w-[1px] bg-slate-200/60"></div>
             <Link href="/cart" className="flex items-center justify-center p-2.5 text-slate-700 hover:bg-slate-50/80 rounded-xl transition duration-200 relative">
               <ShoppingBag className="w-5 h-5 stroke-[2.5]" />
@@ -217,11 +247,19 @@ export default function Header() {
               سیب<span className="text-rose-500">‌شاپ</span>
             </span>
           </Link>
+          
+          {/* 🚀 فیکس موبایل: نمایش خوش‌آمدگویی یا آیکون اعلان بر اساس وضعیت ورود */}
           <div className="flex items-center gap-2">
-            <button className="p-2 text-slate-600 hover:bg-slate-50 rounded-full relative transition">
-              <Bell className="w-5 h-5 stroke-[2.2]" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
-            </button>
+            {isLoggedIn ? (
+              <span className="text-[10px] font-black text-rose-500 bg-rose-50 px-2.5 py-1.5 rounded-full border border-rose-100">
+                {userData?.name || "محسن عزیز"} خوش آمدی 👋
+              </span>
+            ) : (
+              <button className="p-2 text-slate-600 hover:bg-slate-50 rounded-full relative transition">
+                <Bell className="w-5 h-5 stroke-[2.2]" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -238,26 +276,21 @@ export default function Header() {
       <div className="w-full h-[120px] md:h-40 block shrink-0"></div>
 
       {/* ========================================================================= */}
-      {/* ۳. پیاده‌سازی مگامودال سرچ پیشرفته */}
+      {/* ۳. مگامودال سرچ پیشرفته */}
       {/* ========================================================================= */}
       {isSearchModalOpen && (
-        /* 🚀 فیکس شد: اضافه شدن قابلیت کلیک روی بک‌دراپ تاریک دسکتاپ برای بستن مودال */
         <div 
           onClick={() => setIsSearchModalOpen(false)}
           className={`fixed inset-0 bg-white md:bg-slate-900/40 md:backdrop-blur-xs z-[100] flex justify-center md:items-start md:pt-6 direction-rtl antialiased transition-opacity duration-300 ${
             animateModal ? 'opacity-100' : 'opacity-0'
           }`}
         >
-          
-          {/* محفظه اصلی مگامودال */}
-          {/* 🚀 فیکس شد: اعمال ترنزیشن نرم ورود (Scale & Fade) جهت رفع حس خشکی و ممانعت از بسته‌شدن با click propagation */}
           <div 
             onClick={(e) => e.stopPropagation()}
             className={`w-full h-full md:h-auto md:max-w-3xl bg-white md:rounded-3xl md:shadow-2xl flex flex-col overflow-hidden transition-all duration-300 transform ${
               animateModal ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
             }`}
           >
-            
             {/* ردیف بالای فیلد سرچ اصلی */}
             <div className="px-4 py-3 md:px-5 md:py-4 border-b border-slate-100 flex items-center gap-3">
               <button 
@@ -298,8 +331,6 @@ export default function Header() {
 
             {/* بدنه محتوایی لایو سرچ */}
             <div className="p-5 md:p-6 flex-1 overflow-y-auto max-h-[calc(100vh-80px)] md:max-h-[75vh] flex flex-col gap-6 text-right">
-              
-              {/* بخش اول: جستجوهای اخیر */}
               {recentSearches.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -326,7 +357,6 @@ export default function Header() {
                 </div>
               )}
 
-              {/* بخش دوم: جستجوهای پرطرفدار */}
               <div>
                 <span className="text-xs font-black text-slate-800 block mb-3">جستجوهای پرطرفدار</span>
                 <div className="flex flex-wrap gap-2">
@@ -343,7 +373,6 @@ export default function Header() {
                 </div>
               </div>
 
-              {/* بخش سوم: بنر هوشمند تبلیغاتی */}
               <div className="w-full mt-2">
                 <div className="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 rounded-2xl p-4 md:p-5 text-white relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm select-none">
                   <div className="z-10 flex flex-col gap-1">
@@ -366,7 +395,9 @@ export default function Header() {
         </div>
       )}
 
-      {/* ناوبری پایین موبایل */}
+      {/* ========================================================================= */}
+      {/* ۴. ناوبری پایین موبایل (کاملاً داینامیک و هوشمند) */}
+      {/* ========================================================================= */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] z-50 px-4 py-2 rounded-t-2xl">
         <div className="flex items-center justify-around text-slate-400">
           <Link href="/" className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${pathname === '/' && !isMobileMenuOpen ? 'text-rose-500 font-bold scale-102' : 'text-slate-400 font-medium hover:text-slate-700'}`}>
@@ -388,9 +419,16 @@ export default function Header() {
             </div>
             <span className="text-[10px] tracking-tight">سبد خرید</span>
           </Link>
-          <Link href="/login" className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${pathname === '/login' && !isMobileMenuOpen ? 'text-rose-500 font-bold' : 'text-slate-400 font-medium hover:text-slate-700'}`}>
-            <User className="w-5 h-5 stroke-[2.2]" />
-            <span className="text-[10px] tracking-tight">پروفایل</span>
+
+          {/* 🚀 فیکس موبایل: انتقال به /profile در صورت لاگین بودن، در غیر این صورت انتقال به /login */}
+          <Link 
+            href={isLoggedIn ? "/profile" : "/login"} 
+            className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${(pathname === '/login' || pathname === '/profile') && !isMobileMenuOpen ? 'text-rose-500 font-bold' : 'text-slate-400 font-medium hover:text-slate-700'}`}
+          >
+            <User className={`w-5 h-5 ${isLoggedIn ? 'text-rose-500 stroke-[2.5]' : 'stroke-[2.2]'}`} />
+            <span className="text-[10px] tracking-tight">
+              {isLoggedIn ? "پروفایل" : "ورود"}
+            </span>
           </Link>
         </div>
       </nav>

@@ -24,11 +24,16 @@ export default function LoginPage() {
 
         const data = await res.json();
 
-        if (res.ok && data.success) {
-          alert(`${data.message}\nکد دمو (جهت تست): ${data.demoCode}`);
+        if (res.ok) {
+          // فیکسِ الرت برای این مرحله جهت نمایش درست پیام متنی
+          const msg = data.message || 'کد تایید ارسال شد.';
+          alert(`${msg}\nکد دمو (جهت تست): ${data.demoCode}`);
           setStep(2);
         } else {
-          alert(data.error || 'خطایی در ارسال کد رخ داد.');
+          let errorText = 'خطایی در ارسال کد رخ داد.';
+          if (data.error && data.error.message) errorText = data.error.message;
+          else if (data.message) errorText = data.message;
+          alert(errorText);
         }
       } catch (error) {
         console.error("OTP Error:", error);
@@ -41,7 +46,7 @@ export default function LoginPage() {
     }
   };
 
-  // 🚀 مرحله دوم: تایید کد، ذخیره اطلاعات در localStorage و بازگشت به صفحه اصلی
+  // 🚀 مرحله دوم: تایید کد، هندل آبجکت‌های خطا، ذخیره دیتای کاربر و ریدایرکت
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     if (verificationCode.length === 5) {
@@ -55,17 +60,25 @@ export default function LoginPage() {
 
         const data = await res.json();
 
-        if (res.ok && data.success) {
-          // 🔑 ذخیره توکن JWT و اطلاعات کاربر در حافظه مرورگر
+        if (res.ok) {
+          // 🚀 فیکس شد: تبدیل هر نوع ریسپانس ساختاریافته به متن ساده برای الرت بدون لود [object Object]
+          const successMessage = data.message && typeof data.message === 'string' ? data.message : 'ورود با موفقیت انجام شد!';
+          alert(successMessage);
+          
+          // 🔑 ذخیره توکن JWT و اطلاعات کاربر در حافظه مرورگر برای استفاده در هدر و پروفایل
           localStorage.setItem('sibshop_token', data.token);
           localStorage.setItem('sibshop_user', JSON.stringify(data.user));
-
-          alert('خوش آمدید! در حال انتقال به صفحه اصلی...');
           
-          // 🚀 بازگشت اتوماتیک به صفحه اصلی سایت
+          // 🚀 بازگشت اتوماتیک و آنی به صفحه اصلی سایت
           window.location.href = '/';
         } else {
-          alert(data.error || 'کد وارد شده اشتباه است.');
+          // 🚀 فیکس شد: کالبدشکافی عمیق ارورهای استراپی برای استخراج متن واقعی خطا
+          let errorMessage = 'کد وارد شده اشتباه است.';
+          if (data.error && typeof data.error === 'string') errorMessage = data.error;
+          else if (data.error && data.error.message) errorMessage = data.error.message;
+          else if (data.message && typeof data.message === 'string') errorMessage = data.message;
+          
+          alert(errorMessage);
         }
       } catch (error) {
         console.error("Verify Error:", error);

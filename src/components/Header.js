@@ -35,8 +35,9 @@ export default function Header() {
         console.error("خطا در لود تاریخچه:", e);
       }
     } else {
-      setRecentSearches(['آیفون ۱۳', 'شارژر سامسونگ', 'قاب ایفون', 'پاوربانک']);
-    } // 🚀 فیکس شد: کروشه و آکاردئون این بخش به درستی بسته شد
+      // 🚀 فیکس شد: مقدار پیش‌فرض کاملاً خالی شد تا سرچ‌های نامربوط نشان داده نشوند
+      setRecentSearches([]);
+    } 
   }, []);
 
   // ۲. افکت ذخیره خودکار در مرورگر به محض اضافه شدن کلمه جدید
@@ -226,7 +227,7 @@ export default function Header() {
       <div className="w-full h-[120px] md:h-40 block shrink-0"></div>
 
       {/* ========================================================================= */}
-      {/* ۳. پیاده‌سازی مگامودال سرچ پیشرفته (دسکتاپ و موبایل کاملاً مطابق تصاویر) */}
+      {/* ۳. پیاده‌سازی مگامودال سرچ پیشرفته */}
       {/* ========================================================================= */}
       {isSearchModalOpen && (
         <div className="fixed inset-0 bg-white md:bg-slate-900/40 md:backdrop-blur-xs z-[100] flex justify-center md:items-start md:pt-6 direction-rtl antialiased">
@@ -236,7 +237,6 @@ export default function Header() {
             
             {/* ردیف بالای فیلد سرچ اصلی */}
             <div className="px-4 py-3 md:px-5 md:py-4 border-b border-slate-100 flex items-center gap-3">
-              {/* دکمه بازگشت در نسخه موبایل */}
               <button 
                 onClick={() => setIsSearchModalOpen(false)} 
                 className="md:hidden p-1.5 text-slate-700 hover:bg-slate-100 rounded-full transition shrink-0"
@@ -265,7 +265,6 @@ export default function Header() {
                 )}
               </div>
 
-              {/* دکمه بستن در دسکتاپ */}
               <button 
                 onClick={() => setIsSearchModalOpen(false)}
                 className="hidden md:flex p-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-500 rounded-xl transition"
@@ -278,20 +277,18 @@ export default function Header() {
             <div className="p-5 md:p-6 flex-1 overflow-y-auto max-h-[calc(100vh-80px)] md:max-h-[75vh] flex flex-col gap-6 text-right">
               
               {/* بخش اول: جستجوهای اخیر */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-black text-slate-800">جستجوهای اخیر</span>
-                  {recentSearches.length > 0 && (
+              {recentSearches.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-black text-slate-800">جستجوهای اخیر</span>
                     <button 
                       onClick={clearRecentSearches}
                       className="text-[10px] font-bold text-slate-400 hover:text-rose-500 transition px-2 py-1 rounded-md"
                     >
                       پاک کردن
                     </button>
-                  )}
-                </div>
+                  </div>
 
-                {recentSearches.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {recentSearches.map((search, idx) => (
                       <button
@@ -303,10 +300,8 @@ export default function Header() {
                       </button>
                     ))}
                   </div>
-                ) : (
-                  <p className="text-[11px] text-slate-400 font-medium">هیچ تاریخچه جستجویی وجود ندارد.</p>
-                )}
-              </div>
+                </div>
+              )}
 
               {/* بخش دوم: جستجوهای پرطرفدار */}
               <div>
@@ -363,7 +358,10 @@ export default function Header() {
             <div className="w-6 h-6 flex items-center justify-center relative">
               <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
               {cartCount > 0 && (
-                <span className="absolute -top-1.5 -left-1.5 bg-rose-500 text-white text-[9px] font-sans font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white shadow-xs leading-none">{cartCount}</span>
+                /* 🚀 فیکس شد: تغییر ابعاد از 4.5 به 5 و درشت‌تر شدن سایز فانت کانتینر سبد خرید موبایل جهت خوانایی کامل */
+                <span className="absolute -top-1.5 -left-1.5 bg-rose-500 text-white text-[11px] font-sans font-black w-5 h-5 rounded-full flex items-center justify-center border border-white shadow-xs leading-none">
+                  {cartCount}
+                </span>
               )}
             </div>
             <span className="text-[10px] tracking-tight">سبد خرید</span>

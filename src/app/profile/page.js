@@ -64,6 +64,7 @@ export default function ProfilePage() {
         } else {
           // اگر توکن منقضی شده بود، هدایت به لاگین
           localStorage.removeItem('sibshop_token');
+          localStorage.removeItem('sibshop_user');
           router.push('/login');
         }
       } catch (error) {
@@ -76,7 +77,7 @@ export default function ProfilePage() {
     fetchUserProfile();
   }, [router]);
 
-  // 🚀 ذخیره دیتای جدید روی هارد دیتابیس سرور استراپی
+  // 🚀 ذخیره دیتای جدید روی هارد دیتابیس سرور استراپی و به‌روزرسانی لوکال‌استوریج هدر
   const handleSave = async () => {
     const token = localStorage.getItem('sibshop_token');
     setIsLoadingSaving(true);
@@ -101,17 +102,30 @@ export default function ProfilePage() {
       if (res.ok) {
         const updatedData = await res.json();
         
-        setUser({
+        const finalUserData = {
           ...user,
           name: updatedData.name,
           province: updatedData.province,
           city: updatedData.city,
           address: updatedData.address,
           postalCode: updatedData.postalCode
-        });
+        };
+
+        setUser(finalUserData);
+
+        // 🔑 به‌روزرسانی اطلاعات کاربر در مرورگر تا هدر فوراً اسم جدید را لود کند
+        const currentLocalUser = localStorage.getItem('sibshop_user');
+        if (currentLocalUser) {
+          const parsedLocalUser = JSON.parse(currentLocalUser);
+          parsedLocalUser.name = updatedData.name; 
+          localStorage.setItem('sibshop_user', JSON.stringify(parsedLocalUser));
+        }
 
         setIsEditing(false);
         alert('تغییرات با موفقیت روی سرور سیب‌شاپ ذخیره شد. ⚡');
+        
+        // رفرش سبک برای اعمال یکپارچه تغییرات در کل دکمه‌های هدر
+        window.location.reload();
       } else {
         alert('خطا در ذخیره‌سازی اطلاعات روی سرور.');
       }

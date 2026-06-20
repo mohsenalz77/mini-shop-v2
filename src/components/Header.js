@@ -18,12 +18,24 @@ export default function Header() {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [recentSearches, setRecentSearches] = useState([]);
+  
+  // 🚀 استیت کمکی برای اعمال انیمیشن ورود نرم
+  const [animateModal, setAnimateModal] = useState(false);
 
   const popularSearches = ['s26 ultra', 'ps5', 'گوشی موبایل', 'a36'];
 
   const pathname = usePathname();
   const router = useRouter();
   const { cartCount } = useCart();
+
+  // کنترل افکت انیمیشن مودال هنگام باز و بسته شدن
+  useEffect(() => {
+    if (isSearchModalOpen) {
+      setTimeout(() => setAnimateModal(true), 10);
+    } else {
+      setAnimateModal(false);
+    }
+  }, [isSearchModalOpen]);
 
   // ۱. افکت لود کردن داده‌ها از مرورگر (localStorage) در اولین اجرای صفحه
   useEffect(() => {
@@ -35,7 +47,6 @@ export default function Header() {
         console.error("خطا در لود تاریخچه:", e);
       }
     } else {
-      // 🚀 فیکس شد: مقدار پیش‌فرض کاملاً خالی شد تا سرچ‌های نامربوط نشان داده نشوند
       setRecentSearches([]);
     } 
   }, []);
@@ -230,10 +241,22 @@ export default function Header() {
       {/* ۳. پیاده‌سازی مگامودال سرچ پیشرفته */}
       {/* ========================================================================= */}
       {isSearchModalOpen && (
-        <div className="fixed inset-0 bg-white md:bg-slate-900/40 md:backdrop-blur-xs z-[100] flex justify-center md:items-start md:pt-6 direction-rtl antialiased">
+        /* 🚀 فیکس شد: اضافه شدن قابلیت کلیک روی بک‌دراپ تاریک دسکتاپ برای بستن مودال */
+        <div 
+          onClick={() => setIsSearchModalOpen(false)}
+          className={`fixed inset-0 bg-white md:bg-slate-900/40 md:backdrop-blur-xs z-[100] flex justify-center md:items-start md:pt-6 direction-rtl antialiased transition-opacity duration-300 ${
+            animateModal ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
           
           {/* محفظه اصلی مگامودال */}
-          <div className="w-full h-full md:h-auto md:max-w-3xl bg-white md:rounded-3xl md:shadow-2xl flex flex-col overflow-hidden">
+          {/* 🚀 فیکس شد: اعمال ترنزیشن نرم ورود (Scale & Fade) جهت رفع حس خشکی و ممانعت از بسته‌شدن با click propagation */}
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className={`w-full h-full md:h-auto md:max-w-3xl bg-white md:rounded-3xl md:shadow-2xl flex flex-col overflow-hidden transition-all duration-300 transform ${
+              animateModal ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+            }`}
+          >
             
             {/* ردیف بالای فیلد سرچ اصلی */}
             <div className="px-4 py-3 md:px-5 md:py-4 border-b border-slate-100 flex items-center gap-3">
@@ -358,7 +381,6 @@ export default function Header() {
             <div className="w-6 h-6 flex items-center justify-center relative">
               <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
               {cartCount > 0 && (
-                /* 🚀 فیکس شد: تغییر ابعاد از 4.5 به 5 و درشت‌تر شدن سایز فانت کانتینر سبد خرید موبایل جهت خوانایی کامل */
                 <span className="absolute -top-1.5 -left-1.5 bg-rose-500 text-white text-[11px] font-sans font-black w-5 h-5 rounded-full flex items-center justify-center border border-white shadow-xs leading-none">
                   {cartCount}
                 </span>

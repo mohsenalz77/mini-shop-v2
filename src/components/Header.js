@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { 
   Search, ShoppingBag, User, ChevronDown, Menu, 
-  Smartphone, Laptop, Headphones, Home, Grid, X, Bell, Trash2, ArrowRight
+  Smartphone, Laptop, Headphones, Home, Grid, X, Bell, ArrowRight
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -14,12 +14,10 @@ export default function Header() {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // 🔍 استیت‌های پیشرفته بخش مگامودال سرچ زنده
+  // 🔍 استیت‌های مگامودال سرچ زنده
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [recentSearches, setRecentSearches] = useState([
-    'خارپاشنه', 'گلدان سفالی', 'هیدروپونیک', 'گلدان مدل هیدروپونیک', 'گلدان دو جداره'
-  ]);
+  const [recentSearches, setRecentSearches] = useState([]);
 
   const popularSearches = ['s26 ultra', 'ps5', 'گوشی موبایل', 'a36', 'توپ فوتبال'];
 
@@ -27,7 +25,29 @@ export default function Header() {
   const router = useRouter();
   const { cartCount } = useCart();
 
-  // کنترل اسکرول هدر
+  // ۱. افکت لود کردن داده‌ها از مرورگر (localStorage) در اولین اجرای صفحه
+  useEffect(() => {
+    const saved = localStorage.getItem('sibshop_recent_searches');
+    if (saved) {
+      try {
+        setRecentSearches(JSON.parse(saved));
+      } catch (e) {
+        console.error("خطا در لود تاریخچه:", e);
+      }
+    } else {
+      // اگر بار اول بود و دیتایی نبود، این مقادیر پیش‌فرض را نشان بده
+      setRecentSearches(['خارپاشنه', 'گلدان سفالی', 'هیدروپونیک']);
+    }
+  }, []);
+
+  // ۲. افکت ذخیره خودکار در مرورگر به محض اضافه شدن کلمه جدید
+  useEffect(() => {
+    if (recentSearches.length > 0) {
+      localStorage.setItem('sibshop_recent_searches', JSON.stringify(recentSearches));
+    }
+  }, [recentSearches]);
+
+  // کنترل اسکرول هدر برای پنهان/آشکار شدن نوار بالا
   useEffect(() => {
     const controlNavbar = () => {
       if (typeof window !== 'undefined') {
@@ -50,15 +70,17 @@ export default function Header() {
     setIsSearchModalOpen(false);
   }, [pathname]);
 
-  // اکشن اجرای سرچ و ثبت در تاریخچه
+  // 🚀 اکشن اجرای سرچ، فرمت متن، ثبت در تاریخچه بدون تایید تکراری و ریدایرکت
   const executeSearch = (queryText) => {
     const trimmed = queryText.trim();
     if (!trimmed) return;
 
-    // اضافه کردن به تاریخچه اخیر (بدون تکرار)
-    if (!recentSearches.includes(trimmed)) {
-      setRecentSearches(prev => [trimmed, ...prev.slice(0, 5)]);
-    }
+    setSearchQuery(trimmed); 
+
+    setRecentSearches(prev => {
+      const filtered = prev.filter(item => item !== trimmed);
+      return [trimmed, ...filtered].slice(0, 5);
+    });
 
     setIsSearchModalOpen(false);
     router.push(`/products?search=${encodeURIComponent(trimmed)}`);
@@ -72,6 +94,7 @@ export default function Header() {
 
   const clearRecentSearches = () => {
     setRecentSearches([]);
+    localStorage.removeItem('sibshop_recent_searches');
   };
 
   return (
@@ -204,7 +227,7 @@ export default function Header() {
       <div className="w-full h-[120px] md:h-40 block shrink-0"></div>
 
       {/* ========================================================================= */}
-      {/* 🚀 پیاده‌سازی مگامودال سرچ پیشرفته (دسکتاپ و موبایل کاملاً مطابق تصاویر) */}
+      {/* ۳. پیاده‌سازی مگامودال سرچ پیشرفته (دسکتاپ و موبایل کاملاً مطابق تصاویر) */}
       {/* ========================================================================= */}
       {isSearchModalOpen && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-[100] flex justify-center md:items-start md:pt-6 direction-rtl antialiased">
@@ -303,7 +326,7 @@ export default function Header() {
                 </div>
               </div>
 
-              {/* بخش سوم: بنر هوشمند تبلیغاتی (مخصوص دسکتاپ عینا مشابه اسکرین‌شات اول شما) */}
+              {/* بخش سوم: بنر هوشمند تبلیغاتی */}
               <div className="hidden md:block w-full mt-2">
                 <div className="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 rounded-2xl p-5 text-white relative overflow-hidden flex items-center justify-between shadow-sm select-none">
                   <div className="z-10 flex flex-col gap-1.5">
@@ -326,7 +349,9 @@ export default function Header() {
         </div>
       )}
 
-      {/* ناوبری پایین موبایل */}
+      {/* ========================================================================= */}
+      {/* ۴. ناوبری پایین موبایل */}
+      {/* ========================================================================= */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] z-50 px-4 py-2 rounded-t-2xl">
         <div className="flex items-center justify-around text-slate-400">
           <Link href="/" className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${pathname === '/' && !isMobileMenuOpen ? 'text-rose-500 font-bold scale-102' : 'text-slate-400 font-medium hover:text-slate-700'}`}>

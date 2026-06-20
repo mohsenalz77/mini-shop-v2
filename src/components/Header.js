@@ -161,11 +161,11 @@ export default function Header() {
           </div>
 
           <div className="flex items-center gap-4 shrink-0 pointer-events-auto">
-            {/* 🚀 فیکس دسکتاپ: تغییر دکمه لاگین به پروفایل هوشمند همراه با اسم شخصی کاربر */}
+            {/* 🚀 فیکس دسکتاپ: اگر کاربر اسم نداشت، به صورت هوشمند عبارت «کاربر سیب‌شاپ» نمایش داده می‌شود */}
             {isLoggedIn ? (
               <Link href="/profile" className="flex items-center gap-2 text-sm font-black text-rose-600 border border-rose-100 bg-rose-50/60 hover:bg-rose-50 px-4 py-2.5 rounded-xl transition duration-200">
                 <UserCheck className="w-4 h-4 stroke-[2.5]" />
-                <span>{userData?.name || userData?.username || "حساب کاربری"}</span>
+                <span>{userData?.name ? `${userData.name} عزیز` : "کاربر سیب‌شاپ"}</span>
               </Link>
             ) : (
               <Link href="/login" className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-slate-900 border border-slate-200 hover:bg-slate-50/80 px-4 py-2.5 rounded-xl transition duration-200">
@@ -248,11 +248,11 @@ export default function Header() {
             </span>
           </Link>
           
-          {/* 🚀 فیکس موبایل: نمایش خوش‌آمدگویی یا آیکون اعلان بر اساس وضعیت ورود */}
+          {/* 🚀 فیکس موبایل: حذف کلمه هاردکد شده محسن عزیز؛ استفاده از عبارت محترمانه کاربر سیب‌شاپ برای کاربران جدید */}
           <div className="flex items-center gap-2">
             {isLoggedIn ? (
               <span className="text-[10px] font-black text-rose-500 bg-rose-50 px-2.5 py-1.5 rounded-full border border-rose-100">
-                {userData?.name || "محسن عزیز"} خوش آمدی 👋
+                {userData?.name ? `${userData.name} عزیز` : "کاربر سیب‌شاپ"} خوش آمدی 👋
               </span>
             ) : (
               <button className="p-2 text-slate-600 hover:bg-slate-50 rounded-full relative transition">
@@ -396,7 +396,7 @@ export default function Header() {
       )}
 
       {/* ========================================================================= */}
-      {/* ۴. ناوبری پایین موبایل (کاملاً داینامیک و هوشمند) */}
+      {/* ۴. ناوبری پایین موبایل */}
       {/* ========================================================================= */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] z-50 px-4 py-2 rounded-t-2xl">
         <div className="flex items-center justify-around text-slate-400">
@@ -420,7 +420,6 @@ export default function Header() {
             <span className="text-[10px] tracking-tight">سبد خرید</span>
           </Link>
 
-          {/* 🚀 فیکس موبایل: انتقال به /profile در صورت لاگین بودن، در غیر این صورت انتقال به /login */}
           <Link 
             href={isLoggedIn ? "/profile" : "/login"} 
             className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${(pathname === '/login' || pathname === '/profile') && !isMobileMenuOpen ? 'text-rose-500 font-bold' : 'text-slate-400 font-medium hover:text-slate-700'}`}

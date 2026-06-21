@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import Link from 'next/navigation'; // فیکس ریدایرکت با ناوبری نکست
+import Link from 'next/link'; // 🚀 فیکس شد: ایمپورت صحیح از next/link برای جلوگیری از ارور بیلد
 import { Smartphone, ShieldCheck, MessageSquareCode, ArrowRight, X } from 'lucide-react';
 
 export default function LoginPage() {
@@ -26,7 +26,7 @@ export default function LoginPage() {
 
         if (res.ok) {
           const msg = data.message || 'کد تایید ارسال شد.';
-          alert(`${msg}\nکد دمو (جهت تست): ${data.demoCode}`);
+          alert(`${msg}\nکد دمو (جهت ثبت تست): ${data.demoCode}`);
           setStep(2);
         } else {
           let errorText = 'خطایی در ارسال کد رخ داد.';

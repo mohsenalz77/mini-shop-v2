@@ -70,7 +70,7 @@ export default function Header() {
       setIsLoggedIn(false);
       setUserData(null);
     }
-  }, [pathname]); // با تغییر هر صفحه دوباره بررسی کن تا اگر کاربر لایه خروج را زد، هدر آنی آپدیت شود
+  }, [pathname]);
 
   // ۲. افکت ذخیره خودکار در مرورگر به محض اضافه شدن کلمه جدید
   useEffect(() => {
@@ -161,7 +161,7 @@ export default function Header() {
           </div>
 
           <div className="flex items-center gap-4 shrink-0 pointer-events-auto">
-            {/* 🚀 فیکس دسکتاپ: اگر کاربر اسم نداشت، به صورت هوشمند عبارت «کاربر سیب‌شاپ» نمایش داده می‌شود */}
+            {/* 🚀 فیکس دسکتاپ: لود کاملاً هوشمند بدون کلمه ثابت محسن */}
             {isLoggedIn ? (
               <Link href="/profile" className="flex items-center gap-2 text-sm font-black text-rose-600 border border-rose-100 bg-rose-50/60 hover:bg-rose-50 px-4 py-2.5 rounded-xl transition duration-200">
                 <UserCheck className="w-4 h-4 stroke-[2.5]" />
@@ -248,7 +248,7 @@ export default function Header() {
             </span>
           </Link>
           
-          {/* 🚀 فیکس موبایل: حذف کلمه هاردکد شده محسن عزیز؛ استفاده از عبارت محترمانه کاربر سیب‌شاپ برای کاربران جدید */}
+          {/* 🚀 فیکس نهایی موبایل: کلمه ثابت محسن کاملاً حذف شد و مقدار داینامیک یا عبارت کاربر سیب‌شاپ رندر می‌شود */}
           <div className="flex items-center gap-2">
             {isLoggedIn ? (
               <span className="text-[10px] font-black text-rose-500 bg-rose-50 px-2.5 py-1.5 rounded-full border border-rose-100">

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import Link from 'next/link';
+import Link from 'next/navigation'; // فیکس ریدایرکت با ناوبری نکست
 import { Smartphone, ShieldCheck, MessageSquareCode, ArrowRight, X } from 'lucide-react';
 
 export default function LoginPage() {
@@ -25,7 +25,6 @@ export default function LoginPage() {
         const data = await res.json();
 
         if (res.ok) {
-          // فیکسِ الرت برای این مرحله جهت نمایش درست پیام متنی
           const msg = data.message || 'کد تایید ارسال شد.';
           alert(`${msg}\nکد دمو (جهت تست): ${data.demoCode}`);
           setStep(2);
@@ -61,18 +60,27 @@ export default function LoginPage() {
         const data = await res.json();
 
         if (res.ok) {
-          // 🚀 فیکس شد: تبدیل هر نوع ریسپانس ساختاریافته به متن ساده برای الرت بدون لود [object Object]
           const successMessage = data.message && typeof data.message === 'string' ? data.message : 'ورود با موفقیت انجام شد!';
           alert(successMessage);
           
-          // 🔑 ذخیره توکن JWT و اطلاعات کاربر در حافظه مرورگر برای استفاده در هدر و پروفایل
+          // 🔑 فیکس اصلی باگ: پاک کردن کامل اطلاعات کوکی و کش قدیمی مرورگر قبل از ذخیره اطلاعات جدید
+          localStorage.removeItem('sibshop_token');
+          localStorage.removeItem('sibshop_user');
+          
+          // آماده‌سازی دیتای تمیز برای کاربر جدید بدون هاردکد کردن هیچ اسمی
+          const userObject = {
+            id: data.user?.id || "",
+            username: data.user?.username || phoneNumber,
+            name: data.user?.name || "" // اگر نام در سرور تهی بود، دقیقاً تهی ذخیره می‌شود تا هدر بنویسد کاربر سیب‌شاپ
+          };
+
+          // ذخیره توکن زنده و دیتای فیکس شده در مرورگر برای هدر و پروفایل
           localStorage.setItem('sibshop_token', data.token);
-          localStorage.setItem('sibshop_user', JSON.stringify(data.user));
+          localStorage.setItem('sibshop_user', JSON.stringify(userObject));
           
           // 🚀 بازگشت اتوماتیک و آنی به صفحه اصلی سایت
           window.location.href = '/';
         } else {
-          // 🚀 فیکس شد: کالبدشکافی عمیق ارورهای استراپی برای استخراج متن واقعی خطا
           let errorMessage = 'کد وارد شده اشتباه است.';
           if (data.error && typeof data.error === 'string') errorMessage = data.error;
           else if (data.error && data.error.message) errorMessage = data.error.message;

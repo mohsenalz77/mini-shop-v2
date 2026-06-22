@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { 
   Search, ShoppingBag, User, ChevronDown, Menu, 
-  Smartphone, Laptop, Headphones, Home, Grid, X, Bell, ArrowRight, UserCheck
+  Smartphone, Laptop, Headphones, Home, Grid, X, Bell, ArrowRight
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -129,8 +129,16 @@ export default function Header() {
     localStorage.removeItem('sibshop_recent_searches');
   };
 
-  // متغیر کمکی برای تشخیص فعال بودن بخش پروفایل/لاگین
   const isProfileActive = (pathname === '/login' || pathname === '/profile') && !isMobileMenuOpen;
+
+  // 💡 تابع هوشمند برای رندر تمیز نام کاربر مطابق استانداردهای دیجی‌کالا
+  const getUserDisplayName = () => {
+    if (!userData) return "ورود | ثبت‌نام";
+    if (userData.name && userData.name.trim() !== "") {
+      return userData.name;
+    }
+    return "حساب کاربری";
+  };
 
   return (
     <>
@@ -163,23 +171,21 @@ export default function Header() {
             />
           </div>
 
-          <div className="flex items-center gap-4 shrink-0 pointer-events-auto">
-            {/* 🚀 فیکس دسکتاپ: اصلاح تکرار کلمه عزیز */}
-            {isLoggedIn ? (
-              <Link href="/profile" className="flex items-center gap-2 text-sm font-black text-rose-600 border border-rose-100 bg-rose-50/60 hover:bg-rose-50 px-4 py-2.5 rounded-xl transition duration-200">
-                <UserCheck className="w-4 h-4 stroke-[2.5]" />
-                <span>{userData?.name ? `${userData.name} عزیز` : "کاربر سیب‌شاپ"}</span>
-              </Link>
-            ) : (
-              <Link href="/login" className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-slate-900 border border-slate-200 hover:bg-slate-50/80 px-4 py-2.5 rounded-xl transition duration-200">
-                <User className="w-4 h-4 stroke-[2.5]" />
-                <span>ورود | ثبت‌نام</span>
-              </Link>
-            )}
+          {/* 🌟 بخش پروفایل دسکتاپ: کاملاً بازطراحی شده و مینیمال مشابه دیجی‌کالا */}
+          <div className="flex items-center gap-6 shrink-0 pointer-events-auto">
+            <Link 
+              href={isLoggedIn ? "/profile" : "/login"} 
+              className={`flex items-center gap-1.5 text-sm font-bold text-slate-700 hover:text-rose-500 border border-slate-200 rounded-xl px-3.5 py-2 transition duration-200 ${isLoggedIn ? 'bg-slate-50/50' : 'bg-white'}`}
+            >
+              <User className="w-4 h-4 stroke-[2.2]" />
+              <span className="max-w-[120px] truncate">{getUserDisplayName()}</span>
+              {isLoggedIn && <ChevronDown className="w-3.5 h-3.5 text-slate-400" />}
+            </Link>
 
-            <div className="h-6 w-[1px] bg-slate-200/60"></div>
-            <Link href="/cart" className="flex items-center justify-center p-2.5 text-slate-700 hover:bg-slate-50/80 rounded-xl transition duration-200 relative">
-              <ShoppingBag className="w-5 h-5 stroke-[2.5]" />
+            <div className="h-6 w-[1px] bg-slate-200"></div>
+            
+            <Link href="/cart" className="flex items-center justify-center p-2 text-slate-700 hover:text-rose-500 rounded-xl transition duration-200 relative">
+              <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
               {cartCount > 0 && (
                 <span className="absolute -top-0.5 -left-0.5 bg-rose-500 text-white text-[10px] font-sans font-black w-5 h-5 rounded-full flex items-center justify-center shadow-xs animate-fade-in">
                   {cartCount.toLocaleString('fa-IR')}
@@ -243,7 +249,8 @@ export default function Header() {
       {/* ========================================================================= */}
       {/* ۲. هدر نسخه موبایل */}
       {/* ========================================================================= */}
-      <header className="md:hidden w-full fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-100 flex flex-col pt-2 pb-3 px-4 gap-2.5 shadow-xs">
+      {/* 🌟 اصلاح هدر موبایل: دکمه‌های آیکونیک، بسیار خلوت، سبک و شیک درست مثل برنامه دیجی‌کالا */}
+      <header className="md:hidden w-full fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-100 flex flex-col pt-3 pb-3 px-4 gap-3 shadow-xs">
         <div className="w-full flex items-center justify-between">
           <Link href="/" className="flex items-center">
             <span className="text-xl font-black text-slate-800 tracking-tight">
@@ -251,32 +258,32 @@ export default function Header() {
             </span>
           </Link>
           
-          {/* 🚀 فیکس موبایل: اصلاح تکرار کلمه عزیز */}
-          <div className="flex items-center gap-2">
-            {isLoggedIn ? (
-              <span className="text-[10px] font-black text-rose-500 bg-rose-50 px-2.5 py-1.5 rounded-full border border-rose-100">
-                {userData?.name ? `${userData.name} عزیز` : "کاربر سیب‌شاپ"} خوش آمدی 👋
-              </span>
-            ) : (
-              <button className="p-2 text-slate-600 hover:bg-slate-50 rounded-full relative transition">
-                <Bell className="w-5 h-5 stroke-[2.2]" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
-              </button>
-            )}
+          <div className="flex items-center gap-3">
+            <Link 
+              href={isLoggedIn ? "/profile" : "/login"} 
+              className={`p-2 rounded-full transition ${isProfileActive ? 'text-rose-500 bg-rose-50' : 'text-slate-600 hover:bg-slate-50'}`}
+            >
+              <User className="w-5 h-5 stroke-[2.2]" />
+            </Link>
+            
+            <button className="p-2 text-slate-600 hover:bg-slate-50 rounded-full relative transition">
+              <Bell className="w-5 h-5 stroke-[2.2]" />
+              <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-rose-500 rounded-full"></span>
+            </button>
           </div>
         </div>
 
         {/* باکس شبیه‌ساز سرچ در موبایل */}
         <div 
           onClick={() => setIsSearchModalOpen(true)}
-          className="w-full relative flex items-center bg-slate-100 text-slate-400 text-sm font-medium pr-11 pl-4 py-3 rounded-xl cursor-pointer select-none"
+          className="w-full relative flex items-center bg-slate-100 text-slate-400 text-xs font-semibold pr-11 pl-4 py-2.5 rounded-xl cursor-pointer select-none"
         >
-          <Search className="absolute right-4 w-5 h-5 text-slate-400" />
+          <Search className="absolute right-4 w-4 h-4 text-slate-400" />
           <span>جستجو در کالاها...</span>
         </div>
       </header>
 
-      <div className="w-full h-[120px] md:h-40 block shrink-0"></div>
+      <div className="w-full h-[125px] md:h-40 block shrink-0"></div>
 
       {/* ========================================================================= */}
       {/* ۳. مگامودال سرچ پیشرفته */}
@@ -423,7 +430,6 @@ export default function Header() {
             <span className="text-[10px] tracking-tight">سبد خرید</span>
           </Link>
 
-          {/* 🚀 فیکس بزرگ: رفع باگ آیکون فعال پروفایل در صفحه خانه */}
           <Link 
             href={isLoggedIn ? "/profile" : "/login"} 
             className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${isProfileActive ? 'text-rose-500 font-bold' : 'text-slate-400 font-medium hover:text-slate-700'}`}

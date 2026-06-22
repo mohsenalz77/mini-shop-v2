@@ -16,19 +16,23 @@ const menuCategories = [
     id: "phones",
     title: "تلفن هوشمند",
     icon: Smartphone,
-    items: ["آیفون (Apple)", "سامسونگ (Samsung)", "شیائومی (Xiaomi)"]
+    slug: "smartphones", // 👈 آدرس اصلی این دسته
+    subCategories: [
+      { name: "آیفون (Apple)", slug: "apple" },
+      { name: "سامسونگ (Samsung)", slug: "samsung" },
+      { name: "شیائومی (Xiaomi)", slug: "xiaomi" }
+    ]
   },
   {
     id: "accessories",
     title: "لوازم جانبی",
     icon: Laptop,
-    items: ["قاب و کاور گوشی", "کابل و شارژر دیواری", "پاوربانک اکسترنال"]
-  },
-  {
-    id: "audio",
-    title: "صوتی و پوشیدنی",
-    icon: Headphones,
-    items: ["ایرپاد و هندزفری", "ساعت هوشمند"]
+    slug: "accessories",
+    subCategories: [
+      { name: "قاب و کاور گوشی", slug: "cases" },
+      { name: "کابل و شارژر", slug: "cables-chargers" },
+      { name: "پاوربانک", slug: "powerbanks" }
+    ]
   }
 ];
 

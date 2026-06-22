@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   Search, ShoppingBag, User, ChevronDown, Menu, 
-  Smartphone, Laptop, Headphones, Home, Grid, X, Bell, ArrowRight
+  Smartphone, Laptop, Headphones, Home, Grid, X, Bell, ArrowRight,
+  UserCheck, LogOut, Package
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -22,6 +23,10 @@ export default function Header() {
   // 🔑 استیت‌های وضعیت لاگین کاربر متصل به سرور استراپی
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState(null);
+
+  // 🔽 استیت کنترل بازشدن منوی درپ‌داون پروفایل دسکتاپ
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   // 🚀 استیت کمکی برای اعمال انیمیشن ورود نرم
   const [animateModal, setAnimateModal] = useState(false);
@@ -79,12 +84,24 @@ export default function Header() {
     }
   }, [recentSearches]);
 
+  // ۳. بسته‌شدن منو با کلیک روی هرجای دیگر صفحه خارج از دکمه پروفایل
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   // کنترل اسکرول هدر برای پنهان/آشکار شدن نوار بالا
   useEffect(() => {
     const controlNavbar = () => {
       if (typeof window !== 'undefined') {
         if (window.scrollY > lastScrollY && window.scrollY > 30) {
           setIsMenuVisible(false);
+          setIsProfileDropdownOpen(false); // منو هنگام اسکرول بسته شود
         } else if (window.scrollY < lastScrollY) {
           setIsMenuVisible(true);
         }
@@ -100,6 +117,7 @@ export default function Header() {
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setIsSearchModalOpen(false);
+    setIsProfileDropdownOpen(false);
   }, [pathname]);
 
   // 🚀 اکشن اجرای سرچ، فرمت متن، ثبت در تاریخچه بدون تایید تکراری و ریدایرکت
@@ -129,9 +147,19 @@ export default function Header() {
     localStorage.removeItem('sibshop_recent_searches');
   };
 
+  // 🚪 اکشن خروج مستقیم از اکانت مشابه دیجی‌کالا
+  const handleLogout = () => {
+    localStorage.removeItem('sibshop_token');
+    localStorage.removeItem('sibshop_user');
+    setIsLoggedIn(false);
+    setUserData(null);
+    setIsProfileDropdownOpen(false);
+    router.push('/');
+  };
+
   const isProfileActive = (pathname === '/login' || pathname === '/profile') && !isMobileMenuOpen;
 
-  // 💡 تابع هوشمند برای رندر تمیز نام کاربر مطابق استانداردهای دیجی‌کالا
+  // تابع هوشمند برای رندر تمیز نام کاربر مطابق استانداردهای دیجی‌کالا
   const getUserDisplayName = () => {
     if (!userData) return "ورود | ثبت‌نام";
     if (userData.name && userData.name.trim() !== "") {
@@ -171,16 +199,56 @@ export default function Header() {
             />
           </div>
 
-          {/* 🌟 بخش پروفایل دسکتاپ: کاملاً بازطراحی شده و مینیمال مشابه دیجی‌کالا */}
-          <div className="flex items-center gap-6 shrink-0 pointer-events-auto">
-            <Link 
-              href={isLoggedIn ? "/profile" : "/login"} 
-              className={`flex items-center gap-1.5 text-sm font-bold text-slate-700 hover:text-rose-500 border border-slate-200 rounded-xl px-3.5 py-2 transition duration-200 ${isLoggedIn ? 'bg-slate-50/50' : 'bg-white'}`}
-            >
-              <User className="w-4 h-4 stroke-[2.2]" />
-              <span className="max-w-[120px] truncate">{getUserDisplayName()}</span>
-              {isLoggedIn && <ChevronDown className="w-3.5 h-3.5 text-slate-400" />}
-            </Link>
+          {/* 🌟 بخش پروفایل هوشمند با منوی بازشو دسکتاپ */}
+          <div className="flex items-center gap-6 shrink-0 pointer-events-auto" ref={dropdownRef}>
+            {isLoggedIn ? (
+              <div className="relative">
+                <button 
+                  onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                  className="flex items-center gap-1.5 text-sm font-bold text-slate-700 hover:text-rose-500 border border-slate-200 rounded-xl px-3.5 py-2 transition duration-200 bg-slate-50/50 cursor-pointer select-none"
+                >
+                  <User className="w-4 h-4 text-slate-500 stroke-[2.2]" />
+                  <span className="max-w-[120px] truncate">{getUserDisplayName()}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* منوی بازشو اختصاصی دیجی‌کالایی */}
+                {isProfileDropdownOpen && (
+                  <div className="absolute top-[110%] left-0 w-56 bg-white border border-slate-100 shadow-[0_20px_40px_rgba(0,0,0,0.08)] rounded-2xl p-2 z-50 flex flex-col gap-0.5 animate-fade-in text-right">
+                    <Link 
+                      href="/profile" 
+                      className="flex items-center gap-2.5 px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-rose-500 rounded-xl transition"
+                    >
+                      <UserCheck className="w-4 h-4 stroke-[2.2]" />
+                      <span>مشاهده حساب کاربری</span>
+                    </Link>
+                    <Link 
+                      href="/profile/orders" 
+                      className="flex items-center gap-2.5 px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-rose-500 rounded-xl transition"
+                    >
+                      <Package className="w-4 h-4 stroke-[2.2]" />
+                      <span>سفارش‌های من</span>
+                    </Link>
+                    <div className="h-[1px] bg-slate-100 my-1"></div>
+                    <button 
+                      onClick={handleLogout}
+                      className="flex items-center gap-2.5 px-3 py-2.5 text-xs font-bold text-rose-500 hover:bg-rose-50 rounded-xl transition w-full cursor-pointer"
+                    >
+                      <LogOut className="w-4 h-4 stroke-[2.2]" />
+                      <span>خروج از حساب</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link 
+                href="/login" 
+                className="flex items-center gap-1.5 text-sm font-bold text-slate-700 hover:text-rose-500 border border-slate-200 rounded-xl px-3.5 py-2 transition duration-200 bg-white"
+              >
+                <User className="w-4 h-4 stroke-[2.2]" />
+                <span>ورود | ثبت‌نام</span>
+              </Link>
+            )}
 
             <div className="h-6 w-[1px] bg-slate-200"></div>
             
@@ -249,7 +317,6 @@ export default function Header() {
       {/* ========================================================================= */}
       {/* ۲. هدر نسخه موبایل */}
       {/* ========================================================================= */}
-      {/* 🌟 اصلاح هدر موبایل: دکمه‌های آیکونیک، بسیار خلوت، سبک و شیک درست مثل برنامه دیجی‌کالا */}
       <header className="md:hidden w-full fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-100 flex flex-col pt-3 pb-3 px-4 gap-3 shadow-xs">
         <div className="w-full flex items-center justify-between">
           <Link href="/" className="flex items-center">

@@ -88,7 +88,7 @@ export default function Header() {
       setUserData(null);
     }
 
-    // ج) فچ داینامیک و نرمال‌سازی از دامنه امن سرور شما (بستن ارورهای شبکه و هندل Fallback)
+    // ج) فچ داینامیک و نرمال‌سازی از دامنه امن سرور با منطق جدید فیلدهای رابطه مستقل استراپی
     const fetchStrapiCategories = async () => {
       const backupCategories = [
         {
@@ -108,7 +108,6 @@ export default function Header() {
       ];
 
       try {
-        // 🚀 اتصال مستقیم به دامنه زنده شما به جای localhost
         const res = await fetch('https://b.dr-sib.xyz/api/categories?populate=*');
         if (!res.ok) throw new Error("شبکه متصل نشد");
         
@@ -117,12 +116,25 @@ export default function Header() {
         if (json && json.data && json.data.length > 0) {
           const normalizedCategories = json.data.map(item => {
             const attributes = item.attributes || item;
+            
+            // 🚀 اصلاح منطق رابطه مستقل: استخراج دیتای آرایه ساب‌کتگوری‌ها از آبجکت لایه عمیق‌تر استراپی
+            const rawSubs = attributes.subCategories?.data || attributes.sub_categories?.data || [];
+            
+            const cleanSubs = rawSubs.map(subItem => {
+              const subAttrs = subItem.attributes || subItem;
+              return {
+                id: subItem.id,
+                name: subAttrs.title || subAttrs.name, // دریافت فیلد تایتل یا نام
+                slug: subAttrs.slug
+              };
+            });
+
             return {
               id: item.id,
               title: attributes.title,
               slug: attributes.slug,
               iconName: attributes.iconName,
-              subCategories: attributes.subCategories || attributes.sub_categories || []
+              subCategories: cleanSubs
             };
           });
           setMenuCategories(normalizedCategories);
@@ -292,7 +304,7 @@ export default function Header() {
               </Link>
             )}
 
-            <div className="h-6 w-[1px] bg-slate-200"></div>
+            <div className="w-[1px] h-6 bg-slate-200"></div>
             
             {/* لیست علاقه‌مندی‌ها در دسکتاپ */}
             <Link href="/profile/favorites" className="p-2 text-slate-600 hover:text-rose-500 rounded-xl transition relative">
@@ -564,17 +576,31 @@ export default function Header() {
             <button onClick={() => setIsMobileMenuOpen(false)} className="p-1.5 bg-slate-100 text-slate-500 rounded-full"><X className="w-4 h-4" /></button>
           </div>
           <div className="space-y-5 pb-8">
-            <div className="bg-slate-50/60 p-4 rounded-2xl border border-slate-100 text-right">
-              <div className="flex items-center gap-2 text-slate-900 font-bold mb-3 text-sm">
-                <Smartphone className="w-5 h-5 text-rose-500" />
-                <span>تلفن هوشمند</span>
-              </div>
-              <div className="flex flex-wrap gap-2 pr-1">
-                <span className="bg-white text-slate-700 text-xs font-medium px-3 py-2 rounded-xl border border-slate-100 shadow-2xs">آیفون (Apple)</span>
-                <span className="bg-white text-slate-700 text-xs font-medium px-3 py-2 rounded-xl border border-slate-100 shadow-2xs">سامسونگ (Samsung)</span>
-                <span className="bg-white text-slate-700 text-xs font-medium px-3 py-2 rounded-xl border border-slate-100 shadow-2xs">شیائومی (Xiaomi)</span>
-              </div>
-            </div>
+            {menuCategories && menuCategories.map((category) => {
+              return (
+                <div key={category.id} className="bg-slate-50/60 p-4 rounded-2xl border border-slate-100 text-right">
+                  <div className="flex items-center gap-2 text-slate-900 font-bold mb-3 text-sm">
+                    {/* رندر هوشمند آیکون‌ها بر برچسب استراپی برای نسخه موبایل */}
+                    {(() => {
+                      const IconComponent = iconMap[category.iconName] || Smartphone;
+                      return <IconComponent className="w-5 h-5 text-rose-500" />;
+                    })()}
+                    <span>{category.title}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2 pr-1">
+                    {category.subCategories && category.subCategories.map((sub, idx) => (
+                      <Link 
+                        key={sub.id || idx} 
+                        href={`/products?category=${category.slug}&sub=${sub.slug}`}
+                        className="bg-white text-slate-700 text-xs font-semibold px-3 py-2 rounded-xl border border-slate-100 shadow-3xs hover:text-rose-500 transition"
+                      >
+                        {sub.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

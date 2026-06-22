@@ -2,13 +2,18 @@
 
 import React, { useState } from 'react';
 import { useCart } from '../context/CartContext'; 
-import { ShoppingBag, CreditCard, ShieldCheck, MapPin, Wallet } from 'lucide-react';
+import { ShoppingBag, CreditCard, ShieldCheck, MapPin, Wallet, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
-export default function CheckoutContent() {
+export default function CheckoutContent({ onPaymentSuccess }) {
   const context = useCart();
   const cartItems = context?.cartItems || [];
+  // 🚀 استخراج متد پاک‌سازی کل سبد پس از خرید موفق
+  const setCartItems = context?.setCartItems; 
 
+  const router = useRouter();
   const [paymentMethod, setPaymentMethod] = useState('online');
+  const [isSubmitting, setIsSubmitting] = useState(false); // 🚀 استیت لودینگ بررسی انبار
 
   const userAddress = {
     name: "محسن عزیز",
@@ -26,19 +31,48 @@ export default function CheckoutContent() {
 
   const finalTotal = cartTotalPrice + shippingCost;
 
-  const handlePaymentSubmit = (e) => {
+  // 🛠️ هندلر هوشمند پرداخت و اتصال به سیستم کسر موجودی استراپی
+  const handlePaymentSubmit = async (e) => {
     e.preventDefault();
     if (cartItems.length === 0) {
       alert('سبد خرید شما خالی است!');
       return;
     }
-    alert(`درخواست پرداخت به مبلغ ${finalTotal.toLocaleString('fa-IR')} تومان از طریق درگاه بانکی صادر شد.`);
+
+    setIsSubmitting(true);
+
+    // ۱. صدا زدن تابع کسر از انبار استراپی که از صفحه اصلی پاس داده شده است
+    if (onPaymentSuccess) {
+      const isStockUpdated = await onPaymentSuccess(cartItems);
+
+      if (isStockUpdated) {
+        alert(`پرداخت با موفقیت انجام شد! مبلغ ${finalTotal.toLocaleString('fa-IR')} تومان از حساب شما کسر شد و موجودی انبار سیب‌شاپ به‌روزرسانی گردید. 🎉`);
+        
+        // ۲. پاکسازی کامل سبد خرید در سشن مرورگر و استیت لوکال پس از تراکنش موفق
+        localStorage.removeItem("sibshop_cart");
+        if (setCartItems) {
+          setCartItems([]);
+        } else {
+          // فال‌بک در صورتی که ساختار بایندر متفاوت باشد، صفحه را رفرش می‌کند تا سشن صفر شود
+          window.location.reload();
+        }
+
+        // ۳. هدایت به صفحه اصلی یا پنل کاربری بخش سفارشات
+        router.push('/');
+      } else {
+        alert('متاسفانه در حین به‌روزرسانی موجودی انبار مشکلی پیش آمد. لطفا مجددا تلاش کنید.');
+      }
+    } else {
+      alert('خطای ساختاری: متد اتصال به سیستم انبارداری یافت نشد.');
+    }
+
+    setIsSubmitting(false);
   };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 items-start text-right">
       
-      {/* 🔹 ستون سمت راست: جزئیات آدرس، کالاها و شیوه پرداخت */}
+      {/* 🔹 ستون سمت راست: جزئیات آدرس, کالاها و شیوه پرداخت */}
       <div className="lg:col-span-8 flex flex-col gap-5 w-full">
         
         {/* ۱. باکس آدرس تحویل سفارش */}
@@ -65,8 +99,8 @@ export default function CheckoutContent() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label 
-              onClick={() => setPaymentMethod('online')}
-              className={`flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition ${paymentMethod === 'online' ? 'border-rose-500 bg-rose-50/20' : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50'}`}
+              onClick={() => !isSubmitting && setPaymentMethod('online')}
+              className={`flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition ${paymentMethod === 'online' ? 'border-rose-500 bg-rose-50/20' : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50'} ${isSubmitting ? 'pointer-events-none opacity-50' : ''}`}
             >
               <div className="flex items-center gap-3">
                 <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition ${paymentMethod === 'online' ? 'border-rose-500' : 'border-slate-300'}`}>
@@ -81,8 +115,8 @@ export default function CheckoutContent() {
             </label>
 
             <label 
-              onClick={() => setPaymentMethod('wallet')}
-              className={`flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition ${paymentMethod === 'wallet' ? 'border-rose-500 bg-rose-50/20' : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50'}`}
+              onClick={() => !isSubmitting && setPaymentMethod('wallet')}
+              className={`flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition ${paymentMethod === 'wallet' ? 'border-rose-500 bg-rose-50/20' : 'border-slate-100 bg-slate-50/50 hover:bg-slate-50'} ${isSubmitting ? 'pointer-events-none opacity-50' : ''}`}
             >
               <div className="flex items-center gap-3">
                 <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition ${paymentMethod === 'wallet' ? 'border-rose-500' : 'border-slate-300'}`}>
@@ -155,12 +189,27 @@ export default function CheckoutContent() {
         </div>
 
         <div className="mt-6 flex flex-col gap-3 z-10">
+          {/* 🛒 مدیریت وضعیت دکمه و نمایش اسپینر در حین به‌روزرسانی انبار استراپی */}
           <button 
             onClick={handlePaymentSubmit}
-            className="w-full bg-rose-500 hover:bg-rose-600 text-white font-black text-xs md:text-sm py-3.5 rounded-2xl shadow-lg shadow-rose-500/10 transition-all duration-300 flex items-center justify-center gap-2 group active:scale-98"
+            disabled={isSubmitting || cartItems.length === 0}
+            className={`w-full text-white font-black text-xs md:text-sm py-3.5 rounded-2xl shadow-lg shadow-rose-500/10 transition-all duration-300 flex items-center justify-center gap-2 group ${
+              isSubmitting || cartItems.length === 0
+                ? 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed'
+                : 'bg-rose-500 hover:bg-rose-600 active:scale-98 cursor-pointer'
+            }`}
           >
-            <CreditCard className="w-4 h-4" />
-            <span>تایید و پرداخت نهایی</span>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>در حال اتصال به انبارداری...</span>
+              </>
+            ) : (
+              <>
+                <CreditCard className="w-4 h-4" />
+                <span>تایید و پرداخت نهایی</span>
+              </>
+            )}
           </button>
           
           <div className="flex items-center justify-center gap-1.5 text-[9px] md:text-[10px] text-slate-500 font-bold mt-1">

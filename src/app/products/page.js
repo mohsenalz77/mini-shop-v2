@@ -14,9 +14,11 @@ function ProductsContent() {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // دریافت کلمه سرچ شده از URL سایت
+  // 🔍 دریافت پارامترهای سرچ، دسته‌بندی و زیرمجموعه از URL سایت
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
+  const categoryQuery = searchParams.get('category') || '';
+  const subCategoryQuery = searchParams.get('sub') || '';
 
   useEffect(() => {
     async function fetchProducts() {
@@ -24,9 +26,19 @@ function ProductsContent() {
       try {
         let strapiEndpoint = 'https://b.dr-sib.xyz/api/products?populate=*';
 
+        // 🟢 ۱. اعمال فیلتر بر اساس کلمه سرچ شده
         if (searchQuery) {
-          // 🚀 فیکس شد: تغییر فیلتر از name به title بر اساس دیتابیس استراپی شما
           strapiEndpoint += `&filters[title][$containsi]=${encodeURIComponent(searchQuery)}`;
+        }
+
+        // 🟢 ۲. اعمال فیلتر بر اساس اسلاگ دسته‌بندی اصلی (رابطه category)
+        if (categoryQuery) {
+          strapiEndpoint += `&filters[category][slug][$eq]=${encodeURIComponent(categoryQuery)}`;
+        }
+
+        // 🟢 ۳. اعمال فیلتر بر اساس اسلاگ زیرمجموعه مستقل (رابطه sub_category)
+        if (subCategoryQuery) {
+          strapiEndpoint += `&filters[sub_category][slug][$eq]=${encodeURIComponent(subCategoryQuery)}`;
         }
 
         const res = await fetch(strapiEndpoint, { cache: 'no-store' });
@@ -41,7 +53,7 @@ function ProductsContent() {
       }
     }
     fetchProducts();
-  }, [searchQuery]); 
+  }, [searchQuery, categoryQuery, subCategoryQuery]); // 👈 گوش به زنگ برای تغییر هر کدام از فیلترها
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
@@ -106,7 +118,6 @@ function ProductsContent() {
               const id = item.id;
               const attr = item.attributes || {};
               
-              // 🚀 فیکس شد: خواندن نام کالا از فیلد صحیح title در استراپی
               const name = attr.title || "محصول سیب‌شاپ";
               const priceNum = attr.price || 0;
               const oldPriceNum = attr.oldPrice || null;
@@ -216,10 +227,10 @@ export default function ProductsPage() {
               فروشگاه آنلاین
             </span>
             <h1 className="text-xl md:text-3xl font-black mt-2.5 bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-              بررسی و خرید انواع گوشی موبایل
+              بررسی و خرید محصولات سیب‌شاپ
             </h1>
             <p className="hidden md:block text-xs text-slate-400 mt-2 max-w-xl font-medium leading-6">
-              جدیدترین پرچمداران و میان‌رده‌های بازار را با گارانتی معتبر شرکتی و ارسال اکسپرس از سیب‌شاپ تهیه کنید.
+              جدیدترین کالاها، قطعات تخصصی و لوازم جانبی بازار را با گارانتی معتبر شرکتی و مهلت تست از سیب‌شاپ تهیه کنید.
             </p>
           </div>
         </div>

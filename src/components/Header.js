@@ -88,7 +88,7 @@ export default function Header() {
       setUserData(null);
     }
 
-    // ج) فچ داینامیک و نرمال‌سازی هوشمند خروجی Strapi (حل مشکل عدم نمایش لایو کالاها)
+    // ج) فچ داینامیک و نرمال‌سازی خروجی Strapi بر اساس دیتای واقعی دریافت شده
     const fetchStrapiCategories = async () => {
       try {
         const res = await fetch('http://localhost:1337/api/categories?populate=*');
@@ -292,7 +292,7 @@ export default function Header() {
           <div className="w-full px-4 md:px-8 h-12 flex items-center justify-between">
             <nav className="flex items-center gap-8 text-sm font-semibold text-slate-600">
               
-              {/* 🌟 مگامنو ۱۰۰٪ داینامیک و فیکس‌شده برای رندر صحیح زیرمجموعه‌های Strapi */}
+              {/* 🌟 مگامنو داینامیک متصل به جداول زنده استراپی با رندر صحیح لایه subCategories */}
               <div className="relative group/menu py-3 cursor-pointer text-slate-800 hover:text-rose-500 flex items-center gap-1.5 transition">
                 <Menu className="w-4 h-4 text-slate-500 group-hover/menu:text-rose-500 transition" />
                 <span className="font-bold">دسته‌بندی محصولات</span>
@@ -309,11 +309,12 @@ export default function Header() {
                         </div>
                         <ul className="space-y-2.5 font-medium text-slate-500 text-xs pr-5 border-r border-slate-100 text-right">
                           {category.subCategories && category.subCategories.map((sub, index) => {
-                            const subData = sub.attributes || sub;
+                            // فیکس نهایی: از آنجا که داده‌ها مستقیماً در ریشه هستند، بدون attributes فچ می‌شوند
+                            if (!sub.name) return null;
                             return (
                               <li key={sub.id || index}>
-                                <Link href={`/products?category=${category.slug}&sub=${subData.slug}`} className="hover:text-rose-500 transition block py-0.5">
-                                  {subData.name || subData.title}
+                                <Link href={`/products?category=${category.slug}&sub=${sub.slug}`} className="hover:text-rose-500 transition block py-0.5">
+                                  {sub.name}
                                 </Link>
                               </li>
                             );
@@ -375,7 +376,7 @@ export default function Header() {
               <User className="w-5 h-5 stroke-[2.2]" />
             </Link>
             
-            {/* دکمه زنگوله موبایل متصل به مرکز اعلانات و آفرها */}
+            {/* دکمه زنگوله موبایل متصل به مرکز اعلانات */}
             <button 
               onClick={() => setIsNotificationOpen(true)}
               className={`p-2 rounded-full relative transition ${isNotificationOpen ? 'text-rose-500 bg-rose-50' : 'text-slate-600 hover:bg-slate-50'}`}
@@ -384,7 +385,7 @@ export default function Header() {
               <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></span>
             </button>
 
-            {/* کپی آیکون سبد خرید در هدر بالای موبایل */}
+            {/* آیکون کپی سبد خرید در هدر بالای موبایل */}
             <Link href="/cart" className="p-2 text-slate-600 hover:bg-slate-50 rounded-full relative transition">
               <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
               {cartCount > 0 && (
@@ -486,7 +487,7 @@ export default function Header() {
             <div className="bg-gradient-to-br from-rose-50 to-pink-50/30 p-4 rounded-2xl border border-rose-100 flex items-start gap-3">
               <div className="flex flex-col gap-1 w-full">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-rose-600">کد تخفیف اختصاصی شما ایفا شد! 🎉</span>
+                  <span className="text-xs font-black text-rose-600">ککد تخفیف اختصاصی شما ایفا شد! 🎉</span>
                   <span className="text-[9px] font-bold text-slate-400">امروز</span>
                 </div>
                 <p className="text-[11px] font-medium text-slate-600 leading-5 mt-1">کد تخفیف <code className="bg-white px-1.5 py-0.5 rounded-md border text-xs font-mono font-bold text-rose-500">SIBNEW</code> برای خرید لوازم جانبی با ۲۰٪ تخفیف بدون محدودیت خرید اول فعال شد.</p>

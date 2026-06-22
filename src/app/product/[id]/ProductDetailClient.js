@@ -1,20 +1,26 @@
 "use client";
 
 import React, { useState } from 'react';
-import Header from '../../../components/Header'; // ✅ مشکل سینتکس وب‌پک برطرف شد
+import Header from '../../../components/Header'; 
 import Footer from '../../../components/Footer';
-import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2 } from 'lucide-react';
-import { useCart } from '../../../context/CartContext'; // 🚀 ۱. ورود هوک متمرکز سبد خرید
+import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2, Ban } from 'lucide-react';
+import { useCart } from '../../../context/CartContext'; 
 
 export default function ProductDetailClient({ productData }) {
-  const { addToCart } = useCart(); // 🚀 ۲. استخراج متد افزودن به سبد
+  const { addToCart } = useCart(); 
   const [selectedColor, setSelectedColor] = useState(0);
   const [selectedStorage, setSelectedStorage] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
   const [activeTab, setActiveTab] = useState('review');
 
-  // 🚀 ۳. فرمت کردن و تبدیل هوشمند اعداد فارسی به انگلیسی برای حل مشکل قیمت صفر در سبد خرید
+  // 📦 بررسی هوشمند وضعیت موجودی بر اساس مقدار واکشی شده از استراپی
+  const stockCount = productData.stock !== undefined ? Number(productData.stock) : 1;
+  const isAvailable = stockCount > 0;
+
+  // 🚀 فرمت کردن و تبدیل هوشمند اعداد فارسی به انگلیسی برای حل مشکل قیمت صفر در سبد خرید
   const handleAddToCart = () => {
+    if (!isAvailable) return; // لایه امنیتی جانبی جهت مسدودسازی کلیک‌ها
+
     // تابع داخلی برای تبدیل ارقام فارسی/عربی به انگلیسی
     const p2e = s => s.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
 
@@ -30,7 +36,8 @@ export default function ProductDetailClient({ productData }) {
       id: productData.id,
       name: productData.name,
       price: rawPrice,
-      imageUrl: productData.imageUrl
+      imageUrl: productData.imageUrl,
+      stock: stockCount // 🚀 اتصال حیاتی: پاس دادن سقف موجودی به کانتکست سبد خرید
     });
   };
 
@@ -66,13 +73,20 @@ export default function ProductDetailClient({ productData }) {
               </button>
             </div>
             
-            <div className="flex-1 flex items-center justify-center w-full h-full">
+            <div className="flex-1 flex items-center justify-center w-full h-full relative">
+              {/* نشان عدم موجودی بر روی تصویر کالا */}
+              {!isAvailable && (
+                <div className="absolute top-2 right-2 bg-slate-500 text-white text-[10px] font-black px-3 py-1 rounded-xl z-30 shadow-xs select-none">
+                  اتمام موجودی
+                </div>
+              )}
+              
               {productData.imageUrl ? (
                 <img 
                   src={productData.imageUrl} 
                   alt={productData.name}
                   referrerPolicy="no-referrer-when-downgrade"
-                  className="max-h-[260px] md:max-h-[380px] object-contain filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.08)] select-none"
+                  className={`max-h-[260px] md:max-h-[380px] object-contain filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.08)] select-none transition duration-300 ${!isAvailable ? 'grayscale opacity-50' : ''}`}
                 />
               ) : (
                 <span className="text-7xl md:text-8xl lg:text-9xl filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.08)] select-none">
@@ -105,7 +119,7 @@ export default function ProductDetailClient({ productData }) {
                   <span className="text-[11px] font-black text-slate-800 block mb-1.5">انتخاب ظرفیت:</span>
                   <div className="flex items-center gap-2">
                     {productData.storages.map((storage, idx) => (
-                      <button key={idx} onClick={() => setSelectedStorage(idx)} className={`px-3 py-1.5 rounded-xl text-[10px] font-bold border transition ${selectedStorage === idx ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}>{storage}</button>
+                      <button key={idx} disabled={!isAvailable} onClick={() => setSelectedStorage(idx)} className={`px-3 py-1.5 rounded-xl text-[10px] font-bold border transition ${!isAvailable ? 'opacity-40 cursor-not-allowed bg-slate-100 border-slate-200 text-slate-400' : selectedStorage === idx ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}>{storage}</button>
                     ))}
                   </div>
                 </div>
@@ -115,7 +129,7 @@ export default function ProductDetailClient({ productData }) {
                   <span className="text-[11px] font-black text-slate-800 block mb-1.5">رنگ: {productData.colors[selectedColor].name}</span>
                   <div className="flex items-center gap-2.5">
                     {productData.colors.map((color, index) => (
-                      <button key={index} onClick={() => setSelectedColor(index)} className={`w-6 h-6 rounded-full ${color.class} border-2 transition ${selectedColor === index ? 'border-rose-500 scale-110 ring-4 ring-rose-500/10 shadow-sm' : 'border-slate-200'}`} />
+                      <button key={index} disabled={!isAvailable} onClick={() => setSelectedColor(index)} className={`w-6 h-6 rounded-full ${color.class} border-2 transition ${!isAvailable ? 'opacity-30 cursor-not-allowed' : selectedColor === index ? 'border-rose-500 scale-110 ring-4 ring-rose-500/10 shadow-sm' : 'border-slate-200'}`} />
                     ))}
                   </div>
                 </div>
@@ -134,35 +148,59 @@ export default function ProductDetailClient({ productData }) {
             </div>
           </div>
 
-          {/* ستون سوم: باکس خرید دسکتاپ */}
-          <div className="lg:col-span-3 bg-slate-900 border border-slate-950 text-white rounded-3xl p-5 flex flex-col justify-between h-[350px] md:h-[490px] shadow-xl relative overflow-hidden">
+          {/* ستون سوم: باکس خرید دسکتاپ مجهز به منطق انبار */}
+          <div className={`lg:col-span-3 border text-white rounded-3xl p-5 flex flex-col justify-between h-[350px] md:h-[490px] shadow-xl relative overflow-hidden transition-colors duration-300 ${isAvailable ? 'bg-slate-900 border-slate-950' : 'bg-slate-950/95 border-slate-900'}`}>
             <div className="flex flex-col gap-3 z-10">
               <span className="text-[11px] font-black text-slate-400 border-b border-white/5 pb-2 block text-right">فروشنده: سیب‌شاپ</span>
               <div className="flex items-start gap-2.5 text-right">
-                <ShieldCheck className="w-4.5 h-4.5 text-rose-500 shrink-0 mt-0.5" />
-                <div className="flex flex-col"><span className="text-xs font-bold text-white">گارانتی ۱۸ ماهه شرکتی</span></div>
+                <ShieldCheck className={`w-4.5 h-4.5 shrink-0 mt-0.5 ${isAvailable ? 'text-rose-500' : 'text-slate-500'}`} />
+                <div className="flex flex-col"><span className={`text-xs font-bold ${isAvailable ? 'text-white' : 'text-slate-400'}`}>گارانتی ۱۸ ماهه شرکتی</span></div>
               </div>
               <div className="flex items-start gap-2.5 text-right">
-                <Truck className="w-4.5 h-4.5 text-rose-500 shrink-0 mt-0.5" />
-                <div className="flex flex-col"><span className="text-xs font-bold text-white">ارسال اکسپرس سیب‌شاپ</span></div>
+                <Truck className={`w-4.5 h-4.5 shrink-0 mt-0.5 ${isAvailable ? 'text-rose-500' : 'text-slate-500'}`} />
+                <div className="flex flex-col"><span className={`text-xs font-bold ${isAvailable ? 'text-white' : 'text-slate-400'}`}>ارسال اکسپرس سیب‌شاپ</span></div>
               </div>
             </div>
             
             <div className="mt-5 pt-3 border-t border-white/5 z-10 flex flex-col gap-3">
               <div className="flex items-center justify-between w-full text-right">
-                <span className="text-[10px] text-slate-400 font-bold">قیمت کالا:</span>
+                <span className="text-[10px] text-slate-400 font-bold">{isAvailable ? "قیمت کالا:" : "وضعیت انبار:"}</span>
                 <div className="flex flex-col items-end">
-                  {productData.oldPrice && <span className="text-[10px] text-slate-500 line-through font-medium">{productData.oldPrice}</span>}
-                  <div className="text-base md:text-xl font-black text-white flex items-center gap-0.5 mt-0.5"><span>{productData.price}</span><span className="text-[10px] font-normal text-slate-400 mr-0.5">تومان</span></div>
+                  {isAvailable ? (
+                    <>
+                      {productData.oldPrice && <span className="text-[10px] text-slate-500 line-through font-medium">{productData.oldPrice}</span>}
+                      <div className="text-base md:text-xl font-black text-white flex items-center gap-0.5 mt-0.5">
+                        <span>{productData.price}</span>
+                        <span className="text-[10px] font-normal text-slate-400 mr-0.5">تومان</span>
+                      </div>
+                    </>
+                  ) : (
+                    <span className="text-xs md:text-sm font-black text-rose-500 bg-rose-500/10 border border-rose-500/20 px-3 py-1 rounded-xl">ناموجود در انبار</span>
+                  )}
                 </div>
               </div>
-              {/* 🛒 اتصال دکمه دسکتاپ به متد اصلاح‌شده */}
+              
+              {/* 🛒 سوییچ استایل دکمه بر اساس وضعیت موجودی کالا */}
               <button 
                 onClick={handleAddToCart}
-                className="w-full bg-rose-500 hover:bg-rose-600 text-white font-black text-xs md:text-sm py-3.5 rounded-2xl shadow-lg transition duration-300 flex items-center justify-center gap-2 active:scale-98"
+                disabled={!isAvailable}
+                className={`w-full font-black text-xs md:text-sm py-3.5 rounded-2xl shadow-lg transition duration-300 flex items-center justify-center gap-2 ${
+                  isAvailable 
+                    ? 'bg-rose-500 hover:bg-rose-600 text-white active:scale-98 cursor-pointer' 
+                    : 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed'
+                }`}
               >
-                <ShoppingBag className="w-4 h-4" />
-                <span>افزودن به سبد خرید</span>
+                {isAvailable ? (
+                  <>
+                    <ShoppingBag className="w-4 h-4" />
+                    <span>افزودن به سبد خرید</span>
+                  </>
+                ) : (
+                  <>
+                    <Ban className="w-4 h-4" />
+                    <span>کالا ناموجود است</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -186,19 +224,40 @@ export default function ProductDetailClient({ productData }) {
       {/* سیستم فیکس پایین صفحه موبایل */}
       <div className="md:hidden fixed bottom-14 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-100 p-3 flex items-center justify-between z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.04)]">
         <div className="flex flex-col text-right">
-          {productData.oldPrice && <span className="text-[9px] text-slate-400 font-bold line-through">{productData.oldPrice}</span>}
-          <div className="text-sm font-black text-slate-950 flex items-center gap-0.5">
-            <span>{productData.price}</span>
-            <span className="text-[9px] font-normal text-slate-400">تومان</span>
-          </div>
+          {isAvailable ? (
+            <>
+              {productData.oldPrice && <span className="text-[9px] text-slate-400 font-bold line-through">{productData.oldPrice}</span>}
+              <div className="text-sm font-black text-slate-950 flex items-center gap-0.5">
+                <span>{productData.price}</span>
+                <span className="text-[9px] font-normal text-slate-400">تومان</span>
+              </div>
+            </>
+          ) : (
+            <span className="text-xs font-bold text-slate-400">غیرقابل خرید</span>
+          )}
         </div>
-        {/* 🛒 اتصال دکمه نسخه موبایل به متد اصلاح‌شده */}
+        
+        {/* 🛒 دکمه موبایل هماهنگ با انبارداری */}
         <button 
           onClick={handleAddToCart}
-          className="bg-rose-500 text-white font-black text-xs px-5 py-2.5 rounded-xl flex items-center gap-1.5 active:scale-95 transition-all duration-150"
+          disabled={!isAvailable}
+          className={`font-black text-xs px-5 py-2.5 rounded-xl flex items-center gap-1.5 transition-all duration-150 ${
+            isAvailable 
+              ? 'bg-rose-500 text-white active:scale-95' 
+              : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
+          }`}
         >
-          <ShoppingBag className="w-3.5 h-3.5" />
-          <span>افزودن به سبد</span>
+          {isAvailable ? (
+            <>
+              <ShoppingBag className="w-3.5 h-3.5" />
+              <span>افزودن به سبد</span>
+            </>
+          ) : (
+            <>
+              <Ban className="w-3.5 h-3.5" />
+              <span>ناموجود</span>
+            </>
+          )}
         </button>
       </div>
 

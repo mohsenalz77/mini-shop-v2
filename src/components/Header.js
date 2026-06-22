@@ -6,7 +6,7 @@ import {
   Smartphone, Laptop, Headphones, Home, Grid, X, Bell, ArrowRight,
   UserCheck, LogOut, Package, Heart, HelpCircle, Award
 } from 'lucide-react';
-import Link from 'next/navigation';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCart } from "../context/CartContext";
 
@@ -108,7 +108,7 @@ export default function Header() {
       ];
 
       try {
-        // 🚀 فیکس نهایی: اتصال مستقیم به دامنه زنده شما به جای localhost
+        // 🚀 اتصال مستقیم به دامنه زنده شما به جای localhost
         const res = await fetch('https://b.dr-sib.xyz/api/categories?populate=*');
         if (!res.ok) throw new Error("شبکه متصل نشد");
         
@@ -302,7 +302,7 @@ export default function Header() {
             <Link href="/cart" className="flex items-center justify-center p-2 text-slate-700 hover:text-rose-500 rounded-xl transition duration-200 relative">
               <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
               {cartCount > 0 && (
-                <span className="absolute -top-0.5 -left-0.5 bg-rose-500 text-white text-[10px] font-sans font-black w-5 h-5 rounded-full flex items-center justify-center shadow-xs animate-fade-in">
+                <span className="absolute -top-0.5 -left-0.5 bg-rose-500 text-white text-[10px] font-sans font-black w-5 h-5 rounded-full flex items-center justify-center shadow-xs">
                   {cartCount.toLocaleString('fa-IR')}
                 </span>
               )}
@@ -315,7 +315,7 @@ export default function Header() {
           <div className="w-full px-4 md:px-8 h-12 flex items-center justify-between">
             <nav className="flex items-center gap-8 text-sm font-semibold text-slate-600">
               
-              {/* مگامنو متصل به دیتابیس آنلاین زنده */}
+              {/* مگامنو داینامیک متصل به دیتابیس آنلاین زنده */}
               <div className="relative group/menu py-3 cursor-pointer text-slate-800 hover:text-rose-500 flex items-center gap-1.5 transition">
                 <Menu className="w-4 h-4 text-slate-500 group-hover/menu:text-rose-500 transition" />
                 <span className="font-bold">دسته‌بندی محصولات</span>
@@ -359,7 +359,7 @@ export default function Header() {
                 
                 <div className={`absolute top-full right-0 w-44 bg-white border border-slate-100 shadow-xl rounded-xl p-1.5 z-50 flex flex-col gap-0.5 transition-all duration-200 origin-top text-right ${isBrandsDropdownOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'}`}>
                   {popularBrands.map((brand, idx) => (
-                    <Link key={idx} href={`/brands/${brand.slug}`} className="px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-rose-500 rounded-lg transition">
+                    <Link key={idx} href={`/brands/${brand.slug}`} className="px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-rose-50 rounded-lg transition">
                       {brand.name}
                     </Link>
                   ))}

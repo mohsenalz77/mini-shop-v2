@@ -13,6 +13,49 @@ const DynamicCheckoutContent = dynamic(() => import('../../components/CheckoutCo
 });
 
 export default function CheckoutPage() {
+  
+  /**
+   * 🚀 تابع جادویی کسر خودکار از انبار استراپی (باید این را به بخش پرداخت نهایی هندلر پاس بدهی)
+   * @param {Array} cartItems - آرایه محصولات موجود در سبد خرید از Context
+   */
+  const handleReduceStockAfterPayment = async (cartItems) => {
+    try {
+      // اجرای همزمان تمامی درخواست‌های PUT برای بالا بردن سرعت عملیات (Promise.all)
+      const updatePromises = cartItems.map(async (item) => {
+        const currentStock = item.stock !== undefined ? Number(item.stock) : 0;
+        const purchaseQuantity = Number(item.quantity);
+        const newStock = Math.max(0, currentStock - purchaseQuantity); // جلوگیری از منفی شدن انبار تحت هر شرایطی
+
+        const response = await fetch(`https://b.dr-sib.xyz/api/products/${item.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            // اگر استراپی شما نیاز به توکن برای ویرایش دارد، آن را اینجا باز کنید:
+            // 'Authorization': `Bearer ${localStorage.getItem('sibshop_token')}`
+          },
+          body: JSON.stringify({
+            data: {
+              stock: newStock
+            }
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`خطا در به‌روزرسانی انبار محصول با آی‌دی ${item.id}`);
+        }
+        
+        return response.json();
+      });
+
+      await Promise.all(updatePromises);
+      console.log("انبارداری سیب‌شاپ با موفقیت به‌روزرسانی و کالاها کسر شدند. 📦");
+      return true;
+    } catch (error) {
+      console.error("مشکل در کسر اتوماتیک موجودی انبار استراپی:", error);
+      return false;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 direction-rtl antialiased flex flex-col justify-between">
       <Header />
@@ -27,7 +70,8 @@ export default function CheckoutPage() {
           <span className="text-[11px] md:text-xs font-bold text-slate-400">۳. پرداخت نهایی</span>
         </div>
 
-        <DynamicCheckoutContent />
+        {/* 💡 پروپز مجهز شده را به کامپوننت داخلی پاس می‌دهیم تا در زمان دکمه پرداخت نهایی فعالش کند */}
+        <DynamicCheckoutContent onPaymentSuccess={handleReduceStockAfterPayment} />
       </main>
 
       <Footer />

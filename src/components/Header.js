@@ -88,13 +88,24 @@ export default function Header() {
       setUserData(null);
     }
 
-    // ج) فچ داینامیک دسته‌بندی‌ها و کامپوننت‌های تکرارشونده از Strapi
+    // ج) فچ داینامیک و نرمال‌سازی هوشمند خروجی Strapi (حل مشکل عدم نمایش لایو کالاها)
     const fetchStrapiCategories = async () => {
       try {
         const res = await fetch('http://localhost:1337/api/categories?populate=*');
         const json = await res.json();
+        
         if (json && json.data) {
-          setMenuCategories(json.data);
+          const normalizedCategories = json.data.map(item => {
+            const attributes = item.attributes || item;
+            return {
+              id: item.id,
+              title: attributes.title,
+              slug: attributes.slug,
+              iconName: attributes.iconName,
+              subCategories: attributes.subCategories || attributes.sub_categories || []
+            };
+          });
+          setMenuCategories(normalizedCategories);
         }
       } catch (err) {
         console.error("خطا در دریافت دسته‌بندی‌ها از استراپی:", err);
@@ -235,11 +246,11 @@ export default function Header() {
 
                 <div className={`absolute top-[100%] pt-1 left-0 w-full z-50 transition-all duration-250 origin-top text-right ${isProfileDropdownOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'}`}>
                   <div className="bg-white border border-slate-100 shadow-xl rounded-xl p-1.5 flex flex-col gap-0.5">
-                    <Link href="/profile" className="flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-rose-500 rounded-lg transition">
+                    <Link href="/profile" className="flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-rose-50 rounded-lg transition">
                       <UserCheck className="w-4 h-4 stroke-[2.2]" />
                       <span>مشاهده حساب کاربری</span>
                     </Link>
-                    <Link href="/profile/orders" className="flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-rose-500 rounded-lg transition">
+                    <Link href="/profile/orders" className="flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-rose-50 rounded-lg transition">
                       <Package className="w-4 h-4 stroke-[2.2]" />
                       <span>سفارش‌های من</span>
                     </Link>
@@ -281,15 +292,14 @@ export default function Header() {
           <div className="w-full px-4 md:px-8 h-12 flex items-center justify-between">
             <nav className="flex items-center gap-8 text-sm font-semibold text-slate-600">
               
-              {/* 🌟 مگامنو ۱۰۰٪ پویا متصل به جداول و کامپوننت‌های Strapi */}
+              {/* 🌟 مگامنو ۱۰۰٪ داینامیک و فیکس‌شده برای رندر صحیح زیرمجموعه‌های Strapi */}
               <div className="relative group/menu py-3 cursor-pointer text-slate-800 hover:text-rose-500 flex items-center gap-1.5 transition">
                 <Menu className="w-4 h-4 text-slate-500 group-hover/menu:text-rose-500 transition" />
                 <span className="font-bold">دسته‌بندی محصولات</span>
                 <ChevronDown className="w-3 h-3 text-slate-400 group-hover/menu:rotate-180 transition duration-300" />
                 
                 <div className="absolute top-full right-0 w-[700px] bg-white border border-slate-100 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.08)] rounded-3xl p-6 grid grid-cols-3 gap-6 opacity-0 pointer-events-none group-hover/menu:opacity-100 group-hover/menu:pointer-events-auto transition-all duration-300 transform translate-y-2 group-hover/menu:translate-y-0 z-50">
-                  {menuCategories.map((category) => {
-                    // خواندن داینامیک نام آیکون از استراپی و اتصال به کامپوننت لوساید
+                  {menuCategories && menuCategories.map((category) => {
                     const IconComponent = iconMap[category.iconName] || Smartphone;
                     return (
                       <div key={category.id}>
@@ -298,13 +308,16 @@ export default function Header() {
                           <span>{category.title}</span>
                         </div>
                         <ul className="space-y-2.5 font-medium text-slate-500 text-xs pr-5 border-r border-slate-100 text-right">
-                          {category.subCategories && category.subCategories.map((sub, index) => (
-                            <li key={index}>
-                              <Link href={`/products?category=${category.slug}&sub=${sub.slug}`} className="hover:text-rose-500 transition block py-0.5">
-                                {sub.name}
-                              </Link>
-                            </li>
-                          ))}
+                          {category.subCategories && category.subCategories.map((sub, index) => {
+                            const subData = sub.attributes || sub;
+                            return (
+                              <li key={sub.id || index}>
+                                <Link href={`/products?category=${category.slug}&sub=${subData.slug}`} className="hover:text-rose-500 transition block py-0.5">
+                                  {subData.name || subData.title}
+                                </Link>
+                              </li>
+                            );
+                          })}
                         </ul>
                       </div>
                     );
@@ -371,7 +384,7 @@ export default function Header() {
               <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></span>
             </button>
 
-            {/* کپی آیکون سبد خرید در هدر بالای موبایل برای راحتی دست مشتری */}
+            {/* کپی آیکون سبد خرید در هدر بالای موبایل */}
             <Link href="/cart" className="p-2 text-slate-600 hover:bg-slate-50 rounded-full relative transition">
               <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
               {cartCount > 0 && (

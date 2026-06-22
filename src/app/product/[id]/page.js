@@ -5,7 +5,8 @@ import ProductDetailClient from './ProductDetailClient';
 // تابع فچ کردن اطلاعات تک محصول از استراپی بر اساس اسلاگ
 async function getSingleProductBySlug(slug) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products?filters[slug][$eq]=${slug}&populate=*`, {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://b.dr-sib.xyz/api";
+    const res = await fetch(`${apiUrl}/products?filters[slug][$eq]=${slug}&populate=*`, {
       cache: 'no-store'
     });
 
@@ -41,14 +42,30 @@ export default async function ProductDetailPage({ params }) {
   }
 
   // استخراج مشخصات اصلی از دیتای استراپی
-  const { title, price, oldPrice, description, image } = apiProduct.attributes;
+  const attributes = apiProduct.attributes || apiProduct;
+  const { title, price, oldPrice, description, image, stock } = attributes;
 
   // 🚀 اصلاح بنیادی: خواندن آدرس پایه از دامنه امن متغیر محیطی ورسل به جای آی‌پی قدیمی
   const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || "https://b.dr-sib.xyz";
-  const hasImage = image?.data?.attributes?.url;
+  
+  const imgData = image?.data;
+  const hasImage = imgData?.attributes?.url || imgData?.url;
   const safeImageUrl = hasImage 
-    ? `${strapiUrl}${image.data.attributes.url}`
+    ? `${strapiUrl}${imgData?.attributes?.url || imgData?.url}`
     : null;
+
+  // 🛠️ فیکس استراپی ۵: تبدیل ساختار جدید بلاک‌های متنی به استرینگ ساده جهت جلوگیری از کرش رندر
+  let cleanDescription = "توضیحاتی برای این محصول در استراپی وارد نشده است.";
+  if (description) {
+    if (typeof description === 'string') {
+      cleanDescription = description;
+    } else if (Array.isArray(description)) {
+      // استخراج متون از لایه‌های ارایه‌ای Blocks استراپی جدید
+      cleanDescription = description
+        .map(block => block.children?.map(child => child.text).join('') || '')
+        .join('\n');
+    }
+  }
 
   // آماده‌سازی دیتای تمیز و ایمن برای تحویل به قالب فرانت‌اَند شما
   const productData = {
@@ -56,8 +73,10 @@ export default async function ProductDetailPage({ params }) {
     name: title,
     imageUrl: safeImageUrl, 
     englishName: 'Apple Flagship Device', 
-    price: Number(price).toLocaleString('fa-IR'),
+    price: price ? Number(price).toLocaleString('fa-IR') : '۰',
     oldPrice: oldPrice ? Number(oldPrice).toLocaleString('fa-IR') : null,
+    // 🚀 پاس دادن مقدار خام انبار برای کنترل دکمه افزودن و سقف خرید فرانت‌اند
+    stock: stock !== undefined ? Number(stock) : 1,
     rating: '۴.۹',
     reviewCount: '۱ دیدگاه',
     storages: ['۱۲۸ گیگ', '۲۵۶ گیگ', '۵۱۲ گیگ'],
@@ -72,7 +91,7 @@ export default async function ProductDetailPage({ params }) {
       { title: 'ارتباطات زنده', value: 'دیتابیس استراپی آنلاین' },
     ],
     fullSpecs: [
-      { label: 'توضیحات محصول', value: description || 'توضیحاتی برای این محصول در استراپی وارد نشده است.' },
+      { label: 'توضیحات محصول', value: cleanDescription },
     ],
     relatedProducts: [
       { id: 2, name: 'شارژر دیواری انکر مدل Nano ۲۰W', price: '۸۹۰,۰۰۰', image: '🔌' },

@@ -10,33 +10,13 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCart } from "../context/CartContext";
 
-// 🚀 ساختار دیتای دسته‌بندی‌ها جهت اتصال آسان به Strapi در آینده
-const menuCategories = [
-  {
-    id: "phones",
-    title: "تلفن هوشمند",
-    icon: Smartphone,
-    slug: "smartphones", // 👈 آدرس اصلی این دسته
-    subCategories: [
-      { name: "آیفون (Apple)", slug: "apple" },
-      { name: "سامسونگ (Samsung)", slug: "samsung" },
-      { name: "شیائومی (Xiaomi)", slug: "xiaomi" }
-    ]
-  },
-  {
-    id: "accessories",
-    title: "لوازم جانبی",
-    icon: Laptop,
-    slug: "accessories",
-    subCategories: [
-      { name: "قاب و کاور گوشی", slug: "cases" },
-      { name: "کابل و شارژر", slug: "cables-chargers" },
-      { name: "پاوربانک", slug: "powerbanks" }
-    ]
-  }
-];
+// نقشه کمکی برای تبدیل نام متنی آیکون در استراپی به کامپوننت واقعی Lucide
+const iconMap = {
+  Smartphone: Smartphone,
+  Laptop: Laptop,
+  Headphones: Headphones,
+};
 
-// 🚀 ساختار دیتای برندها برای درپ‌داون جدید دسکتاپ
 const popularBrands = [
   { name: "اپل (Apple)", slug: "apple" },
   { name: "سامسونگ (Samsung)", slug: "samsung" },
@@ -64,6 +44,9 @@ export default function Header() {
   const [isBrandsDropdownOpen, setIsBrandsDropdownOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   
+  // 🚀 استیت دسته‌بندی‌های داینامیک فچ شده از Strapi
+  const [menuCategories, setMenuCategories] = useState([]);
+
   const dropdownTimer = useRef(null);
   const brandsTimer = useRef(null);
   const [animateModal, setAnimateModal] = useState(false);
@@ -82,13 +65,15 @@ export default function Header() {
     }
   }, [isSearchModalOpen]);
 
-  // ۱. افکت لود کردن داده‌های سرچ و بررسی وضعیت احراز هویت کاربر
+  // ۱. افکت لود کردن داده‌های سرچ، وضعیت احراز هویت و فچ دسته‌بندی‌ها از Strapi
   useEffect(() => {
+    // الف) لود تاریخچه سرچ
     const saved = localStorage.getItem('sibshop_recent_searches');
     if (saved) {
       try { setRecentSearches(JSON.parse(saved)); } catch (e) { console.error(e); }
     } else { setRecentSearches([]); } 
 
+    // ب) بررسی توکن و دیتای لاگین یوزر استراپی
     const token = localStorage.getItem('sibshop_token');
     const savedUser = localStorage.getItem('sibshop_user');
     if (token && savedUser) {
@@ -102,6 +87,20 @@ export default function Header() {
       setIsLoggedIn(false);
       setUserData(null);
     }
+
+    // ج) فچ داینامیک دسته‌بندی‌ها و کامپوننت‌های تکرارشونده از Strapi
+    const fetchStrapiCategories = async () => {
+      try {
+        const res = await fetch('http://localhost:1337/api/categories?populate=*');
+        const json = await res.json();
+        if (json && json.data) {
+          setMenuCategories(json.data);
+        }
+      } catch (err) {
+        console.error("خطا در دریافت دسته‌بندی‌ها از استراپی:", err);
+      }
+    };
+    fetchStrapiCategories();
   }, [pathname]);
 
   // ۲. افکت ذخیره خودکار در مرورگر به محض اضافه شدن کلمه جدید
@@ -261,7 +260,7 @@ export default function Header() {
 
             <div className="h-6 w-[1px] bg-slate-200"></div>
             
-            {/* 🌟 لیست علاقه‌مندی‌ها در دسکتاپ */}
+            {/* لیست علاقه‌مندی‌ها در دسکتاپ */}
             <Link href="/profile/favorites" className="p-2 text-slate-600 hover:text-rose-500 rounded-xl transition relative">
               <Heart className="w-5 h-5 stroke-[2.2]" />
             </Link>
@@ -282,7 +281,7 @@ export default function Header() {
           <div className="w-full px-4 md:px-8 h-12 flex items-center justify-between">
             <nav className="flex items-center gap-8 text-sm font-semibold text-slate-600">
               
-              {/* 🌟 مگامنو داینامیک و بهینه‌سازی شده با متد رندر MAP */}
+              {/* 🌟 مگامنو ۱۰۰٪ پویا متصل به جداول و کامپوننت‌های Strapi */}
               <div className="relative group/menu py-3 cursor-pointer text-slate-800 hover:text-rose-500 flex items-center gap-1.5 transition">
                 <Menu className="w-4 h-4 text-slate-500 group-hover/menu:text-rose-500 transition" />
                 <span className="font-bold">دسته‌بندی محصولات</span>
@@ -290,7 +289,8 @@ export default function Header() {
                 
                 <div className="absolute top-full right-0 w-[700px] bg-white border border-slate-100 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.08)] rounded-3xl p-6 grid grid-cols-3 gap-6 opacity-0 pointer-events-none group-hover/menu:opacity-100 group-hover/menu:pointer-events-auto transition-all duration-300 transform translate-y-2 group-hover/menu:translate-y-0 z-50">
                   {menuCategories.map((category) => {
-                    const IconComponent = category.icon;
+                    // خواندن داینامیک نام آیکون از استراپی و اتصال به کامپوننت لوساید
+                    const IconComponent = iconMap[category.iconName] || Smartphone;
                     return (
                       <div key={category.id}>
                         <div className="flex items-center gap-1.5 text-slate-900 font-bold mb-3 text-sm">
@@ -298,8 +298,12 @@ export default function Header() {
                           <span>{category.title}</span>
                         </div>
                         <ul className="space-y-2.5 font-medium text-slate-500 text-xs pr-5 border-r border-slate-100 text-right">
-                          {category.items.map((item, index) => (
-                            <li key={index} className="hover:text-rose-500 transition">{item}</li>
+                          {category.subCategories && category.subCategories.map((sub, index) => (
+                            <li key={index}>
+                              <Link href={`/products?category=${category.slug}&sub=${sub.slug}`} className="hover:text-rose-500 transition block py-0.5">
+                                {sub.name}
+                              </Link>
+                            </li>
                           ))}
                         </ul>
                       </div>
@@ -308,7 +312,7 @@ export default function Header() {
                 </div>
               </div>
 
-              {/* 🌟 منوی بازشوی هوشمند و جدید برندها */}
+              {/* منوی بازشوی هوشمند برندها */}
               <div 
                 className="relative py-3 cursor-pointer hover:text-rose-500 transition flex items-center gap-1"
                 onMouseEnter={handleBrandsEnter}
@@ -367,7 +371,7 @@ export default function Header() {
               <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></span>
             </button>
 
-            {/* 🌟 کپی هوشمند آیکون سبد خرید در هدر بالای موبایل برای دسترسی فوق‌العاده راحت دست مشتری */}
+            {/* کپی آیکون سبد خرید در هدر بالای موبایل برای راحتی دست مشتری */}
             <Link href="/cart" className="p-2 text-slate-600 hover:bg-slate-50 rounded-full relative transition">
               <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
               {cartCount > 0 && (
@@ -480,7 +484,7 @@ export default function Header() {
               <div className="p-2.5 bg-rose-50 rounded-xl text-rose-500 shrink-0"><Award className="w-5 h-5" /></div>
               <div className="flex flex-col gap-1">
                 <span className="text-xs font-black text-slate-900">طرح گارانتی اصالت طلایی سیب‌شاپ</span>
-                <p className="text-[11px] font-medium text-slate-500 leading-5">تمامی پاوربانک‌ها و آداپتورهای شارژ از این پس با ۷ روز مهلت تست بی قید و شرط ارسال می‌شوند.</p>
+                <p className="text-[11px] font-medium text-slate-500 leading-5">تمامی پاوربانک‌ها و آداپتورهای شارژ از این پس با ۱۸ ماه گارانتی شرکتی و ۷ روز مهلت تست بی قید و شرط ارسال می‌شوند.</p>
               </div>
             </div>
           </div>

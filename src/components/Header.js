@@ -129,6 +129,9 @@ export default function Header() {
     localStorage.removeItem('sibshop_recent_searches');
   };
 
+  // متغیر کمکی برای تشخیص فعال بودن بخش پروفایل/لاگین
+  const isProfileActive = (pathname === '/login' || pathname === '/profile') && !isMobileMenuOpen;
+
   return (
     <>
       {/* ========================================================================= */}
@@ -161,7 +164,7 @@ export default function Header() {
           </div>
 
           <div className="flex items-center gap-4 shrink-0 pointer-events-auto">
-            {/* 🚀 فیکس دسکتاپ: لود کاملاً هوشمند بدون کلمه ثابت قبلی */}
+            {/* 🚀 فیکس دسکتاپ: اصلاح تکرار کلمه عزیز */}
             {isLoggedIn ? (
               <Link href="/profile" className="flex items-center gap-2 text-sm font-black text-rose-600 border border-rose-100 bg-rose-50/60 hover:bg-rose-50 px-4 py-2.5 rounded-xl transition duration-200">
                 <UserCheck className="w-4 h-4 stroke-[2.5]" />
@@ -248,7 +251,7 @@ export default function Header() {
             </span>
           </Link>
           
-          {/* 🚀 فیکس نهایی موبایل: نمایش هوشمند نام کاربر یا تگ پیش‌فرض */}
+          {/* 🚀 فیکس موبایل: اصلاح تکرار کلمه عزیز */}
           <div className="flex items-center gap-2">
             {isLoggedIn ? (
               <span className="text-[10px] font-black text-rose-500 bg-rose-50 px-2.5 py-1.5 rounded-full border border-rose-100">
@@ -420,11 +423,12 @@ export default function Header() {
             <span className="text-[10px] tracking-tight">سبد خرید</span>
           </Link>
 
+          {/* 🚀 فیکس بزرگ: رفع باگ آیکون فعال پروفایل در صفحه خانه */}
           <Link 
             href={isLoggedIn ? "/profile" : "/login"} 
-            className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${(pathname === '/login' || pathname === '/profile') && !isMobileMenuOpen ? 'text-rose-500 font-bold' : 'text-slate-400 font-medium hover:text-slate-700'}`}
+            className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${isProfileActive ? 'text-rose-500 font-bold' : 'text-slate-400 font-medium hover:text-slate-700'}`}
           >
-            <User className={`w-5 h-5 ${isLoggedIn ? 'text-rose-500 stroke-[2.5]' : 'stroke-[2.2]'}`} />
+            <User className={`w-5 h-5 transition duration-200 ${isProfileActive ? 'text-rose-500 stroke-[2.5]' : 'stroke-[2.2]'}`} />
             <span className="text-[10px] tracking-tight">
               {isLoggedIn ? "پروفایل" : "ورود"}
             </span>

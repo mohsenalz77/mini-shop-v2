@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { 
   Search, ShoppingBag, User, ChevronDown, Menu, 
   Smartphone, Laptop, Headphones, Home, Grid, X, Bell, ArrowRight,
-  UserCheck, LogOut, Package
+  UserCheck, LogOut, Package, Wrench, ShieldCheck
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -15,7 +15,7 @@ export default function Header() {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // 🔍 استیت‌های مگامودال سرچ زنده
+  // 🔍 استیت‌های سرچ زنده
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [recentSearches, setRecentSearches] = useState([]);
@@ -24,20 +24,18 @@ export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState(null);
 
-  // 🔽 استیت کنترل بازشدن منوی درپ‌داون پروفایل دسکتاپ
+  // 🔽 استیت‌های کنترل بازشدن منوی دسکتاپ و کشوی اعلان موبایل
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
-
-  // 🚀 استیت کمکی برای اعمال انیمیشن ورود نرم
-  const [animateModal, setAnimateModal] = useState(false);
-
-  const popularSearches = ['s26 ultra', 'ps5', 'گوشی موبایل', 'a36'];
-
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  
+  const dropdownTimer = useRef(null);
   const pathname = usePathname();
   const router = useRouter();
   const { cartCount } = useCart();
 
-  // کنترل افکت انیمیشن مودال هنگام باز و بسته شدن
+  const [animateModal, setAnimateModal] = useState(false);
+  const popularSearches = ['s26 ultra', 'ps5', 'گوشی موبایل', 'a36'];
+
   useEffect(() => {
     if (isSearchModalOpen) {
       setTimeout(() => setAnimateModal(true), 10);
@@ -46,21 +44,13 @@ export default function Header() {
     }
   }, [isSearchModalOpen]);
 
-  // ۱. افکت لود کردن داده‌های سرچ و بررسی وضعیت احراز هویت کاربر
+  // لود داده‌های اولیه احراز هویت
   useEffect(() => {
-    // الف) لود تاریخچه سرچ
     const saved = localStorage.getItem('sibshop_recent_searches');
     if (saved) {
-      try {
-        setRecentSearches(JSON.parse(saved));
-      } catch (e) {
-        console.error("خطا در لود تاریخچه:", e);
-      }
-    } else {
-      setRecentSearches([]);
-    } 
-
-    // ب) بررسی توکن و دیتای لاگین یوزر استراپی
+      try { setRecentSearches(JSON.parse(saved)); } catch (e) { console.error(e); }
+    }
+    
     const token = localStorage.getItem('sibshop_token');
     const savedUser = localStorage.getItem('sibshop_user');
     if (token && savedUser) {
@@ -68,86 +58,57 @@ export default function Header() {
         setIsLoggedIn(true);
         setUserData(JSON.parse(savedUser));
       } catch (error) {
-        console.error("Error parsing user data:", error);
         setIsLoggedIn(false);
       }
     } else {
       setIsLoggedIn(false);
-      setUserData(null);
     }
   }, [pathname]);
 
-  // ۲. افکت ذخیره خودکار در مرورگر به محض اضافه شدن کلمه جدید
-  useEffect(() => {
-    if (recentSearches.length > 0) {
-      localStorage.setItem('sibshop_recent_searches', JSON.stringify(recentSearches));
-    }
-  }, [recentSearches]);
-
-  // ۳. بسته‌شدن منو با کلیک روی هرجای دیگر صفحه خارج از دکمه پروفایل
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsProfileDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // کنترل اسکرول هدر برای پنهان/آشکار شدن نوار بالا
+  // کنترل اسکرول
   useEffect(() => {
     const controlNavbar = () => {
       if (typeof window !== 'undefined') {
         if (window.scrollY > lastScrollY && window.scrollY > 30) {
           setIsMenuVisible(false);
-          setIsProfileDropdownOpen(false); // منو هنگام اسکرول بسته شود
+          setIsProfileDropdownOpen(false);
         } else if (window.scrollY < lastScrollY) {
           setIsMenuVisible(true);
         }
         setLastScrollY(window.scrollY);
       }
     };
-
     window.addEventListener('scroll', controlNavbar);
     return () => window.removeEventListener('scroll', controlNavbar);
   }, [lastScrollY]);
 
-  // بسته‌شدن خودکار کشو و مودال با تغییر صفحه
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setIsSearchModalOpen(false);
     setIsProfileDropdownOpen(false);
+    setIsNotificationOpen(false);
   }, [pathname]);
 
-  // 🚀 اکشن اجرای سرچ، فرمت متن، ثبت در تاریخچه بدون تایید تکراری و ریدایرکت
+  // هندلرهای هوشمند هاور دسکتاپ (جلوگیری از غیب شدن آنی منو)
+  const handleMouseEnter = () => {
+    if (dropdownTimer.current) clearTimeout(dropdownTimer.current);
+    setIsProfileDropdownOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    dropdownTimer.current = setTimeout(() => {
+      setIsProfileDropdownOpen(false);
+    }, 180); 
+  };
+
   const executeSearch = (queryText) => {
     const trimmed = queryText.trim();
     if (!trimmed) return;
-
-    setSearchQuery(trimmed); 
-
-    setRecentSearches(prev => {
-      const filtered = prev.filter(item => item !== trimmed);
-      return [trimmed, ...filtered].slice(0, 5);
-    });
-
+    setRecentSearches(prev => [trimmed, ...prev.filter(item => item !== trimmed)].slice(0, 5));
     setIsSearchModalOpen(false);
     router.push(`/products?search=${encodeURIComponent(trimmed)}`);
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      executeSearch(searchQuery);
-    }
-  };
-
-  const clearRecentSearches = () => {
-    setRecentSearches([]);
-    localStorage.removeItem('sibshop_recent_searches');
-  };
-
-  // 🚪 اکشن خروج مستقیم از اکانت مشابه دیجی‌کالا
   const handleLogout = () => {
     localStorage.removeItem('sibshop_token');
     localStorage.removeItem('sibshop_user');
@@ -159,36 +120,30 @@ export default function Header() {
 
   const isProfileActive = (pathname === '/login' || pathname === '/profile') && !isMobileMenuOpen;
 
-  // تابع هوشمند برای رندر تمیز نام کاربر مطابق استانداردهای دیجی‌کالا
   const getUserDisplayName = () => {
     if (!userData) return "ورود | ثبت‌نام";
-    if (userData.name && userData.name.trim() !== "") {
-      return userData.name;
-    }
+    if (userData.name && userData.name.trim() !== "") return userData.name;
     return "حساب کاربری";
   };
 
   return (
     <>
       {/* ========================================================================= */}
-      {/* ۱. هدر نسخه دسکتاپ */}
+      {/* ۱. هدر دسکتاپ */}
       {/* ========================================================================= */}
       <header className="hidden md:flex w-full fixed top-0 left-0 right-0 z-50 flex-col pointer-events-none bg-transparent">
-        {/* بنر اعلان دسکتاپ */}
         <div className={`w-full bg-gradient-to-r from-rose-500 to-pink-600 text-white text-center text-xs font-bold shadow-inner pointer-events-auto transition-all duration-300 ease-in-out z-50 select-none overflow-hidden flex items-center justify-center ${isMenuVisible ? 'h-9 py-2 px-4' : 'h-0 py-0 px-0'}`}>
           <span>جشنواره شگفت‌انگیز سیب‌شاپ؛ تا ۴۰٪ تخفیف روی لوازم جانبی موبایل ⚡</span>
         </div>
 
-        {/* ردیف اول دسکتاپ */}
         <div className="w-full px-4 md:px-8 h-20 flex items-center justify-between gap-8 bg-white/70 backdrop-blur-3xl border-b border-slate-100 relative z-50 pointer-events-auto shadow-xs">
-          <Link href="/" className="flex items-center shrink-0 pointer-events-auto">
+          <Link href="/" className="flex items-center shrink-0">
             <span className="text-2xl font-black text-slate-800 tracking-tight cursor-pointer">
               سیب<span className="text-rose-500">‌شاپ</span>
             </span>
           </Link>
 
-          {/* فیلد ورودی سرچ دسکتاپ */}
-          <div className="flex items-center flex-1 max-w-2xl relative group pointer-events-auto">
+          <div className="flex items-center flex-1 max-w-2xl relative group">
             <Search className="absolute right-4 w-5 h-5 text-slate-400" />
             <input
               type="text"
@@ -199,52 +154,45 @@ export default function Header() {
             />
           </div>
 
-          {/* 🌟 بخش پروفایل هوشمند با منوی بازشو دسکتاپ */}
-          <div className="flex items-center gap-6 shrink-0 pointer-events-auto" ref={dropdownRef}>
+          <div className="flex items-center gap-6 shrink-0">
             {isLoggedIn ? (
-              <div className="relative">
+              /* ردیف حساب کاربری دسکتاپ با هاور پیشرفته */
+              <div 
+                className="relative"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              >
                 <button 
-                  onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                  className="flex items-center gap-1.5 text-sm font-bold text-slate-700 hover:text-rose-500 border border-slate-200 rounded-xl px-3.5 py-2 transition duration-200 bg-slate-50/50 cursor-pointer select-none"
+                  className={`flex items-center justify-between gap-1.5 text-sm font-bold text-slate-700 hover:text-rose-500 border border-slate-200 rounded-xl px-3.5 py-2 w-44 transition-all duration-200 bg-slate-50/50 cursor-pointer select-none ${isProfileDropdownOpen ? 'border-rose-200 bg-white shadow-xs' : ''}`}
                 >
-                  <User className="w-4 h-4 text-slate-500 stroke-[2.2]" />
-                  <span className="max-w-[120px] truncate">{getUserDisplayName()}</span>
-                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
+                  <div className="flex items-center gap-1.5 truncate">
+                    <User className="w-4 h-4 text-slate-500 shrink-0 stroke-[2.2]" />
+                    <span className="truncate">{getUserDisplayName()}</span>
+                  </div>
+                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform duration-300 ${isProfileDropdownOpen ? 'rotate-180 text-rose-500' : ''}`} />
                 </button>
 
-                {/* منوی بازشو اختصاصی دیجی‌کالایی */}
-                {isProfileDropdownOpen && (
-                  <div className="absolute top-[110%] left-0 w-56 bg-white border border-slate-100 shadow-[0_20px_40px_rgba(0,0,0,0.08)] rounded-2xl p-2 z-50 flex flex-col gap-0.5 animate-fade-in text-right">
-                    <Link 
-                      href="/profile" 
-                      className="flex items-center gap-2.5 px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-rose-500 rounded-xl transition"
-                    >
+                {/* درپ‌داون کاملاً هماهنگ از نظر اندازه و دارای افکت انیمیشن نرم */}
+                <div className={`absolute top-[100%] pt-1 left-0 w-full z-50 transition-all duration-250 origin-top text-right ${isProfileDropdownOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'}`}>
+                  <div className="bg-white border border-slate-100 shadow-xl rounded-xl p-1.5 flex flex-col gap-0.5">
+                    <Link href="/profile" className="flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-rose-500 rounded-lg transition">
                       <UserCheck className="w-4 h-4 stroke-[2.2]" />
                       <span>مشاهده حساب کاربری</span>
                     </Link>
-                    <Link 
-                      href="/profile/orders" 
-                      className="flex items-center gap-2.5 px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-rose-500 rounded-xl transition"
-                    >
+                    <Link href="/profile/orders" className="flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-rose-500 rounded-lg transition">
                       <Package className="w-4 h-4 stroke-[2.2]" />
                       <span>سفارش‌های من</span>
                     </Link>
                     <div className="h-[1px] bg-slate-100 my-1"></div>
-                    <button 
-                      onClick={handleLogout}
-                      className="flex items-center gap-2.5 px-3 py-2.5 text-xs font-bold text-rose-500 hover:bg-rose-50 rounded-xl transition w-full cursor-pointer"
-                    >
+                    <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-rose-500 hover:bg-rose-50 rounded-lg transition w-full cursor-pointer">
                       <LogOut className="w-4 h-4 stroke-[2.2]" />
                       <span>خروج از حساب</span>
                     </button>
                   </div>
-                )}
+                </div>
               </div>
             ) : (
-              <Link 
-                href="/login" 
-                className="flex items-center gap-1.5 text-sm font-bold text-slate-700 hover:text-rose-500 border border-slate-200 rounded-xl px-3.5 py-2 transition duration-200 bg-white"
-              >
+              <Link href="/login" className="flex items-center gap-1.5 text-sm font-bold text-slate-700 hover:text-rose-500 border border-slate-200 rounded-xl px-4 py-2 transition duration-200 bg-white">
                 <User className="w-4 h-4 stroke-[2.2]" />
                 <span>ورود | ثبت‌نام</span>
               </Link>
@@ -255,7 +203,7 @@ export default function Header() {
             <Link href="/cart" className="flex items-center justify-center p-2 text-slate-700 hover:text-rose-500 rounded-xl transition duration-200 relative">
               <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
               {cartCount > 0 && (
-                <span className="absolute -top-0.5 -left-0.5 bg-rose-500 text-white text-[10px] font-sans font-black w-5 h-5 rounded-full flex items-center justify-center shadow-xs animate-fade-in">
+                <span className="absolute -top-0.5 -left-0.5 bg-rose-500 text-white text-[10px] font-sans font-black w-5 h-5 rounded-full flex items-center justify-center shadow-xs">
                   {cartCount.toLocaleString('fa-IR')}
                 </span>
               )}
@@ -277,7 +225,7 @@ export default function Header() {
                       <Smartphone className="w-4 h-4 text-rose-500" />
                       <span>تلفن هوشمند</span>
                     </div>
-                    <ul className="space-y-2.5 font-medium text-slate-500 text-xs pr-5 border-r border-slate-100">
+                    <ul className="space-y-2.5 font-medium text-slate-500 text-xs pr-5 border-r border-slate-100 text-right">
                       <li className="hover:text-rose-500 transition">آیفون (Apple)</li>
                       <li className="hover:text-rose-500 transition">سامسونگ (Samsung)</li>
                       <li className="hover:text-rose-500 transition">شیائومی (Xiaomi)</li>
@@ -288,7 +236,7 @@ export default function Header() {
                       <Laptop className="w-4 h-4 text-blue-500" />
                       <span>لوازم جانبی</span>
                     </div>
-                    <ul className="space-y-2.5 font-medium text-slate-500 text-xs pr-5 border-r border-slate-100">
+                    <ul className="space-y-2.5 font-medium text-slate-500 text-xs pr-5 border-r border-slate-100 text-right">
                       <li className="hover:text-rose-500 transition">قاب و کاور گوشی</li>
                       <li className="hover:text-rose-500 transition">کابل و شارژر دیواری</li>
                       <li className="hover:text-rose-500 transition">پاوربانک اکسترنال</li>
@@ -299,7 +247,7 @@ export default function Header() {
                       <Headphones className="w-4 h-4 text-emerald-500" />
                       <span>صوتی و پوشیدنی</span>
                     </div>
-                    <ul className="space-y-2.5 font-medium text-slate-500 text-xs pr-5">
+                    <ul className="space-y-2.5 font-medium text-slate-500 text-xs pr-5 text-right">
                       <li className="hover:text-rose-500 transition">ایرپاد و هندزفری</li>
                       <li className="hover:text-rose-500 transition">ساعت هوشمند</li>
                     </ul>
@@ -315,7 +263,7 @@ export default function Header() {
       </header>
 
       {/* ========================================================================= */}
-      {/* ۲. هدر نسخه موبایل */}
+      {/* ۲. هدر موبایل */}
       {/* ========================================================================= */}
       <header className="md:hidden w-full fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-100 flex flex-col pt-3 pb-3 px-4 gap-3 shadow-xs">
         <div className="w-full flex items-center justify-between">
@@ -325,7 +273,8 @@ export default function Header() {
             </span>
           </Link>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            {/* دکمه پروفایل موبایل */}
             <Link 
               href={isLoggedIn ? "/profile" : "/login"} 
               className={`p-2 rounded-full transition ${isProfileActive ? 'text-rose-500 bg-rose-50' : 'text-slate-600 hover:bg-slate-50'}`}
@@ -333,14 +282,17 @@ export default function Header() {
               <User className="w-5 h-5 stroke-[2.2]" />
             </Link>
             
-            <button className="p-2 text-slate-600 hover:bg-slate-50 rounded-full relative transition">
+            {/* دکمه هوشمند زنگوله متصل به پیگیری وضعیت تعمیرات پلتفرم */}
+            <button 
+              onClick={() => setIsNotificationOpen(true)}
+              className={`p-2 rounded-full relative transition ${isNotificationOpen ? 'text-rose-500 bg-rose-50' : 'text-slate-600 hover:bg-slate-50'}`}
+            >
               <Bell className="w-5 h-5 stroke-[2.2]" />
-              <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-rose-500 rounded-full"></span>
+              <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></span>
             </button>
           </div>
         </div>
 
-        {/* باکس شبیه‌ساز سرچ در موبایل */}
         <div 
           onClick={() => setIsSearchModalOpen(true)}
           className="w-full relative flex items-center bg-slate-100 text-slate-400 text-xs font-semibold pr-11 pl-4 py-2.5 rounded-xl cursor-pointer select-none"
@@ -358,25 +310,16 @@ export default function Header() {
       {isSearchModalOpen && (
         <div 
           onClick={() => setIsSearchModalOpen(false)}
-          className={`fixed inset-0 bg-white md:bg-slate-900/40 md:backdrop-blur-xs z-[100] flex justify-center md:items-start md:pt-6 direction-rtl antialiased transition-opacity duration-300 ${
-            animateModal ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`fixed inset-0 bg-white md:bg-slate-900/40 md:backdrop-blur-xs z-[100] flex justify-center md:items-start md:pt-6 direction-rtl antialiased transition-opacity duration-300 ${animateModal ? 'opacity-100' : 'opacity-0'}`}
         >
           <div 
             onClick={(e) => e.stopPropagation()}
-            className={`w-full h-full md:h-auto md:max-w-3xl bg-white md:rounded-3xl md:shadow-2xl flex flex-col overflow-hidden transition-all duration-300 transform ${
-              animateModal ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
-            }`}
+            className={`w-full h-full md:h-auto md:max-w-3xl bg-white md:rounded-3xl md:shadow-2xl flex flex-col overflow-hidden transition-all duration-300 transform ${animateModal ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}
           >
-            {/* ردیف بالای فیلد سرچ اصلی */}
             <div className="px-4 py-3 md:px-5 md:py-4 border-b border-slate-100 flex items-center gap-3">
-              <button 
-                onClick={() => setIsSearchModalOpen(false)} 
-                className="md:hidden p-1.5 text-slate-700 hover:bg-slate-100 rounded-full transition shrink-0"
-              >
+              <button onClick={() => setIsSearchModalOpen(false)} className="md:hidden p-1.5 text-slate-700 hover:bg-slate-100 rounded-full transition shrink-0">
                 <ArrowRight className="w-6 h-6" />
               </button>
-
               <div className="relative flex-1 flex items-center">
                 <Search className="absolute right-4 w-5 h-5 text-rose-500" />
                 <input
@@ -384,51 +327,31 @@ export default function Header() {
                   autoFocus
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={handleKeyDown}
+                  onKeyDown={(e) => e.key === 'Enter' && executeSearch(searchQuery)}
                   placeholder="جستجو در همه کالاها..."
                   className="w-full bg-slate-50 text-base md:text-sm font-bold text-slate-800 pr-12 pl-12 py-3 md:py-3.5 rounded-2xl border-2 border-rose-500/10 focus:outline-none focus:border-rose-500 focus:bg-white transition"
                 />
                 {searchQuery && (
-                  <button 
-                    onClick={() => setSearchQuery('')}
-                    className="absolute left-4 p-1 text-slate-400 hover:text-slate-600 transition"
-                  >
+                  <button onClick={() => setSearchQuery('')} className="absolute left-4 p-1 text-slate-400 hover:text-slate-600 transition">
                     <X className="w-4 h-4" />
                   </button>
                 )}
               </div>
-
-              <button 
-                onClick={() => setIsSearchModalOpen(false)}
-                className="hidden md:flex p-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-500 rounded-xl transition"
-              >
+              <button onClick={() => setIsSearchModalOpen(false)} className="hidden md:flex p-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-500 rounded-xl transition">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* بدنه محتوایی لایو سرچ */}
             <div className="p-5 md:p-6 flex-1 overflow-y-auto max-h-[calc(100vh-80px)] md:max-h-[75vh] flex flex-col gap-6 text-right">
               {recentSearches.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-xs font-black text-slate-800">جستجوهای اخیر</span>
-                    <button 
-                      onClick={clearRecentSearches}
-                      className="text-[10px] font-bold text-slate-400 hover:text-rose-500 transition px-2 py-1 rounded-md"
-                    >
-                      پاک کردن
-                    </button>
+                    <button onClick={() => { setRecentSearches([]); localStorage.removeItem('sibshop_recent_searches'); }} className="text-[10px] font-bold text-slate-400 hover:text-rose-500 transition px-2 py-1 rounded-md">پاک کردن</button>
                   </div>
-
                   <div className="flex flex-wrap gap-2">
                     {recentSearches.map((search, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => executeSearch(search)}
-                        className="bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs font-bold px-3.5 py-2 rounded-xl border border-slate-100 transition"
-                      >
-                        {search}
-                      </button>
+                      <button key={idx} onClick={() => executeSearch(search)} className="bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs font-bold px-3.5 py-2 rounded-xl border border-slate-100 transition">{search}</button>
                     ))}
                   </div>
                 </div>
@@ -438,42 +361,57 @@ export default function Header() {
                 <span className="text-xs font-black text-slate-800 block mb-3">جستجوهای پرطرفدار</span>
                 <div className="flex flex-wrap gap-2">
                   {popularSearches.map((pop, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => executeSearch(pop)}
-                      className="bg-white hover:bg-rose-50/40 text-slate-700 text-xs font-black px-4 py-2 rounded-xl border border-slate-200/70 shadow-3xs flex items-center gap-1.5 transition"
-                    >
+                    <button key={idx} onClick={() => executeSearch(pop)} className="bg-white hover:bg-rose-50/40 text-slate-700 text-xs font-black px-4 py-2 rounded-xl border border-slate-200/70 shadow-3xs flex items-center gap-1.5 transition">
                       <span className="text-slate-300 text-[10px]">↗</span>
                       <span>{pop}</span>
                     </button>
                   ))}
                 </div>
               </div>
-
-              <div className="w-full mt-2">
-                <div className="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 rounded-2xl p-4 md:p-5 text-white relative overflow-hidden flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm select-none">
-                  <div className="z-10 flex flex-col gap-1">
-                    <span className="text-[9px] md:text-xs font-black bg-white/20 px-2.5 py-1 rounded-full w-max">این تابستون انجامش بدیم! ☀️</span>
-                    <p className="text-[10px] md:text-[11px] font-bold text-white/90">برای هر چیزی که تو این تابستون لازم داری روی سیب‌شاپ حساب کن</p>
-                  </div>
-                  <button 
-                    onClick={() => executeSearch('جانبی موبایل')}
-                    className="bg-slate-950/90 text-white text-[9px] md:text-[10px] font-black px-3.5 py-2 md:py-2.5 rounded-xl hover:bg-slate-950 transition z-10 shadow-xs shrink-0"
-                  >
-                    شروع خرید شگفت‌انگیز
-                  </button>
-                  <div className="absolute -right-10 -bottom-10 w-28 h-28 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
-                </div>
-              </div>
-
             </div>
-
           </div>
         </div>
       )}
 
       {/* ========================================================================= */}
-      {/* ۴. ناوبری پایین موبایل */}
+      {/* 🌟 ۴. کشوی لایو وضعیت تعمیرات موبایل و اطلاعیه‌ها (مخصوص موبایل) */}
+      {/* ========================================================================= */}
+      <div className={`fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-[150] transition-opacity duration-300 md:hidden ${isNotificationOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsNotificationOpen(false)}>
+        <div className={`fixed bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] p-6 max-h-[80vh] overflow-y-auto transition-transform duration-300 ease-out transform shadow-2xl text-right`} onClick={(e) => e.stopPropagation()}>
+          <div className="w-14 h-1.5 bg-slate-200 rounded-full mx-auto mb-5 cursor-pointer" onClick={() => setIsNotificationOpen(false)}></div>
+          
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-base font-black text-slate-800 flex items-center gap-2">
+              <Bell className="w-5 h-5 text-rose-500 stroke-[2.2]" />
+              <span>اطلاعیه‌ها و پیگیری تعمیرات</span>
+            </h3>
+            <button onClick={() => setIsNotificationOpen(false)} className="p-1.5 bg-slate-100 text-slate-500 rounded-full"><X className="w-4 h-4" /></button>
+          </div>
+
+          <div className="space-y-3.5 pb-6">
+            {/* کارت هوشمند فرضی وضعیت دستگاه در دست تعمیر */}
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-start gap-3">
+              <div className="p-2.5 bg-amber-50 rounded-xl text-amber-500 shrink-0"><Wrench className="w-5 h-5" /></div>
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-black text-slate-900">وضعیت پرونده تعمیرات دستگاه شما 📱</span>
+                <p className="text-[11px] font-medium text-slate-500 leading-5">گوشی آیفون شما در مرحله تست نهایی قطعات تعویض شده قرار دارد و تا یه‌مدت کوتاه دیگر آماده تحویل می‌شود.</p>
+                <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md w-max mt-1">در حال تست قطعه</span>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-start gap-3">
+              <div className="p-2.5 bg-rose-50 rounded-xl text-rose-500 shrink-0"><ShieldCheck className="w-5 h-5" /></div>
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-black text-slate-900">فعال‌سازی ۱۸ ماه گارانتی شرکتی</span>
+                <p className="text-[11px] font-medium text-slate-500 leading-5">خریدار گرامی، گارانتی طلایی دستگاه شما با موفقیت در سیستم مرکزی سیب‌شاپ ثبت و فعال گردید.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* ۵. ناوبری پایین موبایل */}
       {/* ========================================================================= */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] z-50 px-4 py-2 rounded-t-2xl">
         <div className="flex items-center justify-around text-slate-400">
@@ -489,33 +427,26 @@ export default function Header() {
             <div className="w-6 h-6 flex items-center justify-center relative">
               <ShoppingBag className="w-5 h-5 stroke-[2.2]" />
               {cartCount > 0 && (
-                <span className="absolute -top-1.5 -left-1.5 bg-rose-500 text-white text-[11px] font-sans font-black w-5 h-5 rounded-full flex items-center justify-center border border-white shadow-xs leading-none">
-                  {cartCount}
-                </span>
+                <span className="absolute -top-1.5 -left-1.5 bg-rose-500 text-white text-[11px] font-sans font-black w-5 h-5 rounded-full flex items-center justify-center border border-white shadow-xs leading-none">{cartCount}</span>
               )}
             </div>
             <span className="text-[10px] tracking-tight">سبد خرید</span>
           </Link>
 
-          <Link 
-            href={isLoggedIn ? "/profile" : "/login"} 
-            className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${isProfileActive ? 'text-rose-500 font-bold' : 'text-slate-400 font-medium hover:text-slate-700'}`}
-          >
+          <Link href={isLoggedIn ? "/profile" : "/login"} className={`flex flex-col items-center gap-1 min-w-[60px] py-1 transition duration-200 ${isProfileActive ? 'text-rose-500 font-bold' : 'text-slate-400 font-medium hover:text-slate-700'}`}>
             <User className={`w-5 h-5 transition duration-200 ${isProfileActive ? 'text-rose-500 stroke-[2.5]' : 'stroke-[2.2]'}`} />
-            <span className="text-[10px] tracking-tight">
-              {isLoggedIn ? "پروفایل" : "ورود"}
-            </span>
+            <span className="text-[10px] tracking-tight">{isLoggedIn ? "پروفایل" : "ورود"}</span>
           </Link>
         </div>
       </nav>
 
-      {/* منوی کشویی دسته‌بندی موبایل */}
+      {/* منوی دسته‌بندی موبایل */}
       <div className={`fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 transition-opacity duration-300 md:hidden ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsMobileMenuOpen(false)}>
-        <div className={`fixed bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] p-6 max-h-[85vh] overflow-y-auto transition-transform duration-300 ease-out transform shadow-[0_-10px_40px_rgba(0,0,0,0.12)] ${isMobileMenuOpen ? 'translate-y-0' : 'translate-y-full'}`} onClick={(e) => e.stopPropagation()}>
+        <div className={`fixed bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] p-6 max-h-[85vh] overflow-y-auto transition-transform duration-300 ease-out transform shadow-2xl text-right`} onClick={(e) => e.stopPropagation()}>
           <div className="w-14 h-1.5 bg-slate-200 rounded-full mx-auto mb-5 cursor-pointer" onClick={() => setIsMobileMenuOpen(false)}></div>
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-base font-black text-slate-800">دسته‌بندی محصولات سیب‌شاپ</h3>
-            <button onClick={() => setIsMobileMenuOpen(false)} className="p-1.5 bg-slate-100 text-slate-500 rounded-full hover:bg-slate-200 transition"><X className="w-4 h-4" /></button>
+            <button onClick={() => setIsMobileMenuOpen(false)} className="p-1.5 bg-slate-100 text-slate-500 rounded-full"><X className="w-4 h-4" /></button>
           </div>
           <div className="space-y-5 pb-8">
             <div className="bg-slate-50/60 p-4 rounded-2xl border border-slate-100">

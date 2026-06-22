@@ -53,7 +53,7 @@ function ProductsContent() {
       }
     }
     fetchProducts();
-  }, [searchQuery, categoryQuery, subCategoryQuery]); // 👈 گوش به زنگ برای تغییر هر کدام از فیلترها
+  }, [searchQuery, categoryQuery, subCategoryQuery]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
@@ -122,6 +122,10 @@ function ProductsContent() {
               const priceNum = attr.price || 0;
               const oldPriceNum = attr.oldPrice || null;
               
+              // 📦 ارزیابی وضعیت موجودی انبار
+              const stockCount = attr.stock !== undefined ? Number(attr.stock) : 1;
+              const isAvailable = stockCount > 0;
+              
               let discountPercent = 0;
               if (oldPriceNum && oldPriceNum > priceNum) {
                 discountPercent = Math.round(((oldPriceNum - priceNum) / oldPriceNum) * 100);
@@ -139,28 +143,37 @@ function ProductsContent() {
                 id: id,
                 name: name,
                 price: Number(priceNum),
-                imageUrl: imgUrl
+                imageUrl: imgUrl,
+                stock: stockCount // 🚀 پاس دادن مقدار انبار برای کانتکست سبد خرید
               };
 
               return (
                 <div 
                   key={id}
-                  className="group bg-white border border-slate-100 rounded-xl md:rounded-3xl p-2.5 md:p-4 flex flex-col justify-between transition-all duration-300 hover:shadow-[0_12px_24px_rgba(0,0,0,0.03)] hover:border-slate-200 relative overflow-hidden"
+                  className={`group bg-white border border-slate-100 rounded-xl md:rounded-3xl p-2.5 md:p-4 flex flex-col justify-between transition-all duration-300 hover:shadow-[0_12px_24px_rgba(0,0,0,0.03)] hover:border-slate-200 relative overflow-hidden ${!isAvailable ? 'opacity-80' : ''}`}
                 >
-                  <Link href={`/product/${attr.slug || id}`} className="block w-full">
-                    {discountPercent > 0 && (
+                  <Link href={`/product/${attr.slug || id}`} className="block w-full relative">
+                    {/* برچسب درصد تخفیف - فقط در صورت موجود بودن کالا نشان داده می‌شود */}
+                    {discountPercent > 0 && isAvailable && (
                       <div className="absolute top-2 right-2 bg-rose-500 text-white text-[8px] md:text-[10px] font-black px-1.5 md:px-2 py-0.5 rounded-lg z-10">
                         ٪{discountPercent.toLocaleString('fa-IR')}
                       </div>
                     )}
 
-                    <div className="w-full h-24 md:h-40 flex items-center justify-center mb-2 bg-slate-50/40 rounded-lg md:rounded-2xl p-2 md:p-3 group-hover:scale-[1.02] transition-transform duration-300">
+                    {/* برچسب اختصاصی کالای ناموجود */}
+                    {!isAvailable && (
+                      <div className="absolute top-2 right-2 bg-slate-400 text-white text-[8px] md:text-[9px] font-black px-2 py-0.5 rounded-lg z-10 select-none">
+                        ناموجود
+                      </div>
+                    )}
+
+                    <div className="w-full h-24 md:h-40 flex items-center justify-center mb-2 bg-slate-50/40 rounded-lg md:rounded-2xl p-2 md:p-3 group-hover:scale-[1.02] transition-transform duration-300 relative">
                       {imgUrl ? (
                         <img 
                           src={imgUrl} 
                           alt={name}
                           referrerPolicy="no-referrer-when-downgrade"
-                          className="max-h-20 md:max-h-32 object-contain filter drop-shadow-3xs select-none"
+                          className={`max-h-20 md:max-h-32 object-contain filter drop-shadow-3xs select-none ${!isAvailable ? 'grayscale opacity-50' : ''}`}
                         />
                       ) : (
                         <span className="text-2xl md:text-4xl select-none">📱</span>
@@ -175,26 +188,39 @@ function ProductsContent() {
                   </Link>
 
                   <div className="mt-2 md:mt-3 pt-1.5 border-t border-slate-50 flex flex-col gap-0.5 w-full text-right">
-                    {oldPriceNum && (
-                      <span className="text-[8px] md:text-[10px] text-slate-400 font-medium line-through pr-1">
-                        {oldPriceNum.toLocaleString('fa-IR')}
-                      </span>
-                    )}
-                    
-                    <div className="flex items-center justify-between w-full mt-0.5">
-                      <div className="text-[10px] md:text-sm font-black text-slate-950 flex items-center gap-0.5">
-                        <span>{priceNum.toLocaleString('fa-IR')}</span>
-                        <span className="text-[8px] md:text-[9px] font-normal text-slate-400 mr-0.5">تومان</span>
+                    {/* اگر محصول موجود باشد قیمت رندر می‌شود، در غیر این صورت فیلد کلاً مخفی می‌گردد */}
+                    {isAvailable ? (
+                      <>
+                        {oldPriceNum && (
+                          <span className="text-[8px] md:text-[10px] text-slate-400 font-medium line-through pr-1">
+                            {oldPriceNum.toLocaleString('fa-IR')}
+                          </span>
+                        )}
+                        
+                        <div className="flex items-center justify-between w-full mt-0.5">
+                          <div className="text-[10px] md:text-sm font-black text-slate-950 flex items-center gap-0.5">
+                            <span>{priceNum.toLocaleString('fa-IR')}</span>
+                            <span className="text-[8px] md:text-[9px] font-normal text-slate-400 mr-0.5">تومان</span>
+                          </div>
+                          
+                          <button 
+                            onClick={() => addToCart(cleanProductData)}
+                            className="bg-slate-50 text-slate-600 hover:bg-rose-500 hover:text-white w-5 h-5 md:w-7 md:h-7 rounded-md md:rounded-lg flex items-center justify-center font-bold text-xs transition-all duration-200 border border-slate-100 cursor-pointer"
+                            title="افزودن به سبد خرید"
+                          >
+                            ＋
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      /* ساختار شکیل دارک/خاکستری برای المان‌های پایین کارت در زمان عدم موجودی */
+                      <div className="flex items-center justify-between w-full mt-2 py-0.5">
+                        <span className="text-[10px] md:text-xs font-bold text-slate-400">اتمام موجودی</span>
+                        <div className="bg-slate-100 text-slate-400 text-[9px] md:text-[10px] font-black px-2.5 py-1 rounded-lg select-none cursor-not-allowed">
+                          غیرقابل خرید
+                        </div>
                       </div>
-                      
-                      <button 
-                        onClick={() => addToCart(cleanProductData)}
-                        className="bg-slate-50 text-slate-600 hover:bg-rose-500 hover:text-white w-5 h-5 md:w-7 md:h-7 rounded-md md:rounded-lg flex items-center justify-center font-bold text-xs transition-all duration-200 border border-slate-100"
-                        title="افزودن به سبد خرید"
-                      >
-                        ＋
-                      </button>
-                    </div>
+                    )}
                   </div>
 
                 </div>

@@ -28,7 +28,7 @@ export function CartProvider({ children }) {
     }
   }, [cartItems]);
 
-  // ۳. تابع اضافه کردن محصول به سبد خرید با بررسی سقف موجودی انبار
+  // ۳. تابع اضافه کردن محصول به سبد خرید با بررسی سقف موجودی انبار (بی‌صدا و بدون آلرت)
   const addToCart = (product, quantity = 1) => {
     // 📦 استخراج موجودی واقعی محصول از دیتای استراپی (اگر تعریف نشده بود، فرض بر ۱ است)
     const availableStock = product.stock !== undefined ? Number(product.stock) : 99;
@@ -39,30 +39,28 @@ export function CartProvider({ children }) {
       if (exists) {
         const nextQuantity = exists.quantity + quantity;
 
-        // ⚠️ بررسی تجاوز از سقف انبار
+        // 🤫 قفل بی‌صدا: اگر تعداد درخواستی جدید از سقف انبار بیشتر شد، بدون خطای مزاحم متوقفش کن
         if (nextQuantity > availableStock) {
-          alert(`خطا: حداکثر موجودی این کالا در انبار سیب‌شاپ ${availableStock} عدد است.`);
-          return prevItems; // سبد تغییر نمی‌کند
+          return prevItems; 
         }
 
-        // اگر کالا بود و سقف مجاز بود، تعدادش را زیاد کن
+        // اگر سقف مجاز بود، تعدادش را زیاد کن
         return prevItems.map((item) =>
           item.id === product.id ? { ...item, quantity: nextQuantity } : item
         );
       }
 
-      // ⚠️ بررسی تجاوز از سقف انبار برای کالای جدید
+      // 🤫 قفل بی‌صدا برای کالای جدید
       if (quantity > availableStock) {
-        alert(`خطا: حداکثر موجودی این کالا در انبار سیب‌شاپ ${availableStock} عدد است.`);
         return prevItems;
       }
 
-      // اگر کالا نبود و سقف مجاز بود، جدید اضافه‌اش کن (به همراه ذخیره فیلد stock برای کنترل‌های بعدی)
+      // اگر کالا نبود و سقف مجاز بود، جدید اضافه‌اش کن
       return [...prevItems, { ...product, stock: availableStock, quantity }];
     });
   };
 
-  // ۴. تابع افزایش مستقیم تعداد کالا از داخل صفحه سبد خرید با بررسی انبار
+  // ۴. تابع افزایش مستقیم تعداد کالا با بررسی دقیق و بی‌صدای انبار
   const incrementQuantity = (id) => {
     setCartItems((prevItems) => {
       const targetItem = prevItems.find((item) => item.id === id);
@@ -70,8 +68,8 @@ export function CartProvider({ children }) {
 
       const availableStock = targetItem.stock !== undefined ? Number(targetItem.stock) : 99;
 
+      // 🤫 قفل بی‌صدا: دکمه فرانت غیرفعال است، اما اگر باز هم کلیک شد جلویش را بگیر
       if (targetItem.quantity + 1 > availableStock) {
-        alert(`خطا: امکان افزودن تعداد بیشتر وجود ندارد. موجودی انبار: ${availableStock} عدد`);
         return prevItems;
       }
 
@@ -108,8 +106,9 @@ export function CartProvider({ children }) {
     <CartContext.Provider
       value={{
         cartItems,
+        setCartItems, // 🚀 ارسال مستقیم این متد برای پاکسازی سبد خرید در صفحه تسویه حساب
         addToCart,
-        incrementQuantity, // 🚀 اضافه شدن متد افزایش تعداد امن
+        incrementQuantity, 
         removeFromCart,
         clearItem,
         cartCount,

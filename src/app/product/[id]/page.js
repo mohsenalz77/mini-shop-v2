@@ -2,13 +2,13 @@ import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
 import ProductDetailClient from './ProductDetailClient';
 
-// تابع فچ با سینتکس پاپولیت عمیق استاندارد استراپی ۴
+// تابع فچ کردن اطلاعات تک محصول با پاپولیت همه‌جانبه استراپی ۴
 async function getSingleProductBySlug(slug) {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://b.dr-sib.xyz/api";
     
-    // 🚀 سینتکس دقیق استراپی ۴ برای باز کردن لایه دوم (options) بدون خراب کردن فیلتر اسلاگ
-    const url = `${apiUrl}/products?filters[slug][$eq]=${slug}&populate[image]=*&populate[gallery]=*&populate[attributes][populate]=*&populate[attributes][on][product-attributes.product-variant][populate][options]=*`;
+    // 🔗 پاپولیت کامل لایه اول و دوم برای باز کردن فیلد گزینه‌های تودرتو
+    const url = `${apiUrl}/products?filters[slug][$eq]=${slug}&populate[image]=*&populate[gallery]=*&populate[attributes][populate]=*`;
     
     console.log("🔗 Standard Strapi 4 Deep Fetch URL:", url);
 
@@ -27,7 +27,6 @@ async function getSingleProductBySlug(slug) {
       return data.data[0];
     }
     
-    console.warn(`⚠️ No product found in Strapi 4 for slug: "${slug}"`);
     return null;
   } catch (error) {
     console.error("❌ Fetch Exception:", error);
@@ -44,11 +43,7 @@ export default async function ProductDetailPage({ params }) {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col justify-between direction-rtl">
         <Header />
-        <div className="text-center py-20 text-slate-500 font-bold">
-          <p>محصول مورد نظر یافت نشد.</p>
-          <p className="text-xs text-slate-400 font-normal mt-2">اسلاگ درخواستی: {slug}</p>
-          <p className="text-xs text-rose-500 font-normal mt-1">اگر پس از اعمال این کد باز هم خطا گرفتید، احتمالاً نام کامپوننت یا فیلد گزینه‌ها در استراپی متفاوت است.</p>
-        </div>
+        <div className="text-center py-20 text-slate-500 font-bold">محصول مورد نظر یافت نشد.</div>
         <Footer />
       </div>
     );
@@ -102,43 +97,48 @@ export default async function ProductDetailPage({ params }) {
     }
   }
 
-  // 🔄 ۳. استخراج اجزای داینامیک زون
+  // 🔄 ۳. استخراج اجزای داینامیک زون با انعطاف‌پذیری بالا برای استراپی ۴
   let extractedSpecs = [];
   let dynamicVariants = [];
 
   if (dynamicAttributes && Array.isArray(dynamicAttributes)) {
     dynamicAttributes.forEach(attr => {
-      if (attr.__component === 'product-attributes.specification') {
+      // مشخصات فنی
+      if (attr.__component?.includes('specification')) {
         extractedSpecs.push({
           title: attr.title,
           value: attr.value
         });
       }
       
-      if (attr.__component === 'product-attributes.product-variant') {
+      // تنوع کالا و قیمت‌ها
+      if (attr.__component?.includes('product-variant')) {
+        // پیدا کردن فیلد گزینه‌ها چه با نام options و چه فیلدهای دیگر درون آبجکت کامپوننت
+        const optionsArray = attr.options || attr.VariantOption || attr.variant_options || [];
+        
         dynamicVariants.push({
           price: attr.price,
           stock: attr.stock,
-          options: attr.options || [] 
+          options: optionsArray
         });
       }
     });
   }
 
-  // ۴. آرایه‌های فرانت‌اَند کلاینت (Color, Storage, Size)
+  // ۴. استخراج گزینه‌های فرانت‌اَند کلاینت (Color, Storage, Size)
   const allOptions = dynamicVariants.flatMap(v => v.options || []);
   
-  const extractedColors = Array.from(new Set(allOptions.filter(o => o.type === 'Color').map(o => o.value)))
+  const extractedColors = Array.from(new Set(allOptions.filter(o => o.type === 'Color' || o.type === 'رنگ').map(o => o.value)))
     .map(colorVal => {
-      const matchedOpt = allOptions.find(o => o.type === 'Color' && o.value === colorVal);
+      const matchedOpt = allOptions.find(o => (o.type === 'Color' || o.type === 'رنگ') && o.value === colorVal);
       return {
         name: colorVal,
         class: matchedOpt?.meta_color || 'bg-slate-200'
       };
     });
 
-  const extractedStorages = Array.from(new Set(allOptions.filter(o => o.type === 'Storage').map(o => o.value)));
-  const extractedSizes = Array.from(new Set(allOptions.filter(o => o.type === 'Size').map(o => o.value)));
+  const extractedStorages = Array.from(new Set(allOptions.filter(o => o.type === 'Storage' || o.type === 'حافظه').map(o => o.value)));
+  const extractedSizes = Array.from(new Set(allOptions.filter(o => o.type === 'Size' || o.type === 'سایز').map(o => o.value)));
 
   const productData = {
     id: id,

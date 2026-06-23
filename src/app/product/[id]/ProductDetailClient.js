@@ -290,6 +290,17 @@ export default function ProductDetailClient({ productData }) {
                 </div>
               )}
 
+              {/* ⚡ بنر مینی‌مال پرکننده فضای میانی کارت */}
+              <div className="border-t border-slate-100/80 pt-4">
+                <div className="bg-blue-50/40 border border-blue-100/70 rounded-2xl p-3 flex items-center justify-between text-right select-none">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[11px] font-black text-blue-900">🚀 تحویل اکسپرس سیب‌شاپ</span>
+                    <span className="text-[10px] text-blue-700/80 font-bold">ارسال فوری به سراسر کشور</span>
+                  </div>
+                  <span className="text-xl">📦</span>
+                </div>
+              </div>
+
               {isAvailable && stockCount < 5 && (
                 <div className="mt-2 bg-amber-50 border border-amber-200/50 text-amber-800 px-4 py-2.5 rounded-xl text-xs font-bold">
                   ⚠️ تنها {stockCount.toLocaleString('fa-IR')} عدد از این ترکیب در انبار باقی مانده!
@@ -297,18 +308,20 @@ export default function ProductDetailClient({ productData }) {
               )}
             </div>
 
-            {/* کادر ویژگی‌های کلیدی متصل به لنگر پایین صفحه */}
-            <div className="mt-8 pt-4 border-t border-slate-100">
-              <span className="text-xs font-black text-slate-800 block mb-3">ویژگی‌های کلیدی محصول:</span>
-              <div className="grid grid-cols-1 gap-2.5">
-                {productData?.specs?.map((spec, index) => (
-                  <div key={index} className="flex justify-between bg-slate-50/60 px-4 py-3 rounded-xl border border-slate-100/50 transition-all hover:bg-slate-100/80">
-                    <span className="text-xs font-bold text-slate-400">{spec.title}</span>
-                    <span className="text-xs font-black text-slate-700">{spec.value}</span>
-                  </div>
-                ))}
+            {/* کادر ویژگی‌های کلیدی متصل به لنگر پایین صفحه (محدود شده به نمایش حداکثر ۳ ویژگی) */}
+            {productData?.specs && productData.specs.length > 0 && (
+              <div className="mt-8 pt-4 border-t border-slate-100">
+                <span className="text-xs font-black text-slate-800 block mb-3">ویژگی‌های کلیدی محصول:</span>
+                <div className="grid grid-cols-1 gap-2.5">
+                  {productData.specs.slice(0, 3).map((spec, index) => (
+                    <div key={index} className="flex justify-between bg-slate-50/60 px-4 py-3 rounded-xl border border-slate-100/50 transition-all hover:bg-slate-100/80">
+                      <span className="text-xs font-bold text-slate-400">{spec.title}</span>
+                      <span className="text-xs font-black text-slate-700">{spec.value}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* ستون سوم: باکس خرید */}

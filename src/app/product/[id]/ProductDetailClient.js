@@ -200,83 +200,113 @@ export default function ProductDetailClient({ productData }) {
             )}
           </div>
 
-          {/* 📱 ستون دوم: مشخصات تفکیک‌شده و ویژگی‌ها (بهینه‌سازی شده برای توزیع متوازن فضا) */}
-          <div className="lg:col-span-4 bg-white border border-slate-100 rounded-3xl p-5 flex flex-col justify-between min-h-[420px] lg:h-[520px] shadow-2xs text-right">
-            <div className="h-full flex flex-col justify-start gap-4">
+          {/* 📱 ستون دوم: مشخصات تفکیک‌شده و ویژگی‌ها (طراحی پرکننده و دلباز به سبک دیجی‌کالا) */}
+          <div className="lg:col-span-4 bg-white border border-slate-100 rounded-3xl p-6 flex flex-col justify-between h-fit lg:min-h-[520px] shadow-2xs text-right">
+            <div className="h-full flex flex-col justify-start gap-5">
+              {/* بخش عنوان کالا */}
               <div>
-                <h1 className="text-sm md:text-base lg:text-lg font-black text-slate-900 leading-6 md:leading-7 mb-1">{productData?.name}</h1>
-                <p className="text-[10px] font-bold text-slate-400 mb-4">سیب‌شاپ | اصالت تضمینی کالا</p>
-
-                {/* انتخاب ظرفیت */}
-                {productData?.storages && productData.storages.length > 0 && (
-                  <div className="mb-4 bg-slate-50/50 p-3 rounded-2xl border border-slate-100/60">
-                    <span className="text-[11px] font-black text-slate-800 block mb-2">انتخاب ظرفیت:</span>
-                    <div className="flex flex-wrap gap-2">
-                      {productData.storages.map((storage, idx) => (
-                        <button key={idx} onClick={() => setSelectedStorage(idx)} className={`px-3 py-1.5 rounded-xl text-[10px] font-bold border transition ${selectedStorage === idx ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}>{storage}</button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* انتخاب سایز ساعت هوشمند */}
-                {productData?.sizes && productData.sizes.length > 0 && (
-                  <div className="mb-4 bg-slate-50/50 p-3 rounded-2xl border border-slate-100/60">
-                    <span className="text-[11px] font-black text-slate-800 block mb-2">اندازه قاب ساعت:</span>
-                    <div className="flex flex-wrap gap-2">
-                      {productData.sizes.map((size, idx) => (
-                        <button key={idx} onClick={() => setSelectedSize(idx)} className={`px-3 py-1.5 rounded-xl text-[10px] font-bold border transition ${selectedSize === idx ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}>{size}</button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* 🎨 انتخاب رنگ هوشمند بر اساس کلید نام فارسی */}
-                {productData?.colors && productData.colors.length > 0 && (
-                  <div className="mb-4 bg-slate-50/50 p-3 rounded-2xl border border-slate-100/60">
-                    <span className="text-[11px] font-black text-slate-800 block mb-2">رنگ: {productData.colors?.[selectedColor]?.name || ''}</span>
-                    <div className="flex items-center gap-2.5">
-                      {productData.colors.map((color, index) => {
-                        const cleanColorName = color.name.trim();
-                        const calculatedBg = colorMap[cleanColorName] || (color.class?.startsWith('#') ? color.class : '#cbd5e1');
-                        
-                        return (
-                          <button 
-                            key={index} 
-                            onClick={() => {
-                              setSelectedColor(index);
-                              if (allImages[index]) {
-                                setActiveImage(allImages[index]);
-                              }
-                            }} 
-                            className={`w-7 h-7 rounded-full border border-slate-300/70 transition-all ${selectedColor === index ? 'border-rose-500 scale-110 ring-4 ring-rose-500/10 shadow-sm' : 'hover:border-slate-500'}`} 
-                            style={{ backgroundColor: calculatedBg }}
-                            title={cleanColorName}
-                          />
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {isAvailable && stockCount < 5 && (
-                  <div className="mt-3 bg-amber-50 border border-amber-200/60 text-amber-700 px-3 py-2 rounded-xl text-[11px] font-black">
-                    ⚠️ تنها {stockCount.toLocaleString('fa-IR')} عدد از این ترکیب در انبار باقی مانده!
-                  </div>
-                )}
+                <h1 className="text-lg md:text-xl lg:text-2xl font-extrabold text-slate-900 leading-8 tracking-tight mb-2">
+                  {productData?.name}
+                </h1>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">اصالت تضمینی</span>
+                  <p className="text-xs font-bold text-slate-400">سیب‌شاپ | مشخصات و گارانتی رسمی</p>
+                </div>
               </div>
 
-              {/* کادر مشخصات فنی کلیدی متصل به لنگر پایین جهت پر کردن فضای مرده */}
-              <div className="mt-auto pt-4 border-t border-slate-100">
-                <span className="text-[11px] font-black text-slate-800 block mb-2.5">ویژگی‌های کلیدی محصول:</span>
-                <div className="grid grid-cols-1 gap-2">
-                  {productData?.specs?.map((spec, index) => (
-                    <div key={index} className="flex justify-between bg-slate-50/80 px-4 py-2.5 rounded-xl border border-slate-100/50 transition-all hover:bg-slate-100/60">
-                      <span className="text-[11px] font-bold text-slate-400">{spec.title}</span>
-                      <span className="text-xs font-black text-slate-800">{spec.value}</span>
-                    </div>
-                  ))}
+              {/* انتخاب ظرفیت حافظه */}
+              {productData?.storages && productData.storages.length > 0 && (
+                <div className="border-t border-slate-100/80 pt-4">
+                  <span className="text-xs font-black text-slate-800 block mb-3">انتخاب ظرفیت:</span>
+                  <div className="flex flex-wrap gap-2.5">
+                    {productData.storages.map((storage, idx) => (
+                      <button 
+                        key={idx} 
+                        onClick={() => setSelectedStorage(idx)} 
+                        className={`px-4 py-2 rounded-xl text-xs font-extrabold border transition-all duration-200 ${
+                          selectedStorage === idx 
+                            ? 'bg-slate-900 text-white border-slate-900 shadow-xs' 
+                            : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                        }`}
+                      >
+                        {storage}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+              )}
+
+              {/* انتخاب سایز ساعت هوشمند */}
+              {productData?.sizes && productData.sizes.length > 0 && (
+                <div className="border-t border-slate-100/80 pt-4">
+                  <span className="text-xs font-black text-slate-800 block mb-3">اندازه قاب ساعت:</span>
+                  <div className="flex flex-wrap gap-2.5">
+                    {productData.sizes.map((size, idx) => (
+                      <button 
+                        key={idx} 
+                        onClick={() => setSelectedSize(idx)} 
+                        className={`px-4 py-2 rounded-xl text-xs font-extrabold border transition-all duration-200 ${
+                          selectedSize === idx 
+                            ? 'bg-slate-900 text-white border-slate-900 shadow-xs' 
+                            : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 🎨 انتخاب رنگ هوشمند متصل به نقشه رنگی */}
+              {productData?.colors && productData.colors.length > 0 && (
+                <div className="border-t border-slate-100/80 pt-4">
+                  <span className="text-xs font-black text-slate-800 block mb-3">
+                    رنگ: <span className="text-slate-500 font-bold">{productData.colors?.[selectedColor]?.name || ''}</span>
+                  </span>
+                  <div className="flex items-center gap-3">
+                    {productData.colors.map((color, index) => {
+                      const cleanColorName = color.name.trim();
+                      const calculatedBg = colorMap[cleanColorName] || (color.class?.startsWith('#') ? color.class : '#cbd5e1');
+                      
+                      return (
+                        <button 
+                          key={index} 
+                          onClick={() => {
+                            setSelectedColor(index);
+                            if (allImages[index]) {
+                              setActiveImage(allImages[index]);
+                            }
+                          }} 
+                          className={`w-8 h-8 rounded-full border border-slate-300/60 transition-all duration-200 ${
+                            selectedColor === index ? 'border-rose-500 scale-110 ring-4 ring-rose-500/15 shadow-md' : 'hover:border-slate-500'
+                          }`} 
+                          style={{ backgroundColor: calculatedBg }}
+                          title={cleanColorName}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {isAvailable && stockCount < 5 && (
+                <div className="mt-2 bg-amber-50 border border-amber-200/50 text-amber-800 px-4 py-2.5 rounded-xl text-xs font-bold">
+                  ⚠️ تنها {stockCount.toLocaleString('fa-IR')} عدد از این ترکیب در انبار باقی مانده!
+                </div>
+              )}
+            </div>
+
+            {/* کادر ویژگی‌های کلیدی متصل به لنگر پایین صفحه */}
+            <div className="mt-8 pt-4 border-t border-slate-100">
+              <span className="text-xs font-black text-slate-800 block mb-3">ویژگی‌های کلیدی محصول:</span>
+              <div className="grid grid-cols-1 gap-2.5">
+                {productData?.specs?.map((spec, index) => (
+                  <div key={index} className="flex justify-between bg-slate-50/60 px-4 py-3 rounded-xl border border-slate-100/50 transition-all hover:bg-slate-100/80">
+                    <span className="text-xs font-bold text-slate-400">{spec.title}</span>
+                    <span className="text-xs font-black text-slate-700">{spec.value}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

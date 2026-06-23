@@ -41,18 +41,33 @@ export default async function ProductDetailPage({ params }) {
     );
   }
 
-  // استخراج مشخصات اصلی از دیتای استراپی
+  // استخراج مشخصات اصلی از دیتای استراپی (شامل فیلد جدید gallery)
   const attributes = apiProduct.attributes || apiProduct;
-  const { title, price, oldPrice, description, image, stock } = attributes;
+  const { title, price, oldPrice, description, image, gallery, stock } = attributes;
 
-  // 🚀 اصلاح بنیادی: خواندن آدرس پایه از دامنه امن متغیر محیطی ورسل به جای آی‌پی قدیمی
+  // آدرس پایه برای تصاویر استراپی
   const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || "https://b.dr-sib.xyz";
   
+  // 📸 ۱. پردازش و استخراج عکس اصلی (Single Media)
   const imgData = image?.data;
   const hasImage = imgData?.attributes?.url || imgData?.url;
   const safeImageUrl = hasImage 
     ? `${strapiUrl}${imgData?.attributes?.url || imgData?.url}`
     : null;
+
+  // 🖼️ ۲. پردازش هوشمند آلبوم تصاویر (Multiple Media)
+  const galleryData = gallery?.data;
+  let albumUrls = [];
+
+  // بررسی می‌کنیم که آیا دیتا وجود دارد و به صورت آرایه (چند عکسه) است یا خیر
+  if (galleryData && Array.isArray(galleryData)) {
+    albumUrls = galleryData
+      .map(img => {
+        const url = img.attributes?.url || img.url;
+        return url ? `${strapiUrl}${url}` : null;
+      })
+      .filter(Boolean); // حذف مقادیر null یا ارورهای احتمالی URL
+  }
 
   // 🛠️ فیکس استراپی ۵: تبدیل ساختار جدید بلاک‌های متنی به استرینگ ساده جهت جلوگیری از کرش رندر
   let cleanDescription = "توضیحاتی برای این محصول در استراپی وارد نشده است.";
@@ -71,11 +86,12 @@ export default async function ProductDetailPage({ params }) {
   const productData = {
     id: apiProduct.id,
     name: title,
-    imageUrl: safeImageUrl, 
+    imageUrl: safeImageUrl, // عکس شاخص اصلی
+    imagesAlbum: albumUrls, // 👈 آرایه تصاویر آلبوم گالری (اگر نباشد، آرایه خالی [] فرستاده می‌شود)
     englishName: 'Apple Flagship Device', 
     price: price ? Number(price).toLocaleString('fa-IR') : '۰',
     oldPrice: oldPrice ? Number(oldPrice).toLocaleString('fa-IR') : null,
-    // 🚀 پاس دادن مقدار خام انبار برای کنترل دکمه افزودن و سقف خرید فرانت‌اند
+    // پاس دادن مقدار خام انبار برای کنترل دکمه افزودن و سقف خرید فرانت‌اند
     stock: stock !== undefined ? Number(stock) : 1,
     rating: '۴.۹',
     reviewCount: '۱ دیدگاه',

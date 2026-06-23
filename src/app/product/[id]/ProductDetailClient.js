@@ -1,3 +1,6 @@
+این هم نسخهٔ کاملاً بهینه‌سازی شده، شیک و یکپارچهٔ فایل **`src/app/product/[id]/ProductDetailClient.js`** که فضای خالی ستون وسط را با انتقال کارت مشخصات فنی پویا به پایین ستون (`mt-auto`) و بالانس پدینگ‌ها کاملاً پر و متوازن می‌کند:
+
+```jsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -200,17 +203,17 @@ export default function ProductDetailClient({ productData }) {
             )}
           </div>
 
-          {/* ستون دوم: مشخصات تفکیک‌شده و ویژگی‌ها */}
-          <div className="lg:col-span-4 bg-white border border-slate-100 rounded-3xl p-5 flex flex-col justify-between min-h-[380px] md:h-[520px] shadow-2xs text-right">
-            <div className="h-full flex flex-col justify-between gap-3">
+          {/* 📱 ستون دوم: مشخصات تفکیک‌شده و ویژگی‌ها (بهینه‌سازی شده برای توزیع متوازن فضا) */}
+          <div className="lg:col-span-4 bg-white border border-slate-100 rounded-3xl p-5 flex flex-col justify-between min-h-[420px] lg:h-[520px] shadow-2xs text-right">
+            <div className="h-full flex flex-col justify-start gap-4">
               <div>
                 <h1 className="text-sm md:text-base lg:text-lg font-black text-slate-900 leading-6 md:leading-7 mb-1">{productData?.name}</h1>
-                <p className="text-[10px] font-bold text-slate-400 mb-2.5">سیب‌شاپ | اصالت تضمینی کالا</p>
+                <p className="text-[10px] font-bold text-slate-400 mb-4">سیب‌شاپ | اصالت تضمینی کالا</p>
 
                 {/* انتخاب ظرفیت */}
                 {productData?.storages && productData.storages.length > 0 && (
-                  <div className="mb-3 bg-slate-50/50 p-2.5 rounded-2xl border border-slate-100/60">
-                    <span className="text-[11px] font-black text-slate-800 block mb-1.5">انتخاب ظرفیت:</span>
+                  <div className="mb-4 bg-slate-50/50 p-3 rounded-2xl border border-slate-100/60">
+                    <span className="text-[11px] font-black text-slate-800 block mb-2">انتخاب ظرفیت:</span>
                     <div className="flex flex-wrap gap-2">
                       {productData.storages.map((storage, idx) => (
                         <button key={idx} onClick={() => setSelectedStorage(idx)} className={`px-3 py-1.5 rounded-xl text-[10px] font-bold border transition ${selectedStorage === idx ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}>{storage}</button>
@@ -221,8 +224,8 @@ export default function ProductDetailClient({ productData }) {
 
                 {/* انتخاب سایز ساعت هوشمند */}
                 {productData?.sizes && productData.sizes.length > 0 && (
-                  <div className="mb-3 bg-slate-50/50 p-2.5 rounded-2xl border border-slate-100/60">
-                    <span className="text-[11px] font-black text-slate-800 block mb-1.5">اندازه قاب ساعت:</span>
+                  <div className="mb-4 bg-slate-50/50 p-3 rounded-2xl border border-slate-100/60">
+                    <span className="text-[11px] font-black text-slate-800 block mb-2">اندازه قاب ساعت:</span>
                     <div className="flex flex-wrap gap-2">
                       {productData.sizes.map((size, idx) => (
                         <button key={idx} onClick={() => setSelectedSize(idx)} className={`px-3 py-1.5 rounded-xl text-[10px] font-bold border transition ${selectedSize === idx ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}>{size}</button>
@@ -233,8 +236,8 @@ export default function ProductDetailClient({ productData }) {
 
                 {/* 🎨 انتخاب رنگ هوشمند بر اساس کلید نام فارسی */}
                 {productData?.colors && productData.colors.length > 0 && (
-                  <div className="mb-2 bg-slate-50/50 p-2.5 rounded-2xl border border-slate-100/60">
-                    <span className="text-[11px] font-black text-slate-800 block mb-1.5">رنگ: {productData.colors?.[selectedColor]?.name || ''}</span>
+                  <div className="mb-4 bg-slate-50/50 p-3 rounded-2xl border border-slate-100/60">
+                    <span className="text-[11px] font-black text-slate-800 block mb-2">رنگ: {productData.colors?.[selectedColor]?.name || ''}</span>
                     <div className="flex items-center gap-2.5">
                       {productData.colors.map((color, index) => {
                         const cleanColorName = color.name.trim();
@@ -245,12 +248,11 @@ export default function ProductDetailClient({ productData }) {
                             key={index} 
                             onClick={() => {
                               setSelectedColor(index);
-                              // 📸 سوئیچ عکس شاخص همزمان با ردیف تصاویر آلبوم گالری
                               if (allImages[index]) {
                                 setActiveImage(allImages[index]);
                               }
                             }} 
-                            className={`w-6 h-6 rounded-full border border-slate-300/70 transition-all ${selectedColor === index ? 'border-rose-500 scale-110 ring-4 ring-rose-500/10 shadow-sm' : 'hover:border-slate-500'}`} 
+                            className={`w-7 h-7 rounded-full border border-slate-300/70 transition-all ${selectedColor === index ? 'border-rose-500 scale-110 ring-4 ring-rose-500/10 shadow-sm' : 'hover:border-slate-500'}`} 
                             style={{ backgroundColor: calculatedBg }}
                             title={cleanColorName}
                           />
@@ -267,13 +269,14 @@ export default function ProductDetailClient({ productData }) {
                 )}
               </div>
 
-              {/* کادر مشخصات فنی */}
-              <div className="flex flex-col gap-1.5">
+              {/* کادر مشخصات فنی کلیدی متصل به لنگر پایین جهت پر کردن فضای مرده */}
+              <div className="mt-auto pt-4 border-t border-slate-100">
+                <span className="text-[11px] font-black text-slate-800 block mb-2.5">ویژگی‌های کلیدی محصول:</span>
                 <div className="grid grid-cols-1 gap-2">
                   {productData?.specs?.map((spec, index) => (
-                    <div key={index} className="flex justify-between bg-slate-50/60 px-3 py-1.5 rounded-xl border border-slate-100/30">
-                      <span className="text-[11px] font-medium text-slate-400">{spec.title}</span>
-                      <span className="text-xs font-bold text-slate-800">{spec.value}</span>
+                    <div key={index} className="flex justify-between bg-slate-50/80 px-4 py-2.5 rounded-xl border border-slate-100/50 transition-all hover:bg-slate-100/60">
+                      <span className="text-[11px] font-bold text-slate-400">{spec.title}</span>
+                      <span className="text-xs font-black text-slate-800">{spec.value}</span>
                     </div>
                   ))}
                 </div>
@@ -370,3 +373,5 @@ export default function ProductDetailClient({ productData }) {
     </div>
   );
 }
+
+```

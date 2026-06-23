@@ -23,6 +23,9 @@ export default function ProductDetailClient({ productData }) {
   // 🔘 استیت مدیریت پیام «به سبد خرید اضافه شد» به سبک دیجی‌کالا
   const [showSuccess, setShowSuccess] = useState(false);
 
+  // 📸 استیت کنترل تصویر در حال نمایش در کادر بزرگ گالری
+  const [activeImage, setActiveImage] = useState(productData?.imageUrl);
+
   // 📦 بررسی هوشمند وضعیت موجودی بر اساس مقدار واکشی شده از استراپی
   const stockCount = productData?.stock !== undefined ? Number(productData.stock) : 1;
   const isAvailable = stockCount > 0;
@@ -61,7 +64,6 @@ export default function ProductDetailClient({ productData }) {
       stock: stockCount 
     });
 
-    // فعال کردن وضعیت «اضافه شد» و محو شدن آن پس از ۲ ثانیه
     setShowSuccess(true);
     setTimeout(() => {
       setShowSuccess(false);
@@ -77,6 +79,11 @@ export default function ProductDetailClient({ productData }) {
       </div>
     );
   }
+
+  // ادغام عکس اصلی با تصاویر آلبوم گالری جهت رندر یکپارچه ریزعکس‌ها
+  const allImages = productData.imagesAlbum && productData.imagesAlbum.length > 0 
+    ? [productData.imageUrl, ...productData.imagesAlbum]
+    : [productData.imageUrl].filter(Boolean);
 
   return (
     <div className="min-h-screen bg-slate-50 overflow-x-hidden antialiased direction-rtl pb-32 md:pb-0">
@@ -99,8 +106,8 @@ export default function ProductDetailClient({ productData }) {
         {/* کادر اصلی محصول */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 items-start mb-8">
           
-          {/* 📱 ستون اول: گالری عکس اصلاح‌شده با تکنیک mix-blend-multiply */}
-          <div className="lg:col-span-5 bg-white border border-slate-100 rounded-3xl p-4 md:p-6 flex flex-col justify-between h-[340px] md:h-[490px] shadow-2xs relative overflow-hidden">
+          {/* 📱 ستون اول: گالری عکس پیشرفته متصل به کاتالوگ آلبوم استراپی */}
+          <div className="lg:col-span-5 bg-white border border-slate-100 rounded-3xl p-4 md:p-6 flex flex-col justify-between min-h-[380px] md:h-[490px] shadow-2xs relative overflow-hidden">
             <div className="absolute top-4 right-4 flex flex-col gap-2 z-20">
               <button onClick={() => setIsLiked(!isLiked)} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/80 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-500 transition shadow-3xs">
                 <Heart className={`w-4 h-4 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
@@ -110,21 +117,21 @@ export default function ProductDetailClient({ productData }) {
               </button>
             </div>
             
-            <div className="flex-1 flex items-center justify-center w-full h-full relative p-4 bg-white rounded-2xl">
+            {/* کادر تصویر بزرگ اصلی */}
+            <div className="flex-1 flex items-center justify-center w-full h-[220px] md:h-[320px] relative p-4 bg-white rounded-2xl">
               {!isAvailable && (
                 <div className="absolute top-2 right-2 bg-slate-500 text-white text-[10px] font-black px-3 py-1 rounded-xl z-30 shadow-xs select-none">
                   اتمام موجودی
                 </div>
               )}
               
-              {productData.imageUrl ? (
+              {activeImage || productData.imageUrl ? (
                 <img 
-                  src={productData.imageUrl} 
+                  src={activeImage || productData.imageUrl} 
                   alt={productData.name}
                   referrerPolicy="no-referrer-when-downgrade"
-                  /* 🚀 جادوی سی‌اس‌اس: حذف کادر سفیدِ دورِ تصاویر استراپی */
-                  className={`max-h-[240px] md:max-h-[360px] w-auto object-contain mix-blend-multiply select-none transition duration-500 ${
-                    !isAvailable ? 'grayscale opacity-40' : 'hover:scale-[1.03]'
+                  className={`max-h-full w-auto object-contain mix-blend-multiply select-none transition-all duration-300 ${
+                    !isAvailable ? 'grayscale opacity-40' : 'hover:scale-[1.02]'
                   }`}
                 />
               ) : (
@@ -133,6 +140,26 @@ export default function ProductDetailClient({ productData }) {
                 </span>
               )}
             </div>
+
+            {/* 📸 ردیف تصاویر کوچک آلبوم گالری استراپی (فقط در صورت وجود بیش از ۱ تصویر رندر می‌شود) */}
+            {allImages.length > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-slate-50 overflow-x-auto scrollbar-none w-full">
+                {allImages.map((imgUrl, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setActiveImage(imgUrl)}
+                    onMouseEnter={() => setActiveImage(imgUrl)} // تغییر عکس با هاور کردن ماوس برای جذابیت بیشتر
+                    className={`w-12 h-12 md:w-14 md:h-12 bg-white border p-1 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200 overflow-hidden ${
+                      (activeImage === imgUrl || (!activeImage && index === 0))
+                        ? 'border-rose-500 ring-2 ring-rose-500/10 scale-105' 
+                        : 'border-slate-200 hover:border-slate-400'
+                    }`}
+                  >
+                    <img src={imgUrl} alt={`زاویه ${index + 1}`} className="max-h-full max-w-full object-contain mix-blend-multiply select-none" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* ستون دوم: مشخصات کالا */}
@@ -194,7 +221,7 @@ export default function ProductDetailClient({ productData }) {
           </div>
 
           {/* ستون سوم: باکس خرید دسکتاپ مدرن و کاملاً بهینه‌سازی شده */}
-          <div className={`lg:col-span-3 border text-white rounded-3xl p-6 flex flex-col justify-between h-auto min-h-[380px] md:h-[490px] shadow-xl relative overflow-hidden transition-colors duration-300 ${isAvailable ? 'bg-slate-900 border-slate-950' : 'bg-slate-950/95 border-slate-900'}`}>
+          <div className={`lg:col-span-3 border text-white rounded-3xl p-5 flex flex-col justify-between h-auto min-h-[360px] md:h-[490px] shadow-xl relative overflow-hidden transition-colors duration-300 ${isAvailable ? 'bg-slate-900 border-slate-950' : 'bg-slate-950/95 border-slate-900'}`}>
             <div className="flex flex-col gap-3.5 z-10">
               <span className="text-[11px] font-black text-slate-400 border-b border-white/5 pb-2.5 block text-right">فروشنده: سیب‌شاپ</span>
               <div className="flex items-center gap-3 text-right px-1">
@@ -225,16 +252,14 @@ export default function ProductDetailClient({ productData }) {
                 )}
               </div>
               
-              {/* 🛒 منطق و دکمه‌های خرید توسعه‌یافته مشابه پلتفرم‌های بزرگ */}
+              {/* 🛒 دکمه‌های خرید دسکتاپ */}
               {isAvailable ? (
                 showSuccess ? (
-                  /* 🟢 حالت موقت: تایید افزودن موفقیت‌آمیز به سبد خرید (دیجی‌کالایی) */
                   <div className="w-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-black py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/5 px-4">
                     <Check className="w-4 h-4 text-emerald-400 shrink-0" />
                     <span>به سبد خرید اضافه شد</span>
                   </div>
                 ) : existInCart ? (
-                  /* 🔢 حالت کنترل تعداد اقلام موجود در سبد خرید */
                   <div className="flex flex-col gap-3 w-full transition-all duration-300">
                     <div className="w-full bg-slate-800 border border-slate-700/60 py-2.5 px-4 rounded-2xl flex items-center justify-between shadow-inner">
                       <button 
@@ -268,7 +293,6 @@ export default function ProductDetailClient({ productData }) {
                     </Link>
                   </div>
                 ) : (
-                  /* 🛍️ حالت اولیه: افزودن به سبد خرید */
                   <button 
                     onClick={handleAddToCart}
                     className="w-full bg-rose-500 hover:bg-rose-600 text-white font-black text-xs md:text-sm py-3.5 px-4 rounded-2xl shadow-lg transition duration-300 flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer"
@@ -302,7 +326,7 @@ export default function ProductDetailClient({ productData }) {
 
       </main>
 
-      {/* 📱 سیستم فیکس پایین صفحه موبایل هوشمند با قابلیت فیدبک آنی زمان خرید */}
+      {/* 📱 سیستم فیکس پایین صفحه موبایل */}
       <div className={`md:hidden fixed bottom-14 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/60 px-4 py-3 flex flex-col gap-2.5 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.04)] transition-all ${((existInCart || showSuccess) && isAvailable) ? 'h-auto' : 'h-[72px]'}`}>
         
         <div className="flex items-center justify-between w-full">
@@ -363,7 +387,6 @@ export default function ProductDetailClient({ productData }) {
           </div>
         </div>
 
-        {/* دکمه پایین موبایل برای رفتن به سبد خرید */}
         {isAvailable && existInCart && !showSuccess && (
           <Link 
             href="/cart" 

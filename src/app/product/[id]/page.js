@@ -2,15 +2,15 @@ import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
 import ProductDetailClient from './ProductDetailClient';
 
-// تابع فچ کردن اطلاعات تک محصول با پاپولیت عمیق مخصوص استراپی ۴
+// 🚀 تابع فچ کامل مخصوص استراپی ۴ با پاپولیت لایه دوم (Nested Component) برای دریافت options
 async function getSingleProductBySlug(slug) {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://b.dr-sib.xyz/api";
     
-    // 🚀 سینتکس رسمی استراپی ۴ برای پاپولیت داینامیک‌زون و آبجکت‌های تودرتوی آن (options)
-    const url = `${apiUrl}/products?filters[slug][$eq]=${slug}&populate[image]=*&populate[gallery]=*&populate[attributes][populate]=*`;
+    // 🔗 پاپولیت دقیق مدیا، گالری و نفوذ به لایه دوم کامپوننت‌ها (options)
+    const url = `${apiUrl}/products?filters[slug][$eq]=${slug}&populate[image]=*&populate[gallery]=*&populate[attributes][populate]=*&populate[attributes][populate][options]=*`;
     
-    console.log("🔗 Strapi 4 Fetch URL:", url);
+    console.log("🔗 Deep Strapi 4 Fetch URL:", url);
 
     const res = await fetch(url, {
       cache: 'no-store'
@@ -54,7 +54,7 @@ export default async function ProductDetailPage({ params }) {
     );
   }
 
-  // ساختار استراپی ۴ (دیتا داخل آبجکت attributes قرار دارد)
+  // ساختار داده استراپی ۴
   const id = apiProduct.id;
   const rawAttributes = apiProduct.attributes || apiProduct;
   
@@ -109,7 +109,7 @@ export default async function ProductDetailPage({ params }) {
 
   if (dynamicAttributes && Array.isArray(dynamicAttributes)) {
     dynamicAttributes.forEach(attr => {
-      // در استراپی ۴ نام کامپوننت‌ها با نقطه جدا می‌شود
+      // بررسی کامپوننت مشخصات فنی
       if (attr.__component === 'product-attributes.specification') {
         extractedSpecs.push({
           title: attr.title,
@@ -117,19 +117,21 @@ export default async function ProductDetailPage({ params }) {
         });
       }
       
+      // بررسی کامپوننت تنوع محصول (قیمت و گزینه‌ها)
       if (attr.__component === 'product-attributes.product-variant') {
         dynamicVariants.push({
           price: attr.price,
           stock: attr.stock,
-          options: attr.options || [] // گزینه‌های Color, Storage و...
+          options: attr.options || [] // حالا به لطف پاپولیت لایه دوم پر است
         });
       }
     });
   }
 
-  // ۴. آرایه‌های فرانت‌اَند کلاینت
+  // ۴. استخراج آرایه‌های فرانت‌اَند کلاینت (Color, Storage, Size)
   const allOptions = dynamicVariants.flatMap(v => v.options || []);
   
+  // فیلتر کردن رنگ‌ها
   const extractedColors = Array.from(new Set(allOptions.filter(o => o.type === 'Color').map(o => o.value)))
     .map(colorVal => {
       const matchedOpt = allOptions.find(o => o.type === 'Color' && o.value === colorVal);
@@ -139,6 +141,7 @@ export default async function ProductDetailPage({ params }) {
       };
     });
 
+  // فیلتر کردن حافظه‌ها و سایزها
   const extractedStorages = Array.from(new Set(allOptions.filter(o => o.type === 'Storage').map(o => o.value)));
   const extractedSizes = Array.from(new Set(allOptions.filter(o => o.type === 'Size').map(o => o.value)));
 

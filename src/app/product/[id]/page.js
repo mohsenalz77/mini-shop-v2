@@ -2,11 +2,12 @@ import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
 import ProductDetailClient from './ProductDetailClient';
 
-// تابع فچ کردن اطلاعات تک محصول از استراپی بر اساس اسلاگ
+// تابع فچ کردن اطلاعات تک محصول از استراپی بر اساس اسلاگ و ساختار جدید داینامیک زون
 async function getSingleProductBySlug(slug) {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://b.dr-sib.xyz/api";
-    const res = await fetch(`${apiUrl}/products?filters[slug][$eq]=${slug}&populate=*`, {
+    // 🔗 پاپولیت عمیق برای واکشی فیلدهای داینامیک زون (attributes) و ساب‌کامپوننت‌های آن
+    const res = await fetch(`${apiUrl}/products?filters[slug][$eq]=${slug}&populate=*&populate[attributes][populate]=*`, {
       cache: 'no-store'
     });
 
@@ -41,80 +42,112 @@ export default async function ProductDetailPage({ params }) {
     );
   }
 
-  // استخراج مشخصات اصلی از دیتای استراپی (شامل فیلد جدید gallery)
   const attributes = apiProduct.attributes || apiProduct;
-  const { title, price, oldPrice, description, image, gallery, stock } = attributes;
+  // استخراج فیلد داینامیک زون (attributes) و گارانتی
+  const { title, price, oldPrice, description, image, gallery, stock, warranty, attributes: dynamicAttributes } = attributes;
 
   // آدرس پایه برای تصاویر استراپی
   const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || "https://b.dr-sib.xyz";
   
-  // 📸 ۱. پردازش و استخراج عکس اصلی (Single Media)
+  // 📸 ۱. پردازش و استخراج عکس اصلی
   const imgData = image?.data;
   const hasImage = imgData?.attributes?.url || imgData?.url;
   const safeImageUrl = hasImage 
     ? `${strapiUrl}${imgData?.attributes?.url || imgData?.url}`
     : null;
 
-  // 🖼️ ۲. پردازش هوشمند آلبوم تصاویر (Multiple Media)
+  // 🖼️ ۲. پردازش هوشمند آلبوم تصاویر
   const galleryData = gallery?.data;
   let albumUrls = [];
 
-  // بررسی می‌کنیم که آیا دیتا وجود دارد و به صورت آرایه (چند عکسه) است یا خیر
   if (galleryData && Array.isArray(galleryData)) {
     albumUrls = galleryData
       .map(img => {
         const url = img.attributes?.url || img.url;
         return url ? `${strapiUrl}${url}` : null;
       })
-      .filter(Boolean); // حذف مقادیر null یا ارورهای احتمالی URL
+      .filter(Boolean);
   }
 
-  // 🛠️ فیکس استراپی ۵: تبدیل ساختار جدید بلاک‌های متنی به استرینگ ساده جهت جلوگیری از کرش رندر
+  // 🛠️ پردازش بلاک‌های متنی توضیحات استراپی ۵
   let cleanDescription = "توضیحاتی برای این محصول در استراپی وارد نشده است.";
   if (description) {
     if (typeof description === 'string') {
       cleanDescription = description;
     } else if (Array.isArray(description)) {
-      // استخراج متون از لایه‌های ارایه‌ای Blocks استراپی جدید
       cleanDescription = description
         .map(block => block.children?.map(child => child.text).join('') || '')
         .join('\n');
     }
   }
 
-  // آماده‌سازی دیتای تمیز و ایمن برای تحویل به قالب فرانت‌اَند شما
+  // 🔄 ۳. استخراج و فیلتر هوشمند ویژگی‌های پویا (Dynamic Zone) از استراپی
+  let extractedSpecs = [];
+  let dynamicVariants = [];
+
+  if (dynamicAttributes && Array.isArray(dynamicAttributes)) {
+    dynamicAttributes.forEach(attr => {
+      // الف) اگر مشخصات فنی (Specification) بود:
+      if (attr.__component === 'product-attributes.specification') {
+        extractedSpecs.push({
+          title: attr.title,
+          value: attr.value
+        });
+      }
+      
+      // ب) اگر تنوع اصلی محصول (ProductVariant) بود:
+      if (attr.__component === 'product-attributes.product-variant') {
+        dynamicVariants.push({
+          price: attr.price,
+          stock: attr.stock,
+          options: attr.options || [] // شامل گزینه‌های ریز مثل Color, Storage, Size
+        });
+      }
+    });
+  }
+
+  // ۴. استخراج آرایه رنگ‌ها و ظرفیت‌ها به صورت یونیک برای نمایش اولیه در فرانت
+  const allOptions = dynamicVariants.flatMap(v => v.options);
+  
+  const extractedColors = Array.from(new Set(allOptions.filter(o => o.type === 'Color').map(o => o.value)))
+    .map(colorVal => {
+      const matchedOpt = allOptions.find(o => o.type === 'Color' && o.value === colorVal);
+      return {
+        name: colorVal,
+        class: matchedOpt?.meta_color || 'bg-slate-200' // استفاده از meta_color وارد شده در استراپی
+      };
+    });
+
+  const extractedStorages = Array.from(new Set(allOptions.filter(o => o.type === 'Storage').map(o => o.value)));
+  const extractedSizes = Array.from(new Set(allOptions.filter(o => o.type === 'Size').map(o => o.value)));
+
+  // آماده‌سازی نهایی دیتای شسته رفته برای کامپوننت کلاینت
   const productData = {
     id: apiProduct.id,
     name: title,
-    imageUrl: safeImageUrl, // عکس شاخص اصلی
-    imagesAlbum: albumUrls, // 👈 آرایه تصاویر آلبوم گالری (اگر نباشد، آرایه خالی [] فرستاده می‌شود)
-    englishName: 'Apple Flagship Device', 
+    imageUrl: safeImageUrl,
+    imagesAlbum: albumUrls,
+    englishName: attributes.englishName || '', 
+    // فیلدهای قیمت و انبار پایه (در صورت وجود تنوع داینامیک، کلاینت آن را مدیریت می‌کند)
     price: price ? Number(price).toLocaleString('fa-IR') : '۰',
     oldPrice: oldPrice ? Number(oldPrice).toLocaleString('fa-IR') : null,
-    // پاس دادن مقدار خام انبار برای کنترل دکمه افزودن و سقف خرید فرانت‌اند
     stock: stock !== undefined ? Number(stock) : 1,
-    rating: '۴.۹',
-    reviewCount: '۱ دیدگاه',
-    storages: ['۱۲۸ گیگ', '۲۵۶ گیگ', '۵۱۲ گیگ'],
-    colors: [
-      { name: 'تایتانیم طبیعی', class: 'bg-stone-400' },
-      { name: 'تایتانیم مشکی', class: 'bg-zinc-800' },
-      { name: 'تایتانیم سفید', class: 'bg-slate-100' },
-    ],
-    specs: [
-      { title: 'حافظه داخلی', value: '۲۵۶ گیگابایت' },
-      { title: 'حافظه رم', value: '۸ گیگابایت' },
-      { title: 'ارتباطات زنده', value: 'دیتابیس استراپی آنلاین' },
-    ],
+    rating: attributes.rating || '۴.۸',
+    reviewCount: attributes.reviewCount || '۱ دیدگاه',
+    warranty: warranty || 'گارانتی ۱۸ ماهه سیب‌شاپ', // فیلد داینامیک گارانتی
+    
+    // آرایه‌های پویا استخراج شده از استراپی
+    storages: extractedStorages,
+    colors: extractedColors,
+    sizes: extractedSizes, // ویژگی‌های ساعت
+    specs: extractedSpecs.length > 0 ? extractedSpecs : [{ title: 'ارتباطات', value: 'دیزاین پویا' }],
+    variants: dynamicVariants, // پاس دادن کل آبجکت تنوع‌ها برای مدیریت قیمت‌ها در کلاینت
+    
     fullSpecs: [
       { label: 'توضیحات محصول', value: cleanDescription },
     ],
     relatedProducts: [
       { id: 2, name: 'شارژر دیواری انکر مدل Nano ۲۰W', price: '۸۹۰,۰۰۰', image: '🔌' },
-      { id: 3, name: 'هدفون بی‌سیم اپل مدل AirPods Pro 2', price: '۱۰,۴۰۰,۰۰۰', image: '🎧' },
-    ],
-    comments: [
-      { id: 1, user: 'سیب‌شاپ بوت‌کمپ', date: 'امروز', rating: 5, text: 'این دیتا مستقیماً و به صورت داینامیک بر اساس آدرس اسلاگ از دیتابیس استراپی لود شده است!', badge: 'توسعه‌دهنده' },
     ]
   };
 

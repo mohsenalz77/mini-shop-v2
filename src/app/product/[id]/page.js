@@ -2,31 +2,21 @@ import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
 import ProductDetailClient from './ProductDetailClient';
 
-// تابع فچ کردن اطلاعات تک محصول با پاپولیت همه‌جانبه استراپی ۴
+// تابع فچ با پاپولیت عمیق استراپی ۴
 async function getSingleProductBySlug(slug) {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://b.dr-sib.xyz/api";
-    
-    // 🔗 پاپولیت کامل لایه اول و دوم برای باز کردن فیلد گزینه‌های تودرتو
-    const url = `${apiUrl}/products?filters[slug][$eq]=${slug}&populate[image]=*&populate[gallery]=*&populate[attributes][populate]=*`;
+    const url = `${apiUrl}/products?filters[slug][$eq]=${slug}&populate[image]=*&populate[gallery]=*&populate[attributes][populate][options]=*&populate[attributes][populate]=*`;
     
     console.log("🔗 Standard Strapi 4 Deep Fetch URL:", url);
 
-    const res = await fetch(url, {
-      cache: 'no-store'
-    });
-
-    if (!res.ok) {
-      console.error(`❌ Strapi 4 Error! Status: ${res.status}`);
-      return null;
-    }
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) return null;
     
     const data = await res.json();
-    
     if (data.data && data.data.length > 0) {
       return data.data[0];
     }
-    
     return null;
   } catch (error) {
     console.error("❌ Fetch Exception:", error);
@@ -36,7 +26,6 @@ async function getSingleProductBySlug(slug) {
 
 export default async function ProductDetailPage({ params }) {
   const { id: slug } = params;
-  
   const apiProduct = await getSingleProductBySlug(slug);
 
   if (!apiProduct) {
@@ -59,7 +48,7 @@ export default async function ProductDetailPage({ params }) {
     description, 
     image, 
     gallery, 
-    stock, 
+    stock: rootStock, // انبار قدیمی در ریشه محصول
     warranty, 
     attributes: dynamicAttributes 
   } = rawAttributes;
@@ -72,10 +61,9 @@ export default async function ProductDetailPage({ params }) {
     ? `${strapiUrl}${imgData?.attributes?.url || imgData?.url}`
     : null;
 
-  // 🖼️ ۲. پردازش آلبوم تصاویر گالری
+  // 🖼️ ۲. پردازش آلبوم تصاویر
   const galleryData = gallery?.data;
   let albumUrls = [];
-
   if (galleryData && Array.isArray(galleryData)) {
     albumUrls = galleryData
       .map(img => {
@@ -88,22 +76,21 @@ export default async function ProductDetailPage({ params }) {
   // 🛠️ پارسر متن توضیحات
   let cleanDescription = "توضیحاتی برای این محصول وارد نشده است.";
   if (description) {
-    if (typeof description === 'string') {
-      cleanDescription = description;
-    } else if (Array.isArray(description)) {
+    if (typeof description === 'string') cleanDescription = description;
+    else if (Array.isArray(description)) {
       cleanDescription = description
         .map(block => block.children?.map(child => child.text).join('') || '')
         .join('\n');
     }
   }
 
-  // 🔄 ۳. استخراج اجزای داینامیک زون با انعطاف‌پذیری بالا برای استراپی ۴
+  // 🔄 ۳. استخراج اجزای داینامیک زون
   let extractedSpecs = [];
   let dynamicVariants = [];
 
   if (dynamicAttributes && Array.isArray(dynamicAttributes)) {
     dynamicAttributes.forEach(attr => {
-      // مشخصات فنی
+      // الف) جدول مشخصات فنی
       if (attr.__component?.includes('specification')) {
         extractedSpecs.push({
           title: attr.title,
@@ -111,53 +98,71 @@ export default async function ProductDetailPage({ params }) {
         });
       }
       
-      // تنوع کالا و قیمت‌ها
+      // ب) تنوع‌های محصول
       if (attr.__component?.includes('product-variant')) {
-        // پیدا کردن فیلد گزینه‌ها چه با نام options و چه فیلدهای دیگر درون آبجکت کامپوننت
-        const optionsArray = attr.options || attr.VariantOption || attr.variant_options || [];
-        
         dynamicVariants.push({
-          price: attr.price,
-          stock: attr.stock,
-          options: optionsArray
+          id: attr.id, // ارسال ID برای مدیریت بهتر در کلاینت
+          price: attr.price ? Number(attr.price) : null,
+          stock: attr.stock !== undefined ? Number(attr.stock) : 0,
+          options: attr.options || []
         });
       }
     });
   }
 
-  // ۴. استخراج گزینه‌های فرانت‌اَند کلاینت (Color, Storage, Size)
+  // ۴. پردازش و فیلتر کردن هوشمند گزینه‌ها برای لایه کلاینت
   const allOptions = dynamicVariants.flatMap(v => v.options || []);
   
-  const extractedColors = Array.from(new Set(allOptions.filter(o => o.type === 'Color' || o.type === 'رنگ').map(o => o.value)))
-    .map(colorVal => {
-      const matchedOpt = allOptions.find(o => (o.type === 'Color' || o.type === 'رنگ') && o.value === colorVal);
-      return {
-        name: colorVal,
-        class: matchedOpt?.meta_color || 'bg-slate-200'
-      };
-    });
+  // استخراج رنگ‌ها
+  const extractedColors = Array.from(new Set(allOptions.filter(o => {
+    const t = o.type?.toLowerCase() || '';
+    return t === 'color' || t === 'رنگ' || o.meta_color;
+  }).map(o => o.value)))
+  .map(colorVal => {
+    const matchedOpt = allOptions.find(o => o.value === colorVal);
+    return {
+      name: colorVal,
+      class: matchedOpt?.meta_color || 'bg-slate-200'
+    };
+  });
 
-  const extractedStorages = Array.from(new Set(allOptions.filter(o => o.type === 'Storage' || o.type === 'حافظه').map(o => o.value)));
-  const extractedSizes = Array.from(new Set(allOptions.filter(o => o.type === 'Size' || o.type === 'سایز').map(o => o.value)));
+  // استخراج حافظه
+  const extractedStorages = Array.from(new Set(allOptions.filter(o => {
+    const t = o.type?.toLowerCase() || '';
+    return t === 'storage' || t === 'حافظه' || o.value?.toLowerCase().includes('gb');
+  }).map(o => o.value)));
+
+  // استخراج سایزها
+  const extractedSizes = Array.from(new Set(allOptions.filter(o => {
+    const t = o.type?.toLowerCase() || '';
+    return t === 'size' || t === 'سایز';
+  }).map(o => o.value)));
+
+  // 🛠️ محاسبه هوشمند موجودی کل کالا (اگر در ریشه صفر بود، مجموع انبار تنوع‌ها را حساب کند)
+  let totalStock = rootStock !== undefined ? Number(rootStock) : 0;
+  if (totalStock === 0 && dynamicVariants.length > 0) {
+    totalStock = dynamicVariants.reduce((sum, variant) => sum + variant.stock, 0);
+  }
 
   const productData = {
     id: id,
     name: title || "بدون نام",
     imageUrl: safeImageUrl,
     imagesAlbum: albumUrls,
-    englishName: rawAttributes.englishName || 'Apple Flagship Device', 
+    englishName: rawAttributes.englishName || 'Apple Device', 
     price: price ? Number(price).toLocaleString('fa-IR') : '۰',
+    rawPrice: price ? Number(price) : 0, // ارسال قیمت عددی برای محاسبات فرانت
     oldPrice: oldPrice ? Number(oldPrice).toLocaleString('fa-IR') : null,
-    stock: stock !== undefined ? Number(stock) : 1,
+    stock: totalStock, // موجودی کل اصلاح‌شده برای فعال شدن سبد خرید
     rating: rawAttributes.rating || '۴.۹',
     reviewCount: rawAttributes.reviewCount || '۱ دیدگاه',
-    warranty: warranty || 'گارانتی ۱۸ ماهه شرکتی',
+    warranty: warranty || 'گارانتی شرکتی',
     
     storages: extractedStorages,
     colors: extractedColors,
     sizes: extractedSizes,
     specs: extractedSpecs.length > 0 ? extractedSpecs : [{ title: 'اصالت کالا', value: 'تضمین اصالت سیب‌شاپ' }],
-    variants: dynamicVariants,
+    variants: dynamicVariants, // آرایه اصلاح‌شده تنوع‌ها به همراه آبجکت کامل آپشن‌ها
     
     fullSpecs: [
       { label: 'توضیحات محصول', value: cleanDescription },

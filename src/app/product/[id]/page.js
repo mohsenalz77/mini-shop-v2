@@ -2,36 +2,35 @@ import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
 import ProductDetailClient from './ProductDetailClient';
 
-// تابع فچ کردن اطلاعات تک محصول با مانیتورینگ دقیق خطاها
+// تابع فچ کردن اطلاعات تک محصول با پاپولیت عمیق مخصوص استراپی ۴
 async function getSingleProductBySlug(slug) {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://b.dr-sib.xyz/api";
     
-    // 🔗 اضافه کردن پاپولیت عمیق به صورت کاملاً استاندارد برای استراپی ۵ و ۴
-    const url = `${apiUrl}/products?filters[slug][$eq]=${slug}&populate=*&populate[attributes][populate]=*`;
+    // 🚀 سینتکس رسمی استراپی ۴ برای پاپولیت داینامیک‌زون و آبجکت‌های تودرتوی آن (options)
+    const url = `${apiUrl}/products?filters[slug][$eq]=${slug}&populate[image]=*&populate[gallery]=*&populate[attributes][populate]=*`;
     
-    console.log("🚀 Requesting Strapi URL:", url); // این لاگ در ترمینال VSCode آدرس فچ را بهت نشان می‌دهد
+    console.log("🔗 Strapi 4 Fetch URL:", url);
 
     const res = await fetch(url, {
       cache: 'no-store'
     });
 
     if (!res.ok) {
-      console.error(`❌ Strapi error response! Status: ${res.status}`);
+      console.error(`❌ Strapi 4 Error! Status: ${res.status}`);
       return null;
     }
     
     const data = await res.json();
     
-    // اگر دیتایی پیدا شد
     if (data.data && data.data.length > 0) {
       return data.data[0];
     }
     
-    console.warn(`⚠️ No product found in Strapi for slug: "${slug}"`);
+    console.warn(`⚠️ No product found in Strapi 4 for slug: "${slug}"`);
     return null;
   } catch (error) {
-    console.error("❌ Error fetching single product by slug:", error);
+    console.error("❌ Fetch Exception:", error);
     return null;
   }
 }
@@ -39,7 +38,6 @@ async function getSingleProductBySlug(slug) {
 export default async function ProductDetailPage({ params }) {
   const { id: slug } = params;
   
-  // گرفتن دیتای واقعی از استراپی بر اساس اسلاگ کالا
   const apiProduct = await getSingleProductBySlug(slug);
 
   if (!apiProduct) {
@@ -49,14 +47,14 @@ export default async function ProductDetailPage({ params }) {
         <div className="text-center py-20 text-slate-500 font-bold">
           <p>محصول مورد نظر یافت نشد.</p>
           <p className="text-xs text-slate-400 font-normal mt-2">اسلاگ درخواستی: {slug}</p>
-          <p className="text-xs text-rose-500 font-normal mt-1">مطمئن شو که محصول در استراپی در وضعیت Publish قرار دارد و فیلد attributes ساخته شده است.</p>
+          <p className="text-xs text-rose-500 font-normal mt-1">اتصال با آدرس رسمی استراپی ۴ برقرار شد.</p>
         </div>
         <Footer />
       </div>
     );
   }
 
-  // لایه دفاعی برای استراپی ۴ و ۵ (تخت کردن ویژگی‌ها)
+  // ساختار استراپی ۴ (دیتا داخل آبجکت attributes قرار دارد)
   const id = apiProduct.id;
   const rawAttributes = apiProduct.attributes || apiProduct;
   
@@ -74,14 +72,13 @@ export default async function ProductDetailPage({ params }) {
 
   const strapiUrl = process.env.NEXT_PUBLIC_STRAPI_URL || "https://b.dr-sib.xyz";
   
-  // 📸 ۱. پردازش عکس اصلی
+  // 📸 ۱. پردازش تصویر اصلی
   const imgData = image?.data;
-  const hasImage = imgData?.attributes?.url || imgData?.url;
-  const safeImageUrl = hasImage 
+  const safeImageUrl = imgData?.attributes?.url || imgData?.url
     ? `${strapiUrl}${imgData?.attributes?.url || imgData?.url}`
     : null;
 
-  // 🖼️ ۲. پردازش آلبوم تصاویر
+  // 🖼️ ۲. پردازش آلبوم تصاویر گالری
   const galleryData = gallery?.data;
   let albumUrls = [];
 
@@ -94,8 +91,8 @@ export default async function ProductDetailPage({ params }) {
       .filter(Boolean);
   }
 
-  // 🛠️ پردازش توضیحات متنی استراپی
-  let cleanDescription = "توضیحاتی برای این محصول در استراپی وارد نشده است.";
+  // 🛠️ پارسر متن توضیحات استراپی ۴
+  let cleanDescription = "توضیحاتی برای این محصول وارد نشده است.";
   if (description) {
     if (typeof description === 'string') {
       cleanDescription = description;
@@ -106,30 +103,31 @@ export default async function ProductDetailPage({ params }) {
     }
   }
 
-  // 🔄 ۳. استخراج ویژگی‌های داینامیک زون با لایه دفاعی عدم وجود کامپوننت
+  // 🔄 ۳. استخراج و تفکیک اجزای داینامیک زون در استراپی ۴
   let extractedSpecs = [];
   let dynamicVariants = [];
 
   if (dynamicAttributes && Array.isArray(dynamicAttributes)) {
     dynamicAttributes.forEach(attr => {
-      // بررسی گارد ریل نام کامپوننت (متناسب با نام کامپوننت شما در استراپی)
-      if (attr.__component?.endsWith('specification')) {
+      // در استراپی ۴ نام کامپوننت‌ها با نقطه جدا می‌شود
+      if (attr.__component === 'product-attributes.specification') {
         extractedSpecs.push({
           title: attr.title,
           value: attr.value
         });
       }
       
-      if (attr.__component?.endsWith('product-variant')) {
+      if (attr.__component === 'product-attributes.product-variant') {
         dynamicVariants.push({
           price: attr.price,
           stock: attr.stock,
-          options: attr.options || []
+          options: attr.options || [] // گزینه‌های Color, Storage و...
         });
       }
     });
   }
 
+  // ۴. آرایه‌های فرانت‌اَند کلاینت
   const allOptions = dynamicVariants.flatMap(v => v.options || []);
   
   const extractedColors = Array.from(new Set(allOptions.filter(o => o.type === 'Color').map(o => o.value)))
@@ -160,7 +158,7 @@ export default async function ProductDetailPage({ params }) {
     storages: extractedStorages,
     colors: extractedColors,
     sizes: extractedSizes,
-    specs: extractedSpecs.length > 0 ? extractedSpecs : [{ title: 'ارتباطات', value: 'دیتابیس آنلاین سیب‌شاپ' }],
+    specs: extractedSpecs.length > 0 ? extractedSpecs : [{ title: 'اصالت کالا', value: 'تضمین اصالت سیب‌شاپ' }],
     variants: dynamicVariants,
     
     fullSpecs: [

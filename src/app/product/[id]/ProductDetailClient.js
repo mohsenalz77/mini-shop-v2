@@ -7,8 +7,29 @@ import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2, Ban
 import { useCart } from '../../../context/CartContext'; 
 import Link from 'next/link';
 
+// 🎨 دیکشنری هوشمند تبدیل نام‌های فارسی به کدهای رنگی وب
+const colorMap = {
+  'مشکی': '#1a1a1a',
+  'مشکی مات': '#111111',
+  'تایتانیم مشکی': '#232426',
+  'سفید': '#ffffff',
+  'تایتانیم سفید': '#e3e4e5',
+  'نقره ای': '#e5e7eb',
+  'سیلور': '#e5e7eb',
+  'خاکستری': '#6b7280',
+  'تایتانیم طبیعی': '#8a8885',
+  'تایتانیم بیابانی': '#d3c1a5',
+  'طلایی': '#fbbf24',
+  'گلد': '#f59e0b',
+  'آبی': '#2563eb',
+  'سبز': '#16a34a',
+  'قرمز': '#dc2626',
+  'صورتی': '#fbcfe8',
+  'بنفش': '#9333ea',
+};
+
 export default function ProductDetailClient({ productData }) {
-  // 🛡️ لایه دفاعی برای جلوگیری از ارور در صورت عدم بارگذاری کانتکست
+  // 🛡️ کانتکست سبد خرید
   const context = useCart() || {};
   const cartItems = context.cartItems || [];
   const addToCart = context.addToCart || (() => {});
@@ -24,59 +45,72 @@ export default function ProductDetailClient({ productData }) {
   const [activeTab, setActiveTab] = useState('review');
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // 📸 استیت کنترل تصویر در حال نمایش در کادر بزرگ گالری
+  // 📸 استیت تصویر بزرگ گالری
   const [activeImage, setActiveImage] = useState(productData?.imageUrl);
 
-  // 💰 استیت‌های داینامیک قیمت و موجودی بر اساس ترکیب ویژگی‌های انتخابی
+  // 💰 استیت‌های قیمت و انبار لحظه‌ای ترکیب انتخابی
   const [currentPrice, setCurrentPrice] = useState(productData?.price);
   const [currentStock, setCurrentStock] = useState(productData?.stock);
 
-  // 🔄 هوش مصنوعی کوچک فرانت‌اَند برای محاسبه قیمت و انبار بر اساس تنوع‌های لود شده از استراپی
+  // 🔄 فیلتر و مچ کردن هوشمند ترکیب انتخاب‌شده با آرایه تنوع‌های استراپی
   useEffect(() => {
     if (productData?.variants && productData.variants.length > 0) {
       const activeColorName = productData.colors?.[selectedColor]?.name;
       const activeStorageName = productData.storages?.[selectedStorage];
       const activeSizeName = productData.sizes?.[selectedSize];
 
-      // پیدا کردن متغیر تطبیق‌یافته در آرایه ترکیبی استراپی
       const matchedVariant = productData.variants.find(v => {
-        const matchColor = activeColorName ? v.options.some(o => o.type === 'Color' && o.value === activeColorName) : true;
-        const matchStorage = activeStorageName ? v.options.some(o => o.type === 'Storage' && o.value === activeStorageName) : true;
-        const matchSize = activeSizeName ? v.options.some(o => o.type === 'Size' && o.value === activeSizeName) : true;
+        const matchColor = activeColorName 
+          ? v.options.some(o => (o.type?.toLowerCase() === 'color' || o.type === 'رنگ') && o.value === activeColorName) 
+          : true;
+          
+        const matchStorage = activeStorageName 
+          ? v.options.some(o => (o.type?.toLowerCase() === 'storage' || o.type === 'حافظه') && o.value === activeStorageName) 
+          : true;
+          
+        const matchSize = activeSizeName 
+          ? v.options.some(o => (o.type?.toLowerCase() === 'size' || o.type === 'سایز') && o.value === activeSizeName) 
+          : true;
+
         return matchColor && matchStorage && matchSize;
       });
 
       if (matchedVariant) {
         setCurrentPrice(Number(matchedVariant.price).toLocaleString('fa-IR'));
         setCurrentStock(Number(matchedVariant.stock));
+      } else {
+        setCurrentPrice(productData.price);
+        setCurrentStock(productData.stock);
       }
     }
   }, [selectedColor, selectedStorage, selectedSize, productData]);
 
-  // ریست کردن عکس اصلی در صورت تغییر محصول
+  // هماهنگی تصویر اولیه با تغییر کالا
   useEffect(() => {
-    setActiveImage(productData?.imageUrl);
+    if (productData?.imageUrl) {
+      setActiveImage(productData.imageUrl);
+    }
   }, [productData]);
 
-  const stockCount = currentStock !== undefined ? currentStock : 1;
+  const stockCount = currentStock !== undefined ? currentStock : 0;
   const isAvailable = stockCount > 0;
 
-  // 🛒 بررسی وضعیت حضور این کالا در سبد خرید فعلی کاربر
-  const existInCart = cartItems.find(item => item.id === productData?.id);
+  // 🛒 تولید کلید شناسه یکتا برای هر ترکیب ویژگی جهت تفکیک در سبد خرید
+  const uniqueCartId = `${productData?.id}-${selectedColor}-${selectedStorage}-${selectedSize}`;
+  const existInCart = cartItems.find(item => item.id === uniqueCartId);
 
   const handleIncrement = () => {
     if (existInCart && existInCart.quantity < stockCount) {
-      incrementQuantity(productData.id);
+      incrementQuantity(uniqueCartId);
     }
   };
 
   const handleDecrement = () => {
     if (existInCart) {
-      removeFromCart(productData.id);
+      removeFromCart(uniqueCartId);
     }
   };
 
-  // 🚀 مدیریت هوشمند افزودن به سبد با انیمیشن موفقیت
   const handleAddToCart = () => {
     if (!isAvailable || !productData) return;
 
@@ -86,12 +120,10 @@ export default function ProductDetailClient({ productData }) {
       : '0';
 
     const rawPrice = Number(cleanPriceString);
-
-    // آماده‌سازی نام نهایی با ذکر ویژگی‌ها جهت نمایش درست در سبد خرید
-    const finalName = `${productData.name} ${productData.colors?.[selectedColor]?.name || ''} ${productData.storages?.[selectedStorage] || ''} ${productData.sizes?.[selectedSize] || ''}`.trim();
+    const finalName = `${productData.name} (${productData.colors?.[selectedColor]?.name || ''} - ${productData.storages?.[selectedStorage] || ''})`.trim();
 
     addToCart({
-      id: `${productData.id}-${selectedColor}-${selectedStorage}-${selectedSize}`, // شناسه یکتا برای هر تنوع کالا
+      id: uniqueCartId,
       name: finalName,
       price: rawPrice,
       imageUrl: activeImage || productData.imageUrl,
@@ -99,25 +131,12 @@ export default function ProductDetailClient({ productData }) {
     });
 
     setShowSuccess(true);
-    setTimeout(() => {
-      setShowSuccess(false);
-    }, 2000);
+    setTimeout(() => setShowSuccess(false), 2000);
   };
 
-  if (!productData) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col justify-between direction-rtl">
-        <Header />
-        <div className="text-center py-20 text-slate-500 font-bold">دریافت اطلاعات محصول...</div>
-        <Footer />
-      </div>
-    );
-  }
-
-  // ادغام عکس اصلی با تصاویر آلبوم گالری جهت رندر یکپارچه ریزعکس‌ها
-  const allImages = productData.imagesAlbum && productData.imagesAlbum.length > 0 
+  const allImages = productData?.imagesAlbum && productData.imagesAlbum.length > 0 
     ? [productData.imageUrl, ...productData.imagesAlbum]
-    : [productData.imageUrl].filter(Boolean);
+    : [productData?.imageUrl].filter(Boolean);
 
   return (
     <div className="min-h-screen bg-slate-50 overflow-x-hidden antialiased direction-rtl pb-32 md:pb-0">
@@ -129,14 +148,14 @@ export default function ProductDetailClient({ productData }) {
         <div className="flex items-center gap-2 text-[11px] md:text-xs font-bold text-slate-400 mb-4 text-right">
           <span className="hover:text-slate-600 cursor-pointer">سیب‌شاپ</span>
           <ChevronRight className="w-3 h-3 text-slate-300" />
-          <span className="text-slate-800 truncate max-w-[220px] md:max-w-none">{productData.name}</span>
+          <span className="text-slate-800 truncate max-w-[220px] md:max-w-none">{productData?.name}</span>
         </div>
 
         {/* کادر اصلی محصول */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 items-start mb-8">
           
-          {/* 📱 ستون اول: گالری عکس بهینه‌سازی شده */}
-          <div className="lg:col-span-5 bg-white border border-slate-100 rounded-3xl p-4 md:p-6 flex flex-col justify-between h-[420px] md:h-[520px] shadow-2xs relative overflow-hidden transition-all">
+          {/* 📱 ستون اول: گالری عکس فیکس شده */}
+          <div className="lg:col-span-5 bg-white border border-slate-100 rounded-3xl p-4 md:p-6 flex flex-col justify-between h-[420px] md:h-[520px] shadow-2xs relative overflow-hidden">
             <div className="absolute top-4 right-4 flex flex-col gap-2 z-20">
               <button onClick={() => setIsLiked(!isLiked)} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-500 transition shadow-3xs">
                 <Heart className={`w-4 h-4 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
@@ -154,8 +173,8 @@ export default function ProductDetailClient({ productData }) {
               )}
               
               <img 
-                src={activeImage || productData.imageUrl} 
-                alt={productData.name}
+                src={activeImage || productData?.imageUrl} 
+                alt={productData?.name}
                 referrerPolicy="no-referrer-when-downgrade"
                 className={`max-h-full max-w-full object-contain mix-blend-multiply select-none transition-all duration-300 ${
                   !isAvailable ? 'grayscale opacity-40' : 'hover:scale-[1.01]'
@@ -163,14 +182,13 @@ export default function ProductDetailClient({ productData }) {
               />
             </div>
 
-            {/* ریزعکس‌های آلبوم گالری استراپی */}
+            {/* ریزعکس‌های آلبوم گالری */}
             {allImages.length > 1 && (
               <div className="flex items-center justify-start md:justify-center gap-2 mt-4 pt-4 border-t border-slate-100/70 overflow-x-auto scrollbar-none w-full px-1 py-0.5">
                 {allImages.map((imgUrl, index) => (
                   <button
                     key={index}
                     onClick={() => setActiveImage(imgUrl)}
-                    onMouseEnter={() => setActiveImage(imgUrl)}
                     className={`w-12 h-12 md:w-14 md:h-14 bg-white border p-1 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200 overflow-hidden ${
                       activeImage === imgUrl ? 'border-rose-500 ring-2 ring-rose-500/10 scale-105 shadow-xs' : 'border-slate-200/80'
                     }`}
@@ -182,15 +200,15 @@ export default function ProductDetailClient({ productData }) {
             )}
           </div>
 
-          {/* ستون دوم: مشخصات تفکیک‌شده پویا */}
+          {/* ستون دوم: مشخصات تفکیک‌شده و ویژگی‌ها */}
           <div className="lg:col-span-4 bg-white border border-slate-100 rounded-3xl p-5 flex flex-col justify-between min-h-[380px] md:h-[520px] shadow-2xs text-right">
             <div className="h-full flex flex-col justify-between gap-3">
               <div>
-                <h1 className="text-sm md:text-base lg:text-lg font-black text-slate-900 leading-6 md:leading-7 mb-1">{productData.name}</h1>
-                <p className="text-[10px] font-bold text-slate-400 mb-2.5">سیب‌شاپ | اصالت تضمینی</p>
+                <h1 className="text-sm md:text-base lg:text-lg font-black text-slate-900 leading-6 md:leading-7 mb-1">{productData?.name}</h1>
+                <p className="text-[10px] font-bold text-slate-400 mb-2.5">سیب‌شاپ | اصالت تضمینی کالا</p>
 
-                {/* 1️⃣ انتخاب ظرفیت حافظه (مخصوص گوشی/تبلت - در صورت وجود رندر می‌شود) */}
-                {productData.storages && productData.storages.length > 0 && (
+                {/* انتخاب ظرفیت */}
+                {productData?.storages && productData.storages.length > 0 && (
                   <div className="mb-3 bg-slate-50/50 p-2.5 rounded-2xl border border-slate-100/60">
                     <span className="text-[11px] font-black text-slate-800 block mb-1.5">انتخاب ظرفیت:</span>
                     <div className="flex flex-wrap gap-2">
@@ -201,8 +219,8 @@ export default function ProductDetailClient({ productData }) {
                   </div>
                 )}
 
-                {/* 2️⃣ انتخاب ابعاد/سایز قاب (مخصوص ساعت هوشمند - در صورت وجود رندر می‌شود) */}
-                {productData.sizes && productData.sizes.length > 0 && (
+                {/* انتخاب سایز ساعت هوشمند */}
+                {productData?.sizes && productData.sizes.length > 0 && (
                   <div className="mb-3 bg-slate-50/50 p-2.5 rounded-2xl border border-slate-100/60">
                     <span className="text-[11px] font-black text-slate-800 block mb-1.5">اندازه قاب ساعت:</span>
                     <div className="flex flex-wrap gap-2">
@@ -213,14 +231,31 @@ export default function ProductDetailClient({ productData }) {
                   </div>
                 )}
 
-                {/* 3️⃣ انتخاب رنگ پویا (مستصل به متارنگ‌های استراپی) */}
-                {productData.colors && productData.colors.length > 0 && (
+                {/* 🎨 انتخاب رنگ هوشمند بر اساس کلید نام فارسی */}
+                {productData?.colors && productData.colors.length > 0 && (
                   <div className="mb-2 bg-slate-50/50 p-2.5 rounded-2xl border border-slate-100/60">
                     <span className="text-[11px] font-black text-slate-800 block mb-1.5">رنگ: {productData.colors?.[selectedColor]?.name || ''}</span>
                     <div className="flex items-center gap-2.5">
-                      {productData.colors.map((color, index) => (
-                        <button key={index} onClick={() => setSelectedColor(index)} className={`w-6 h-6 rounded-full ${color.class} border-2 transition ${selectedColor === index ? 'border-rose-500 scale-110 ring-4 ring-rose-500/10 shadow-sm' : 'border-slate-200'}`} style={{ backgroundColor: color.class.startsWith('#') ? color.class : undefined }} />
-                      ))}
+                      {productData.colors.map((color, index) => {
+                        const cleanColorName = color.name.trim();
+                        const calculatedBg = colorMap[cleanColorName] || (color.class?.startsWith('#') ? color.class : '#cbd5e1');
+                        
+                        return (
+                          <button 
+                            key={index} 
+                            onClick={() => {
+                              setSelectedColor(index);
+                              // 📸 سوئیچ عکس شاخص همزمان با ردیف تصاویر آلبوم گالری
+                              if (allImages[index]) {
+                                setActiveImage(allImages[index]);
+                              }
+                            }} 
+                            className={`w-6 h-6 rounded-full border border-slate-300/70 transition-all ${selectedColor === index ? 'border-rose-500 scale-110 ring-4 ring-rose-500/10 shadow-sm' : 'hover:border-slate-500'}`} 
+                            style={{ backgroundColor: calculatedBg }}
+                            title={cleanColorName}
+                          />
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -232,10 +267,10 @@ export default function ProductDetailClient({ productData }) {
                 )}
               </div>
 
-              {/* کادر مشخصات فنی پویا */}
+              {/* کادر مشخصات فنی */}
               <div className="flex flex-col gap-1.5">
                 <div className="grid grid-cols-1 gap-2">
-                  {productData.specs?.map((spec, index) => (
+                  {productData?.specs?.map((spec, index) => (
                     <div key={index} className="flex justify-between bg-slate-50/60 px-3 py-1.5 rounded-xl border border-slate-100/30">
                       <span className="text-[11px] font-medium text-slate-400">{spec.title}</span>
                       <span className="text-xs font-bold text-slate-800">{spec.value}</span>
@@ -246,13 +281,13 @@ export default function ProductDetailClient({ productData }) {
             </div>
           </div>
 
-          {/* ستون سوم: باکس خرید هوشمند با دیتای قیمت لحظه‌ای */}
+          {/* ستون سوم: باکس خرید */}
           <div className={`lg:col-span-3 border text-white rounded-3xl p-6 flex flex-col justify-between h-auto min-h-[380px] md:h-[520px] shadow-xl relative overflow-hidden transition-colors duration-300 ${isAvailable ? 'bg-slate-900 border-slate-950' : 'bg-slate-950/95 border-slate-900'}`}>
             <div className="flex flex-col gap-3.5 z-10">
               <span className="text-[11px] font-black text-slate-400 border-b border-white/5 pb-2.5 block text-right">فروشنده: سیب‌شاپ</span>
               <div className="flex items-center gap-3 text-right px-1">
                 <ShieldCheck className="w-5 h-5 shrink-0 text-rose-500" />
-                <span className="text-xs font-bold text-slate-200">{productData.warranty}</span> {/* گارانتی پویای استراپی */}
+                <span className="text-xs font-bold text-slate-200">{productData?.warranty}</span>
               </div>
               <div className="flex items-center gap-3 text-right px-1">
                 <Truck className="w-5 h-5 shrink-0 text-rose-500" />
@@ -266,9 +301,9 @@ export default function ProductDetailClient({ productData }) {
                   <>
                     <span className="text-xs text-slate-400 font-bold">قیمت ترکیب انتخابی:</span>
                     <div className="flex flex-col items-end">
-                      {productData.oldPrice && <span className="text-[10px] text-slate-500 line-through font-medium">{productData.oldPrice}</span>}
+                      {productData?.oldPrice && <span className="text-[10px] text-slate-500 line-through font-medium">{productData.oldPrice}</span>}
                       <div className="text-base md:text-xl font-black text-white flex items-center gap-1 mt-0.5">
-                        <span>{currentPrice}</span> {/* قیمت داینامیک متغیر */}
+                        <span>{currentPrice}</span>
                         <span className="text-xs font-normal text-slate-400 mr-1">تومان</span>
                       </div>
                     </div>
@@ -316,7 +351,7 @@ export default function ProductDetailClient({ productData }) {
           </div>
         </div>
 
-        {/* سیستم تب‌بندی */}
+        {/* توضیحات محصول */}
         <div className="w-full bg-white border border-slate-100 rounded-3xl p-5 md:p-6 shadow-2xs mb-8 text-right">
           <div className="flex items-center gap-6 border-b border-slate-100 pb-3 mb-5">
             <button onClick={() => setActiveTab('review')} className={`text-xs md:text-sm font-black pb-2 transition relative ${activeTab === 'review' ? 'text-rose-500' : 'text-slate-400'}`}>
@@ -325,61 +360,11 @@ export default function ProductDetailClient({ productData }) {
             </button>
           </div>
           <div className="leading-6 md:leading-7 text-[11px] md:text-sm text-slate-600 font-medium max-w-4xl">
-            <p>{productData.fullSpecs?.[0]?.value || 'توضیحاتی در دسترس نیست.'}</p>
+            <p>{productData?.fullSpecs?.[0]?.value || 'توضیحاتی در دسترس نیست.'}</p>
           </div>
         </div>
 
       </main>
-
-      {/* 📱 سیستم فیکس پایین صفحه موبایل */}
-      <div className={`md:hidden fixed bottom-14 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/60 px-4 py-3 flex flex-col gap-2.5 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.04)] transition-all ${((existInCart || showSuccess) && isAvailable) ? 'h-auto' : 'h-[72px]'}`}>
-        <div className="flex items-center justify-between w-full">
-          <div className="flex flex-col text-right justify-center">
-            {isAvailable ? (
-              <div className="text-sm font-black text-slate-950 flex items-center gap-0.5">
-                <span>{currentPrice}</span>
-                <span className="text-[9px] font-normal text-slate-400">تومان</span>
-              </div>
-            ) : (
-              <span className="text-xs font-bold text-slate-400">ناموجود</span>
-            )}
-          </div>
-          
-          <div className="flex items-center justify-end">
-            {isAvailable ? (
-              showSuccess ? (
-                <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-xs font-black px-4 py-2 rounded-xl flex items-center gap-1.5">
-                  <Check className="w-3.5 h-3.5" />
-                  <span>اضافه شد</span>
-                </div>
-              ) : existInCart ? (
-                <div className="bg-slate-900 text-white px-3 py-1.5 rounded-xl flex items-center gap-5 border border-slate-950 shadow-md">
-                  <button disabled={existInCart.quantity >= stockCount} onClick={handleIncrement} className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold ${existInCart.quantity >= stockCount ? 'bg-slate-800 text-slate-600' : 'bg-rose-500 text-white'}`}>+</button>
-                  <span className="text-xs font-black min-w-[12px] text-center">{existInCart.quantity.toLocaleString('fa-IR')}</span>
-                  <button onClick={handleDecrement} className="w-6 h-6 bg-slate-800 text-white rounded-md flex items-center justify-center text-xs font-bold">-</button>
-                </div>
-              ) : (
-                <button onClick={handleAddToCart} className="bg-rose-500 text-white font-black text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 active:scale-95 transition-all">
-                  <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
-                  <span>افزودن به سبد</span>
-                </button>
-              )
-            ) : (
-              <button disabled className="bg-slate-100 text-slate-400 border border-slate-200 font-black text-xs px-5 py-2.5 rounded-xl cursor-not-allowed">
-                <span>ناموجود</span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {isAvailable && existInCart && !showSuccess && (
-          <Link href="/cart" className="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-[11px] font-black py-2.5 rounded-xl flex items-center justify-center gap-2 border border-rose-500/30 shadow-sm">
-            <ShoppingCart className="w-3.5 h-3.5 text-rose-500" />
-            <span>تایید و نهایی‌سازی سبد خرید</span>
-            <ArrowLeft className="w-3 h-3 mr-auto ml-1 bg-rose-500/20 p-0.5 rounded-md text-rose-400" />
-          </Link>
-        )}
-      </div>
 
       <Footer />
     </div>

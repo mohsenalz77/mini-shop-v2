@@ -1,6 +1,3 @@
-این هم نسخهٔ کاملاً بهینه‌سازی شده، شیک و یکپارچهٔ فایل **`src/app/product/[id]/ProductDetailClient.js`** که فضای خالی ستون وسط را با انتقال کارت مشخصات فنی پویا به پایین ستون (`mt-auto`) و بالانس پدینگ‌ها کاملاً پر و متوازن می‌کند:
-
-```jsx
 "use client";
 
 import React, { useState, useEffect } from 'react';

@@ -20,7 +20,7 @@ export default function ProductDetailClient({ productData }) {
   const [isLiked, setIsLiked] = useState(false);
   const [activeTab, setActiveTab] = useState('review');
   
-  // 🔘 استیت جدید برای مدیریت پیام «به سبد خرید اضافه شد» به سبک دیجی‌کالا
+  // 🔘 استیت مدیریت پیام «به سبد خرید اضافه شد» به سبک دیجی‌کالا
   const [showSuccess, setShowSuccess] = useState(false);
 
   // 📦 بررسی هوشمند وضعیت موجودی بر اساس مقدار واکشی شده از استراپی
@@ -99,18 +99,18 @@ export default function ProductDetailClient({ productData }) {
         {/* کادر اصلی محصول */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 items-start mb-8">
           
-          {/* ستون اول: گالری عکس */}
-          <div className="lg:col-span-5 bg-white border border-slate-100 rounded-3xl p-4 md:p-6 flex flex-col justify-between h-[340px] md:h-[490px] shadow-2xs relative">
+          {/* 📱 ستون اول: گالری عکس اصلاح‌شده با تکنیک mix-blend-multiply */}
+          <div className="lg:col-span-5 bg-white border border-slate-100 rounded-3xl p-4 md:p-6 flex flex-col justify-between h-[340px] md:h-[490px] shadow-2xs relative overflow-hidden">
             <div className="absolute top-4 right-4 flex flex-col gap-2 z-20">
-              <button onClick={() => setIsLiked(!isLiked)} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50 border border-slate-100/70 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-500 transition shadow-3xs">
+              <button onClick={() => setIsLiked(!isLiked)} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/80 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-500 transition shadow-3xs">
                 <Heart className={`w-4 h-4 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
               </button>
-              <button className="w-8 h-8 md:w-9 md:h-9 bg-slate-50 border border-slate-100/70 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 transition shadow-3xs">
+              <button className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/80 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 transition shadow-3xs">
                 <Share2 className="w-4 h-4" />
               </button>
             </div>
             
-            <div className="flex-1 flex items-center justify-center w-full h-full relative">
+            <div className="flex-1 flex items-center justify-center w-full h-full relative p-4 bg-white rounded-2xl">
               {!isAvailable && (
                 <div className="absolute top-2 right-2 bg-slate-500 text-white text-[10px] font-black px-3 py-1 rounded-xl z-30 shadow-xs select-none">
                   اتمام موجودی
@@ -122,7 +122,10 @@ export default function ProductDetailClient({ productData }) {
                   src={productData.imageUrl} 
                   alt={productData.name}
                   referrerPolicy="no-referrer-when-downgrade"
-                  className={`max-h-[260px] md:max-h-[380px] object-contain filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.08)] select-none transition duration-300 ${!isAvailable ? 'grayscale opacity-50' : ''}`}
+                  /* 🚀 جادوی سی‌اس‌اس: حذف کادر سفیدِ دورِ تصاویر استراپی */
+                  className={`max-h-[240px] md:max-h-[360px] w-auto object-contain mix-blend-multiply select-none transition duration-500 ${
+                    !isAvailable ? 'grayscale opacity-40' : 'hover:scale-[1.03]'
+                  }`}
                 />
               ) : (
                 <span className="text-7xl md:text-8xl lg:text-9xl filter drop-shadow-[0_15px_25px_rgba(0,0,0,0.08)] select-none">
@@ -226,13 +229,13 @@ export default function ProductDetailClient({ productData }) {
               {isAvailable ? (
                 showSuccess ? (
                   /* 🟢 حالت موقت: تایید افزودن موفقیت‌آمیز به سبد خرید (دیجی‌کالایی) */
-                  <div className="w-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-black py-3.5 rounded-2xl flex items-center justify-center gap-2 animate-scaleIn shadow-lg shadow-emerald-500/5">
-                    <Check className="w-4 h-4 text-emerald-400 animate-bounce" />
+                  <div className="w-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-black py-3.5 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/5 px-4">
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />
                     <span>به سبد خرید اضافه شد</span>
                   </div>
                 ) : existInCart ? (
                   /* 🔢 حالت کنترل تعداد اقلام موجود در سبد خرید */
-                  <div className="flex flex-col gap-3 w-full transition-all duration-300 animate-fadeIn">
+                  <div className="flex flex-col gap-3 w-full transition-all duration-300">
                     <div className="w-full bg-slate-800 border border-slate-700/60 py-2.5 px-4 rounded-2xl flex items-center justify-between shadow-inner">
                       <button 
                         disabled={existInCart.quantity >= stockCount}

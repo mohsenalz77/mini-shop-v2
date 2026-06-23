@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../../../components/Header'; 
 import Footer from '../../../components/Footer';
-import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2, Ban, Plus, Minus } from 'lucide-react';
+import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2, Ban, Plus, Minus, CheckCircle, ArrowLeft } from 'lucide-react';
 import { useCart } from '../../../context/CartContext'; 
+import Link from 'next/link';
 
 export default function ProductDetailClient({ productData }) {
   const { cartItems, addToCart, incrementQuantity, removeFromCart } = useCart(); 
@@ -13,12 +14,23 @@ export default function ProductDetailClient({ productData }) {
   const [isLiked, setIsLiked] = useState(false);
   const [activeTab, setActiveTab] = useState('review');
 
+  // 🚀 استیت جدید برای مدیریت نمایش توست نوتیفیکیشن اختصاصی و شکیل
+  const [showToast, setShowToast] = useState(false);
+
   // 📦 بررسی هوشمند وضعیت موجودی بر اساس مقدار واکشی شده از استراپی
   const stockCount = productData.stock !== undefined ? Number(productData.stock) : 1;
   const isAvailable = stockCount > 0;
 
   // 🛒 بررسی این که آیا این کالا همین الان در سبد خرید هست یا نه؟
   const existInCart = cartItems.find(item => item.id === productData.id);
+
+  // افکت خودکار برای محو کردن توست پس از ۳ ثانیه
+  useEffect(() => {
+    if (showToast) {
+      const timer = setTimeout(() => setShowToast(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showToast]);
 
   // 🚀 فرمت کردن و تبدیل هوشمند اعداد فارسی به انگلیسی برای حل مشکل قیمت صفر در سبد خرید
   const handleAddToCart = () => {
@@ -38,11 +50,42 @@ export default function ProductDetailClient({ productData }) {
       imageUrl: productData.imageUrl,
       stock: stockCount
     });
+
+    // ✨ نمایش انیمیشن توست پس از افزودن موفق
+    setShowToast(true);
+  };
+
+  const handleIncrement = () => {
+    if (existInCart && existInCart.quantity < stockCount) {
+      incrementQuantity(productData.id);
+      setShowToast(true); // نمایش مجدد توست در زمان افزایش تعداد
+    }
   };
 
   return (
     <div className="min-h-screen bg-slate-50 overflow-x-hidden antialiased direction-rtl pb-16 md:pb-0">
       <Header />
+
+      {/* 🟢 توست نوتیفیکیشن اختصاصی، شیک و متحرک سیب‌شاپ */}
+      <div className={`fixed top-24 left-4 right-4 md:left-8 md:right-auto md:w-[400px] bg-emerald-600 border border-emerald-500 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-4 z-50 transition-all duration-500 transform text-right ${
+        showToast ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-12 opacity-0 scale-95 pointer-events-none'
+      }`}>
+        <div className="flex items-center gap-3">
+          <CheckCircle className="w-6 h-6 text-emerald-100 shrink-0" />
+          <div className="flex flex-col gap-0.5">
+            <span className="text-xs font-black">با موفقیت اعمال شد</span>
+            <span className="text-[10px] text-emerald-100 font-medium line-clamp-1">{productData.name} به سبد اضافه شد.</span>
+          </div>
+        </div>
+        
+        <Link 
+          href="/cart" 
+          className="bg-white/15 hover:bg-white/25 text-white text-[11px] font-black px-3 py-2 rounded-xl border border-white/10 flex items-center gap-1 shrink-0 transition-all active:scale-95"
+        >
+          <span>مشاهده سبد</span>
+          <ArrowLeft className="w-3 h-3" />
+        </Link>
+      </div>
 
       <div className="absolute top-32 left-1/4 w-[500px] h-[500px] bg-rose-500/5 blur-[150px] rounded-full pointer-events-none z-0"></div>
 
@@ -152,7 +195,7 @@ export default function ProductDetailClient({ productData }) {
             </div>
           </div>
 
-          {/* ستون سوم: باکس خرید دسکتاپ */}
+          {/* ستون سوم: باکس خرید دسکتاپ مجهز به منطق انبار */}
           <div className={`lg:col-span-3 border text-white rounded-3xl p-5 flex flex-col justify-between h-[350px] md:h-[490px] shadow-xl relative overflow-hidden transition-colors duration-300 ${isAvailable ? 'bg-slate-900 border-slate-950' : 'bg-slate-950/95 border-slate-900'}`}>
             <div className="flex flex-col gap-3 z-10">
               <span className="text-[11px] font-black text-slate-400 border-b border-white/5 pb-2 block text-right">فروشنده: سیب‌شاپ</span>
@@ -184,13 +227,13 @@ export default function ProductDetailClient({ productData }) {
                 </div>
               </div>
               
-              {/* 🛒 فیکس شماره ۲ و ۳: تبدیل دکمه به کنترلر هوشمند تعداد در دسکتاپ */}
+              {/* 🛒 باکس مدیریت خرید و پلاس تعداد منحصربفرد دسکتاپ */}
               {isAvailable ? (
                 existInCart ? (
                   <div className="w-full bg-slate-800 border border-slate-700 py-2.5 px-4 rounded-2xl flex items-center justify-between shadow-inner">
                     <button 
                       disabled={existInCart.quantity >= stockCount}
-                      onClick={() => incrementQuantity(productData.id)}
+                      onClick={handleIncrement}
                       className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${existInCart.quantity >= stockCount ? 'bg-slate-700/40 text-slate-600 cursor-not-allowed' : 'bg-rose-500 hover:bg-rose-600 text-white cursor-pointer'}`}
                       title={existInCart.quantity >= stockCount ? "سقف موجودی انبار" : "افزایش تعداد"}
                     >
@@ -228,11 +271,11 @@ export default function ProductDetailClient({ productData }) {
           </div>
         </div>
 
-        {/* سیستم تب‌بندی */}
+        {/* سیستم تب‌بندی نقد و بررسی */}
         <div className="w-full bg-white border border-slate-100 rounded-3xl p-5 md:p-6 shadow-2xs mb-8 text-right">
           <div className="flex items-center gap-6 border-b border-slate-100 pb-3 mb-5">
             <button onClick={() => setActiveTab('review')} className={`text-xs md:text-sm font-black pb-2 transition relative ${activeTab === 'review' ? 'text-rose-500' : 'text-slate-400'}`}>
-              <span>توضیحات...</span>
+              <span>توضیحات محصول</span>
               {activeTab === 'review' && <span className="absolute bottom-0 inset-x-0 h-0.5 bg-rose-500 rounded-full"></span>}
             </button>
           </div>
@@ -264,7 +307,7 @@ export default function ProductDetailClient({ productData }) {
             <div className="bg-slate-900 text-white px-3 py-1.5 rounded-xl flex items-center gap-4 border border-slate-950 shadow-md">
               <button 
                 disabled={existInCart.quantity >= stockCount}
-                onClick={() => incrementQuantity(productData.id)}
+                onClick={handleIncrement}
                 className={`w-6 h-6 rounded-md flex items-center justify-center text-xs ${existInCart.quantity >= stockCount ? 'bg-slate-800 text-slate-600 cursor-not-allowed' : 'bg-rose-500 text-white'}`}
               >
                 +

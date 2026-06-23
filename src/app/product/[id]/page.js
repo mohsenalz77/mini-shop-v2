@@ -2,15 +2,15 @@ import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
 import ProductDetailClient from './ProductDetailClient';
 
-// 🚀 تابع فچ کامل مخصوص استراپی ۴ با پاپولیت لایه دوم (Nested Component) برای دریافت options
+// تابع فچ با سینتکس پاپولیت عمیق استاندارد استراپی ۴
 async function getSingleProductBySlug(slug) {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://b.dr-sib.xyz/api";
     
-    // 🔗 پاپولیت دقیق مدیا، گالری و نفوذ به لایه دوم کامپوننت‌ها (options)
-    const url = `${apiUrl}/products?filters[slug][$eq]=${slug}&populate[image]=*&populate[gallery]=*&populate[attributes][populate]=*&populate[attributes][populate][options]=*`;
+    // 🚀 سینتکس دقیق استراپی ۴ برای باز کردن لایه دوم (options) بدون خراب کردن فیلتر اسلاگ
+    const url = `${apiUrl}/products?filters[slug][$eq]=${slug}&populate[image]=*&populate[gallery]=*&populate[attributes][populate]=*&populate[attributes][on][product-attributes.product-variant][populate][options]=*`;
     
-    console.log("🔗 Deep Strapi 4 Fetch URL:", url);
+    console.log("🔗 Standard Strapi 4 Deep Fetch URL:", url);
 
     const res = await fetch(url, {
       cache: 'no-store'
@@ -47,14 +47,13 @@ export default async function ProductDetailPage({ params }) {
         <div className="text-center py-20 text-slate-500 font-bold">
           <p>محصول مورد نظر یافت نشد.</p>
           <p className="text-xs text-slate-400 font-normal mt-2">اسلاگ درخواستی: {slug}</p>
-          <p className="text-xs text-rose-500 font-normal mt-1">اتصال با آدرس رسمی استراپی ۴ برقرار شد.</p>
+          <p className="text-xs text-rose-500 font-normal mt-1">اگر پس از اعمال این کد باز هم خطا گرفتید، احتمالاً نام کامپوننت یا فیلد گزینه‌ها در استراپی متفاوت است.</p>
         </div>
         <Footer />
       </div>
     );
   }
 
-  // ساختار داده استراپی ۴
   const id = apiProduct.id;
   const rawAttributes = apiProduct.attributes || apiProduct;
   
@@ -91,7 +90,7 @@ export default async function ProductDetailPage({ params }) {
       .filter(Boolean);
   }
 
-  // 🛠️ پارسر متن توضیحات استراپی ۴
+  // 🛠️ پارسر متن توضیحات
   let cleanDescription = "توضیحاتی برای این محصول وارد نشده است.";
   if (description) {
     if (typeof description === 'string') {
@@ -103,13 +102,12 @@ export default async function ProductDetailPage({ params }) {
     }
   }
 
-  // 🔄 ۳. استخراج و تفکیک اجزای داینامیک زون در استراپی ۴
+  // 🔄 ۳. استخراج اجزای داینامیک زون
   let extractedSpecs = [];
   let dynamicVariants = [];
 
   if (dynamicAttributes && Array.isArray(dynamicAttributes)) {
     dynamicAttributes.forEach(attr => {
-      // بررسی کامپوننت مشخصات فنی
       if (attr.__component === 'product-attributes.specification') {
         extractedSpecs.push({
           title: attr.title,
@@ -117,21 +115,19 @@ export default async function ProductDetailPage({ params }) {
         });
       }
       
-      // بررسی کامپوننت تنوع محصول (قیمت و گزینه‌ها)
       if (attr.__component === 'product-attributes.product-variant') {
         dynamicVariants.push({
           price: attr.price,
           stock: attr.stock,
-          options: attr.options || [] // حالا به لطف پاپولیت لایه دوم پر است
+          options: attr.options || [] 
         });
       }
     });
   }
 
-  // ۴. استخراج آرایه‌های فرانت‌اَند کلاینت (Color, Storage, Size)
+  // ۴. آرایه‌های فرانت‌اَند کلاینت (Color, Storage, Size)
   const allOptions = dynamicVariants.flatMap(v => v.options || []);
   
-  // فیلتر کردن رنگ‌ها
   const extractedColors = Array.from(new Set(allOptions.filter(o => o.type === 'Color').map(o => o.value)))
     .map(colorVal => {
       const matchedOpt = allOptions.find(o => o.type === 'Color' && o.value === colorVal);
@@ -141,7 +137,6 @@ export default async function ProductDetailPage({ params }) {
       };
     });
 
-  // فیلتر کردن حافظه‌ها و سایزها
   const extractedStorages = Array.from(new Set(allOptions.filter(o => o.type === 'Storage').map(o => o.value)));
   const extractedSizes = Array.from(new Set(allOptions.filter(o => o.type === 'Size').map(o => o.value)));
 

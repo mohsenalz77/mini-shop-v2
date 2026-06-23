@@ -27,7 +27,6 @@ export default function ProductDetailClient({ productData }) {
   // 🛒 بررسی وضعیت حضور این کالا در سبد خرید فعلی کاربر
   const existInCart = cartItems.find(item => item.id === productData?.id);
 
-  // 🛠️ فیکس اصلی: تعریف توابع مدیریت تعداد که در کد قبلی شما حذف شده بود
   const handleIncrement = () => {
     if (existInCart && existInCart.quantity < stockCount) {
       incrementQuantity(productData.id);
@@ -182,7 +181,7 @@ export default function ProductDetailClient({ productData }) {
             </div>
           </div>
 
-          {/* ستون سوم: باکس خرید دسکتاپ مجهز به منطق انبار */}
+          {/* ستون سوم: باکس خرید دسکتاپ (رنگ تیره بدون تغییر، دکمهٔ تایید کاملاً اصلاح شد) */}
           <div className={`lg:col-span-3 border text-white rounded-3xl p-5 flex flex-col justify-between h-auto min-h-[360px] md:h-[490px] shadow-xl relative overflow-hidden transition-colors duration-300 ${isAvailable ? 'bg-slate-900 border-slate-950' : 'bg-slate-950/95 border-slate-900'}`}>
             <div className="flex flex-col gap-3 z-10">
               <span className="text-[11px] font-black text-slate-400 border-b border-white/5 pb-2 block text-right">فروشنده: سیب‌شاپ</span>
@@ -214,10 +213,10 @@ export default function ProductDetailClient({ productData }) {
                 )}
               </div>
               
-              {/* 🛒 باکس خرید دسکتاپ طبقاتی */}
+              {/* 🛒 مدیریت افزودن و تعداد طبقاتی دسکتاپ */}
               {isAvailable ? (
                 existInCart ? (
-                  <div className="flex flex-col gap-3 w-full transition-all duration-300">
+                  <div className="flex flex-col gap-2.5 w-full transition-all duration-300">
                     <div className="w-full bg-slate-800 border border-slate-700 py-2.5 px-4 rounded-2xl flex items-center justify-between shadow-inner">
                       <button 
                         disabled={existInCart.quantity >= stockCount}
@@ -240,13 +239,14 @@ export default function ProductDetailClient({ productData }) {
                       </button>
                     </div>
 
+                    {/* ✨ اصلاح جدی دیزاین: دکمهٔ تایید با تم اختصاصی شیشه‌ای و درخشانِ رز (پایان رنگ سبز تداخل‌دار) */}
                     <Link 
                       href="/cart" 
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black py-3 rounded-2xl flex items-center justify-center gap-2 border border-emerald-500/30 transition-all shadow-lg"
+                      className="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-black py-3 rounded-2xl flex items-center justify-center gap-2 border border-rose-500/40 transition-all shadow-lg shadow-rose-500/5"
                     >
-                      <ShoppingCart className="w-4 h-4" />
-                      <span>تایید و مشاهده سبد خرید</span>
-                      <ArrowLeft className="w-3.5 h-3.5 mr-auto ml-1 bg-white/10 p-0.5 rounded-md" />
+                      <ShoppingCart className="w-4 h-4 text-rose-400" />
+                      <span>مشاهده و تایید سبد خرید</span>
+                      <ArrowLeft className="w-4 h-4 mr-auto ml-1 bg-rose-500/20 p-0.5 rounded-lg text-rose-300" />
                     </Link>
                   </div>
                 ) : (
@@ -283,7 +283,7 @@ export default function ProductDetailClient({ productData }) {
 
       </main>
 
-      {/* 📱 سیستم فیکس پایین صفحه موبایل */}
+      {/* 📱 سیستم فیکس پایین صفحه موبایل هماهنگ با دیزاین لوکس جدید رز */}
       <div className={`md:hidden fixed bottom-14 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/60 px-4 py-3 flex flex-col gap-2.5 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.04)] transition-all ${existInCart ? 'h-auto' : 'h-[72px]'}`}>
         
         <div className="flex items-center justify-between w-full">
@@ -339,14 +339,15 @@ export default function ProductDetailClient({ productData }) {
           </div>
         </div>
 
+        {/* دکمهٔ موبایل هماهنگ با طیف رنگی اصلاح‌شدهٔ رز شیشه‌ای */}
         {isAvailable && existInCart && (
           <Link 
             href="/cart" 
-            className="w-full bg-emerald-600 text-white text-[11px] font-black py-2.5 rounded-xl flex items-center justify-center gap-2 border border-emerald-500/20 shadow-md"
+            className="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-[11px] font-black py-2.5 rounded-xl flex items-center justify-center gap-2 border border-rose-500/30 shadow-sm"
           >
-            <ShoppingCart className="w-3.5 h-3.5" />
+            <ShoppingCart className="w-3.5 h-3.5 text-rose-500" />
             <span>تایید و نهایی‌سازی سبد خرید</span>
-            <ArrowLeft className="w-3 h-3 mr-auto ml-1 bg-white/10 p-0.5 rounded-md" />
+            <ArrowLeft className="w-3 h-3 mr-auto ml-1 bg-rose-500/20 p-0.5 rounded-md text-rose-400" />
           </Link>
         )}
       </div>

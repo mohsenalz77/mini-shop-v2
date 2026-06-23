@@ -3,11 +3,11 @@
 import React, { useState } from 'react';
 import Header from '../../../components/Header'; 
 import Footer from '../../../components/Footer';
-import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2, Ban } from 'lucide-react';
+import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2, Ban, Plus, Minus } from 'lucide-react';
 import { useCart } from '../../../context/CartContext'; 
 
 export default function ProductDetailClient({ productData }) {
-  const { addToCart } = useCart(); 
+  const { cartItems, addToCart, incrementQuantity, removeFromCart } = useCart(); 
   const [selectedColor, setSelectedColor] = useState(0);
   const [selectedStorage, setSelectedStorage] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
@@ -17,19 +17,18 @@ export default function ProductDetailClient({ productData }) {
   const stockCount = productData.stock !== undefined ? Number(productData.stock) : 1;
   const isAvailable = stockCount > 0;
 
+  // 🛒 بررسی این که آیا این کالا همین الان در سبد خرید هست یا نه؟
+  const existInCart = cartItems.find(item => item.id === productData.id);
+
   // 🚀 فرمت کردن و تبدیل هوشمند اعداد فارسی به انگلیسی برای حل مشکل قیمت صفر در سبد خرید
   const handleAddToCart = () => {
-    if (!isAvailable) return; // لایه امنیتی جانبی جهت مسدودسازی کلیک‌ها
+    if (!isAvailable) return;
 
-    // تابع داخلی برای تبدیل ارقام فارسی/عربی به انگلیسی
     const p2e = s => s.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
-
-    // پاکسازی کامل متن قیمت، تبدیل به عدد انگلیسی و حذف کاماها
     const cleanPriceString = productData.price 
       ? p2e(productData.price.toString()).replace(/[^\d]/g, '') 
       : '0';
 
-    // تبدیل نهایی به متغیر عددی خالص
     const rawPrice = Number(cleanPriceString);
 
     addToCart({
@@ -37,7 +36,7 @@ export default function ProductDetailClient({ productData }) {
       name: productData.name,
       price: rawPrice,
       imageUrl: productData.imageUrl,
-      stock: stockCount // 🚀 اتصال حیاتی: پاس دادن سقف موجودی به کانتکست سبد خرید
+      stock: stockCount
     });
   };
 
@@ -45,7 +44,6 @@ export default function ProductDetailClient({ productData }) {
     <div className="min-h-screen bg-slate-50 overflow-x-hidden antialiased direction-rtl pb-16 md:pb-0">
       <Header />
 
-      {/* هاله‌های آمبیانس نوری */}
       <div className="absolute top-32 left-1/4 w-[500px] h-[500px] bg-rose-500/5 blur-[150px] rounded-full pointer-events-none z-0"></div>
 
       <main className="w-full px-4 md:px-8 mt-4 md:mt-6 pt-1 pb-16 relative z-10">
@@ -62,7 +60,7 @@ export default function ProductDetailClient({ productData }) {
         {/* کادر اصلی محصول */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 items-start mb-8">
           
-          {/* ستون اول: گالری عکس کاملاً هوشمند */}
+          {/* ستون اول: گالری عکس */}
           <div className="lg:col-span-5 bg-white border border-slate-100 rounded-3xl p-4 md:p-6 flex flex-col justify-between h-[340px] md:h-[490px] shadow-2xs relative">
             <div className="absolute top-4 right-4 flex flex-col gap-2 z-20">
               <button onClick={() => setIsLiked(!isLiked)} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50 border border-slate-100/70 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-500 transition shadow-3xs">
@@ -74,7 +72,6 @@ export default function ProductDetailClient({ productData }) {
             </div>
             
             <div className="flex-1 flex items-center justify-center w-full h-full relative">
-              {/* نشان عدم موجودی بر روی تصویر کالا */}
               {!isAvailable && (
                 <div className="absolute top-2 right-2 bg-slate-500 text-white text-[10px] font-black px-3 py-1 rounded-xl z-30 shadow-xs select-none">
                   اتمام موجودی
@@ -133,6 +130,13 @@ export default function ProductDetailClient({ productData }) {
                     ))}
                   </div>
                 </div>
+
+                {/* 🔴 فیکس شماره ۱: نمایش تعداد موجودی دقیق اگر کمتر از ۵ عدد بود */}
+                {isAvailable && stockCount < 5 && (
+                  <div className="mt-3 bg-amber-50 border border-amber-200/60 text-amber-700 px-3 py-2 rounded-xl text-[11px] font-black flex items-center gap-1.5 animate-pulse">
+                    ⚠️ شتاب کنید! فقط {stockCount.toLocaleString('fa-IR')} عدد از این محصول در انبار سیب‌شاپ باقی مانده است.
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-col gap-1.5">
@@ -148,7 +152,7 @@ export default function ProductDetailClient({ productData }) {
             </div>
           </div>
 
-          {/* ستون سوم: باکس خرید دسکتاپ مجهز به منطق انبار */}
+          {/* ستون سوم: باکس خرید دسکتاپ */}
           <div className={`lg:col-span-3 border text-white rounded-3xl p-5 flex flex-col justify-between h-[350px] md:h-[490px] shadow-xl relative overflow-hidden transition-colors duration-300 ${isAvailable ? 'bg-slate-900 border-slate-950' : 'bg-slate-950/95 border-slate-900'}`}>
             <div className="flex flex-col gap-3 z-10">
               <span className="text-[11px] font-black text-slate-400 border-b border-white/5 pb-2 block text-right">فروشنده: سیب‌شاپ</span>
@@ -180,37 +184,55 @@ export default function ProductDetailClient({ productData }) {
                 </div>
               </div>
               
-              {/* 🛒 سوییچ استایل دکمه بر اساس وضعیت موجودی کالا */}
-              <button 
-                onClick={handleAddToCart}
-                disabled={!isAvailable}
-                className={`w-full font-black text-xs md:text-sm py-3.5 rounded-2xl shadow-lg transition duration-300 flex items-center justify-center gap-2 ${
-                  isAvailable 
-                    ? 'bg-rose-500 hover:bg-rose-600 text-white active:scale-98 cursor-pointer' 
-                    : 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed'
-                }`}
-              >
-                {isAvailable ? (
-                  <>
+              {/* 🛒 فیکس شماره ۲ و ۳: تبدیل دکمه به کنترلر هوشمند تعداد در دسکتاپ */}
+              {isAvailable ? (
+                existInCart ? (
+                  <div className="w-full bg-slate-800 border border-slate-700 py-2.5 px-4 rounded-2xl flex items-center justify-between shadow-inner">
+                    <button 
+                      disabled={existInCart.quantity >= stockCount}
+                      onClick={() => incrementQuantity(productData.id)}
+                      className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${existInCart.quantity >= stockCount ? 'bg-slate-700/40 text-slate-600 cursor-not-allowed' : 'bg-rose-500 hover:bg-rose-600 text-white cursor-pointer'}`}
+                      title={existInCart.quantity >= stockCount ? "سقف موجودی انبار" : "افزایش تعداد"}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                    
+                    <div className="flex flex-col items-center select-none">
+                      <span className="text-sm font-black text-white">{existInCart.quantity.toLocaleString('fa-IR')}</span>
+                      <span className="text-[9px] text-slate-400 font-bold">عدد در سبد</span>
+                    </div>
+
+                    <button 
+                      onClick={() => removeFromCart(productData.id)}
+                      className="w-8 h-8 bg-slate-700 hover:bg-slate-600 text-white rounded-xl flex items-center justify-center cursor-pointer transition-all"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={handleAddToCart}
+                    className="w-full bg-rose-500 hover:bg-rose-600 text-white font-black text-xs md:text-sm py-3.5 rounded-2xl shadow-lg transition duration-300 flex items-center justify-center gap-2 active:scale-98 cursor-pointer"
+                  >
                     <ShoppingBag className="w-4 h-4" />
                     <span>افزودن به سبد خرید</span>
-                  </>
-                ) : (
-                  <>
-                    <Ban className="w-4 h-4" />
-                    <span>کالا ناموجود است</span>
-                  </>
-                )}
-              </button>
+                  </button>
+                )
+              ) : (
+                <button disabled className="w-full bg-slate-800 text-slate-500 border border-slate-700 py-3.5 rounded-2xl font-black text-xs md:text-sm flex items-center justify-center gap-2 cursor-not-allowed">
+                  <Ban className="w-4 h-4" />
+                  <span>کالا ناموجود است</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
 
-        {/* سیستم تب‌بندی نقد و بررسی */}
+        {/* سیستم تب‌بندی */}
         <div className="w-full bg-white border border-slate-100 rounded-3xl p-5 md:p-6 shadow-2xs mb-8 text-right">
           <div className="flex items-center gap-6 border-b border-slate-100 pb-3 mb-5">
             <button onClick={() => setActiveTab('review')} className={`text-xs md:text-sm font-black pb-2 transition relative ${activeTab === 'review' ? 'text-rose-500' : 'text-slate-400'}`}>
-              <span>توضیحات محصول</span>
+              <span>توضیحات...</span>
               {activeTab === 'review' && <span className="absolute bottom-0 inset-x-0 h-0.5 bg-rose-500 rounded-full"></span>}
             </button>
           </div>
@@ -221,7 +243,7 @@ export default function ProductDetailClient({ productData }) {
 
       </main>
 
-      {/* سیستم فیکس پایین صفحه موبایل */}
+      {/* سیستم فیکس پایین صفحه موبایل هماهنگ با کنترلر تعداد */}
       <div className="md:hidden fixed bottom-14 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-100 p-3 flex items-center justify-between z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.04)]">
         <div className="flex flex-col text-right">
           {isAvailable ? (
@@ -237,28 +259,38 @@ export default function ProductDetailClient({ productData }) {
           )}
         </div>
         
-        {/* 🛒 دکمه موبایل هماهنگ با انبارداری */}
-        <button 
-          onClick={handleAddToCart}
-          disabled={!isAvailable}
-          className={`font-black text-xs px-5 py-2.5 rounded-xl flex items-center gap-1.5 transition-all duration-150 ${
-            isAvailable 
-              ? 'bg-rose-500 text-white active:scale-95' 
-              : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
-          }`}
-        >
-          {isAvailable ? (
-            <>
+        {isAvailable ? (
+          existInCart ? (
+            <div className="bg-slate-900 text-white px-3 py-1.5 rounded-xl flex items-center gap-4 border border-slate-950 shadow-md">
+              <button 
+                disabled={existInCart.quantity >= stockCount}
+                onClick={() => incrementQuantity(productData.id)}
+                className={`w-6 h-6 rounded-md flex items-center justify-center text-xs ${existInCart.quantity >= stockCount ? 'bg-slate-800 text-slate-600 cursor-not-allowed' : 'bg-rose-500 text-white'}`}
+              >
+                +
+              </button>
+              <span className="text-xs font-black min-w-[12px] text-center">{existInCart.quantity.toLocaleString('fa-IR')}</span>
+              <button 
+                onClick={() => removeFromCart(productData.id)}
+                className="w-6 h-6 bg-slate-800 text-white rounded-md flex items-center justify-center text-xs"
+              >
+                -
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={handleAddToCart}
+              className="bg-rose-500 text-white font-black text-xs px-5 py-2.5 rounded-xl flex items-center gap-1.5 active:scale-95 transition-all duration-150"
+            >
               <ShoppingBag className="w-3.5 h-3.5" />
               <span>افزودن به سبد</span>
-            </>
-          ) : (
-            <>
-              <Ban className="w-3.5 h-3.5" />
-              <span>ناموجود</span>
-            </>
-          )}
-        </button>
+            </button>
+          )
+        ) : (
+          <button disabled className="bg-slate-100 text-slate-400 border border-slate-200 font-black text-xs px-5 py-2.5 rounded-xl cursor-not-allowed">
+            <span>ناموجود</span>
+          </button>
+        )}
       </div>
 
       <Footer />

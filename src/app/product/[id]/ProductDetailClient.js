@@ -14,8 +14,8 @@ export default function ProductDetailClient({ productData }) {
   const [isLiked, setIsLiked] = useState(false);
   const [activeTab, setActiveTab] = useState('review');
 
-  // 🚀 استیت جدید برای مدیریت نمایش توست نوتیفیکیشن اختصاصی و شکیل
-  const [showToast, setShowToast] = useState(false);
+  // ✨ استیت مدیریت نمایش اعلان موقت جایگزین قیمت (فقط برای بار اول)
+  const [showLocalAlert, setShowLocalAlert] = useState(false);
 
   // 📦 بررسی هوشمند وضعیت موجودی بر اساس مقدار واکشی شده از استراپی
   const stockCount = productData.stock !== undefined ? Number(productData.stock) : 1;
@@ -24,13 +24,13 @@ export default function ProductDetailClient({ productData }) {
   // 🛒 بررسی این که آیا این کالا همین الان در سبد خرید هست یا نه؟
   const existInCart = cartItems.find(item => item.id === productData.id);
 
-  // افکت خودکار برای محو کردن توست پس از ۳ ثانیه
+  // تایمر محو شدن اعلان محلی و بازگشت قیمت به وضعیت عادی (پس از ۴ ثانیه)
   useEffect(() => {
-    if (showToast) {
-      const timer = setTimeout(() => setShowToast(false), 3000);
+    if (showLocalAlert) {
+      const timer = setTimeout(() => setShowLocalAlert(false), 4000);
       return () => clearTimeout(timer);
     }
-  }, [showToast]);
+  }, [showLocalAlert]);
 
   // 🚀 فرمت کردن و تبدیل هوشمند اعداد فارسی به انگلیسی برای حل مشکل قیمت صفر در سبد خرید
   const handleAddToCart = () => {
@@ -51,41 +51,27 @@ export default function ProductDetailClient({ productData }) {
       stock: stockCount
     });
 
-    // ✨ نمایش انیمیشن توست پس از افزودن موفق
-    setShowToast(true);
+    // ✨ فقط در اولین بار اضافه شدن به سبد خرید، اعلان داخل باکس قیمت را فعال کن
+    setShowLocalAlert(true);
   };
 
   const handleIncrement = () => {
     if (existInCart && existInCart.quantity < stockCount) {
       incrementQuantity(productData.id);
-      setShowToast(true); // نمایش مجدد توست در زمان افزایش تعداد
+      setShowLocalAlert(false); // اگر روی پلاس زد، اعلان محو شود تا قیمت یا تعداد را ببیند
+    }
+  };
+
+  const handleDecrement = () => {
+    if (existInCart) {
+      removeFromCart(productData.id);
+      setShowLocalAlert(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-slate-50 overflow-x-hidden antialiased direction-rtl pb-16 md:pb-0">
       <Header />
-
-      {/* 🟢 توست نوتیفیکیشن اختصاصی، شیک و متحرک سیب‌شاپ */}
-      <div className={`fixed top-24 left-4 right-4 md:left-8 md:right-auto md:w-[400px] bg-emerald-600 border border-emerald-500 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-4 z-50 transition-all duration-500 transform text-right ${
-        showToast ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-12 opacity-0 scale-95 pointer-events-none'
-      }`}>
-        <div className="flex items-center gap-3">
-          <CheckCircle className="w-6 h-6 text-emerald-100 shrink-0" />
-          <div className="flex flex-col gap-0.5">
-            <span className="text-xs font-black">با موفقیت اعمال شد</span>
-            <span className="text-[10px] text-emerald-100 font-medium line-clamp-1">{productData.name} به سبد اضافه شد.</span>
-          </div>
-        </div>
-        
-        <Link 
-          href="/cart" 
-          className="bg-white/15 hover:bg-white/25 text-white text-[11px] font-black px-3 py-2 rounded-xl border border-white/10 flex items-center gap-1 shrink-0 transition-all active:scale-95"
-        >
-          <span>مشاهده سبد</span>
-          <ArrowLeft className="w-3 h-3" />
-        </Link>
-      </div>
 
       <div className="absolute top-32 left-1/4 w-[500px] h-[500px] bg-rose-500/5 blur-[150px] rounded-full pointer-events-none z-0"></div>
 
@@ -174,10 +160,9 @@ export default function ProductDetailClient({ productData }) {
                   </div>
                 </div>
 
-                {/* 🔴 فیکس شماره ۱: نمایش تعداد موجودی دقیق اگر کمتر از ۵ عدد بود */}
                 {isAvailable && stockCount < 5 && (
                   <div className="mt-3 bg-amber-50 border border-amber-200/60 text-amber-700 px-3 py-2 rounded-xl text-[11px] font-black flex items-center gap-1.5 animate-pulse">
-                    ⚠️ شتاب کنید! فقط {stockCount.toLocaleString('fa-IR')} عدد از این محصول در انبار سیب‌شاپ باقی مانده است.
+                    ⚠️ تنها {stockCount.toLocaleString('fa-IR')} عدد از این کالا در انبار سیب‌شاپ باقی مانده است.
                   </div>
                 )}
               </div>
@@ -210,24 +195,41 @@ export default function ProductDetailClient({ productData }) {
             </div>
             
             <div className="mt-5 pt-3 border-t border-white/5 z-10 flex flex-col gap-3">
-              <div className="flex items-center justify-between w-full text-right">
-                <span className="text-[10px] text-slate-400 font-bold">{isAvailable ? "قیمت کالا:" : "وضعیت انبار:"}</span>
-                <div className="flex flex-col items-end">
-                  {isAvailable ? (
+              
+              {/* 🟢 بخش قیمت داینامیک دسکتاپ متصل به سیستم توست داخلی */}
+              <div className="flex items-center justify-between w-full min-h-[44px] text-right transition-all duration-300">
+                {isAvailable ? (
+                  showLocalAlert ? (
+                    /* 💚 انیمیشن باکس اعلان سبز به جای قیمت در اولین افزودن */
+                    <div className="w-full bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 p-2 rounded-xl flex items-center justify-between gap-2 animate-fadeIn">
+                      <div className="flex items-center gap-1.5">
+                        <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="text-[10px] font-black">به سبد اضافه شد</span>
+                      </div>
+                      <Link href="/cart" className="bg-emerald-500 hover:bg-emerald-600 text-white text-[9px] font-black px-2 py-1 rounded-lg flex items-center gap-0.5 transition-colors">
+                        <span>مشاهده</span>
+                        <ArrowLeft className="w-2.5 h-2.5" />
+                      </Link>
+                    </div>
+                  ) : (
+                    /* رندر عادی مشخصات مالی کالا */
                     <>
-                      {productData.oldPrice && <span className="text-[10px] text-slate-500 line-through font-medium">{productData.oldPrice}</span>}
-                      <div className="text-base md:text-xl font-black text-white flex items-center gap-0.5 mt-0.5">
-                        <span>{productData.price}</span>
-                        <span className="text-[10px] font-normal text-slate-400 mr-0.5">تومان</span>
+                      <span className="text-[10px] text-slate-400 font-bold">قیمت کالا:</span>
+                      <div className="flex flex-col items-end">
+                        {productData.oldPrice && <span className="text-[10px] text-slate-500 line-through font-medium">{productData.oldPrice}</span>}
+                        <div className="text-base md:text-xl font-black text-white flex items-center gap-0.5 mt-0.5">
+                          <span>{productData.price}</span>
+                          <span className="text-[10px] font-normal text-slate-400 mr-0.5">تومان</span>
+                        </div>
                       </div>
                     </>
-                  ) : (
-                    <span className="text-xs md:text-sm font-black text-rose-500 bg-rose-500/10 border border-rose-500/20 px-3 py-1 rounded-xl">ناموجود در انبار</span>
-                  )}
-                </div>
+                  )
+                ) : (
+                  <span className="text-xs md:text-sm font-black text-rose-500 bg-rose-500/10 border border-rose-500/20 px-3 py-1 rounded-xl w-full text-center">ناموجود در انبار</span>
+                )}
               </div>
               
-              {/* 🛒 باکس مدیریت خرید و پلاس تعداد منحصربفرد دسکتاپ */}
+              {/* 🛒 باکس مدیریت خرید دسکتاپ */}
               {isAvailable ? (
                 existInCart ? (
                   <div className="w-full bg-slate-800 border border-slate-700 py-2.5 px-4 rounded-2xl flex items-center justify-between shadow-inner">
@@ -235,7 +237,6 @@ export default function ProductDetailClient({ productData }) {
                       disabled={existInCart.quantity >= stockCount}
                       onClick={handleIncrement}
                       className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${existInCart.quantity >= stockCount ? 'bg-slate-700/40 text-slate-600 cursor-not-allowed' : 'bg-rose-500 hover:bg-rose-600 text-white cursor-pointer'}`}
-                      title={existInCart.quantity >= stockCount ? "سقف موجودی انبار" : "افزایش تعداد"}
                     >
                       <Plus className="w-4 h-4" />
                     </button>
@@ -246,7 +247,7 @@ export default function ProductDetailClient({ productData }) {
                     </div>
 
                     <button 
-                      onClick={() => removeFromCart(productData.id)}
+                      onClick={handleDecrement}
                       className="w-8 h-8 bg-slate-700 hover:bg-slate-600 text-white rounded-xl flex items-center justify-center cursor-pointer transition-all"
                     >
                       <Minus className="w-4 h-4" />
@@ -271,7 +272,7 @@ export default function ProductDetailClient({ productData }) {
           </div>
         </div>
 
-        {/* سیستم تب‌بندی نقد و بررسی */}
+        {/* سیستم تب‌بندی */}
         <div className="w-full bg-white border border-slate-100 rounded-3xl p-5 md:p-6 shadow-2xs mb-8 text-right">
           <div className="flex items-center gap-6 border-b border-slate-100 pb-3 mb-5">
             <button onClick={() => setActiveTab('review')} className={`text-xs md:text-sm font-black pb-2 transition relative ${activeTab === 'review' ? 'text-rose-500' : 'text-slate-400'}`}>
@@ -286,54 +287,74 @@ export default function ProductDetailClient({ productData }) {
 
       </main>
 
-      {/* سیستم فیکس پایین صفحه موبایل هماهنگ با کنترلر تعداد */}
-      <div className="md:hidden fixed bottom-14 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-100 p-3 flex items-center justify-between z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.04)]">
-        <div className="flex flex-col text-right">
+      {/* 📱 سیستم فیکس پایین صفحه موبایل هوشمند هماهنگ با اعلان محلی قیمت */}
+      <div className="md:hidden fixed bottom-14 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-100 p-3 flex items-center justify-between z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.04)] min-h-[64px]">
+        <div className="flex flex-col text-right justify-center flex-1 max-w-[50%]">
           {isAvailable ? (
-            <>
-              {productData.oldPrice && <span className="text-[9px] text-slate-400 font-bold line-through">{productData.oldPrice}</span>}
-              <div className="text-sm font-black text-slate-950 flex items-center gap-0.5">
-                <span>{productData.price}</span>
-                <span className="text-[9px] font-normal text-slate-400">تومان</span>
+            showLocalAlert ? (
+              /* 💚 رندر اعلان سبز محلی برای نسخه موبایل بجای قیمت */
+              <div className="flex items-center gap-1 text-emerald-600 animate-fadeIn">
+                <CheckCircle className="w-3.5 h-3.5 shrink-0" />
+                <span className="text-[10px] font-black truncate">اضافه شد</span>
               </div>
-            </>
+            ) : (
+              <>
+                {productData.oldPrice && <span className="text-[9px] text-slate-400 font-bold line-through">{productData.oldPrice}</span>}
+                <div className="text-sm font-black text-slate-950 flex items-center gap-0.5">
+                  <span>{productData.price}</span>
+                  <span className="text-[9px] font-normal text-slate-400">تومان</span>
+                </div>
+              </>
+            )
           ) : (
-            <span className="text-xs font-bold text-slate-400">غیرقابل خرید</span>
+            <span className="text-xs font-bold text-slate-400">کالا ناموجود است</span>
           )}
         </div>
         
-        {isAvailable ? (
-          existInCart ? (
-            <div className="bg-slate-900 text-white px-3 py-1.5 rounded-xl flex items-center gap-4 border border-slate-950 shadow-md">
+        <div className="flex items-center justify-end gap-2">
+          {/* دکمهٔ ورود سریع به سبد خرید روی موبایل فقط وقتی اعلان فعال است */}
+          {showLocalAlert && isAvailable && (
+            <Link href="/cart" className="bg-emerald-50 text-emerald-600 border border-emerald-200 text-[10px] font-black px-2.5 py-2 rounded-xl flex items-center gap-0.5 animate-fadeIn">
+              <span>سبد</span>
+              <ArrowLeft className="w-3 h-3" />
+            </Link>
+          )}
+
+          {isAvailable ? (
+            existInCart ? (
+              <div className="bg-slate-900 text-white px-3 py-1.5 rounded-xl flex items-center gap-4 border border-slate-950 shadow-md">
+                <button 
+                  disabled={existInCart.quantity >= stockCount}
+                  onClick={handleIncrement}
+                  className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold ${
+                    existInCart.quantity >= stockCount ? 'bg-slate-800 text-slate-600 cursor-not-allowed' : 'bg-rose-500 text-white'
+                  }`}
+                >
+                  +
+                </button>
+                <span className="text-xs font-black min-w-[12px] text-center">{existInCart.quantity.toLocaleString('fa-IR')}</span>
+                <button 
+                  onClick={handleDecrement}
+                  className="w-6 h-6 bg-slate-800 text-white rounded-md flex items-center justify-center text-xs font-bold"
+                >
+                  -
+                </button>
+              </div>
+            ) : (
               <button 
-                disabled={existInCart.quantity >= stockCount}
-                onClick={handleIncrement}
-                className={`w-6 h-6 rounded-md flex items-center justify-center text-xs ${existInCart.quantity >= stockCount ? 'bg-slate-800 text-slate-600 cursor-not-allowed' : 'bg-rose-500 text-white'}`}
+                onClick={handleAddToCart}
+                className="bg-rose-500 text-white font-black text-xs px-5 py-2.5 rounded-xl flex items-center gap-1.5 active:scale-95 transition-all duration-150"
               >
-                +
+                <ShoppingBag className="w-3.5 h-3.5" />
+                <span>افزودن به سبد</span>
               </button>
-              <span className="text-xs font-black min-w-[12px] text-center">{existInCart.quantity.toLocaleString('fa-IR')}</span>
-              <button 
-                onClick={() => removeFromCart(productData.id)}
-                className="w-6 h-6 bg-slate-800 text-white rounded-md flex items-center justify-center text-xs"
-              >
-                -
-              </button>
-            </div>
+            )
           ) : (
-            <button 
-              onClick={handleAddToCart}
-              className="bg-rose-500 text-white font-black text-xs px-5 py-2.5 rounded-xl flex items-center gap-1.5 active:scale-95 transition-all duration-150"
-            >
-              <ShoppingBag className="w-3.5 h-3.5" />
-              <span>افزودن به سبد</span>
+            <button disabled className="bg-slate-100 text-slate-400 border border-slate-200 font-black text-xs px-5 py-2.5 rounded-xl cursor-not-allowed">
+              <span>ناموجود</span>
             </button>
-          )
-        ) : (
-          <button disabled className="bg-slate-100 text-slate-400 border border-slate-200 font-black text-xs px-5 py-2.5 rounded-xl cursor-not-allowed">
-            <span>ناموجود</span>
-          </button>
-        )}
+          )}
+        </div>
       </div>
 
       <Footer />

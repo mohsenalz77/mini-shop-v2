@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Header from '../../../components/Header'; 
 import Footer from '../../../components/Footer';
-import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2, Ban, Plus, Minus, ArrowLeft, ShoppingCart } from 'lucide-react';
+import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2, Ban, Plus, Minus, ArrowLeft, ShoppingCart, Check } from 'lucide-react';
 import { useCart } from '../../../context/CartContext'; 
 import Link from 'next/link';
 
@@ -19,6 +19,9 @@ export default function ProductDetailClient({ productData }) {
   const [selectedStorage, setSelectedStorage] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
   const [activeTab, setActiveTab] = useState('review');
+  
+  // 🔘 استیت جدید برای مدیریت پیام «به سبد خرید اضافه شد» به سبک دیجی‌کالا
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // 📦 بررسی هوشمند وضعیت موجودی بر اساس مقدار واکشی شده از استراپی
   const stockCount = productData?.stock !== undefined ? Number(productData.stock) : 1;
@@ -39,7 +42,7 @@ export default function ProductDetailClient({ productData }) {
     }
   };
 
-  // 🚀 فرمت کردن و تبدیل هوشمند اعداد فارسی به انگلیسی برای حل مشکل قیمت صفر در سبد خرید
+  // 🚀 مدیریت هوشمند افزودن به سبد با انیمیشن موفقیت
   const handleAddToCart = () => {
     if (!isAvailable || !productData) return;
 
@@ -57,6 +60,12 @@ export default function ProductDetailClient({ productData }) {
       imageUrl: productData.imageUrl,
       stock: stockCount 
     });
+
+    // فعال کردن وضعیت «اضافه شد» و محو شدن آن پس از ۲ ثانیه
+    setShowSuccess(true);
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 2000);
   };
 
   if (!productData) {
@@ -181,80 +190,87 @@ export default function ProductDetailClient({ productData }) {
             </div>
           </div>
 
-          {/* ستون سوم: باکس خرید دسکتاپ (رنگ تیره بدون تغییر، دکمهٔ تایید کاملاً اصلاح شد) */}
-          <div className={`lg:col-span-3 border text-white rounded-3xl p-5 flex flex-col justify-between h-auto min-h-[360px] md:h-[490px] shadow-xl relative overflow-hidden transition-colors duration-300 ${isAvailable ? 'bg-slate-900 border-slate-950' : 'bg-slate-950/95 border-slate-900'}`}>
-            <div className="flex flex-col gap-3 z-10">
-              <span className="text-[11px] font-black text-slate-400 border-b border-white/5 pb-2 block text-right">فروشنده: سیب‌شاپ</span>
-              <div className="flex items-start gap-2.5 text-right">
-                <ShieldCheck className={`w-4.5 h-4.5 shrink-0 mt-0.5 ${isAvailable ? 'text-rose-500' : 'text-slate-500'}`} />
-                <div className="flex flex-col"><span className="text-xs font-bold">گارانتی ۱۸ ماهه شرکتی</span></div>
+          {/* ستون سوم: باکس خرید دسکتاپ مدرن و کاملاً بهینه‌سازی شده */}
+          <div className={`lg:col-span-3 border text-white rounded-3xl p-6 flex flex-col justify-between h-auto min-h-[380px] md:h-[490px] shadow-xl relative overflow-hidden transition-colors duration-300 ${isAvailable ? 'bg-slate-900 border-slate-950' : 'bg-slate-950/95 border-slate-900'}`}>
+            <div className="flex flex-col gap-3.5 z-10">
+              <span className="text-[11px] font-black text-slate-400 border-b border-white/5 pb-2.5 block text-right">فروشنده: سیب‌شاپ</span>
+              <div className="flex items-center gap-3 text-right px-1">
+                <ShieldCheck className={`w-5 h-5 shrink-0 ${isAvailable ? 'text-rose-500' : 'text-slate-500'}`} />
+                <span className="text-xs font-bold text-slate-200">گارانتی ۱۸ ماهه شرکتی</span>
               </div>
-              <div className="flex items-start gap-2.5 text-right">
-                <Truck className={`w-4.5 h-4.5 shrink-0 mt-0.5 ${isAvailable ? 'text-rose-500' : 'text-slate-500'}`} />
-                <div className="flex flex-col"><span className="text-xs font-bold">ارسال اکسپرس سیب‌شاپ</span></div>
+              <div className="flex items-center gap-3 text-right px-1">
+                <Truck className={`w-5 h-5 shrink-0 ${isAvailable ? 'text-rose-500' : 'text-slate-500'}`} />
+                <span className="text-xs font-bold text-slate-200">ارسال اکسپرس سیب‌شاپ</span>
               </div>
             </div>
             
-            <div className="mt-5 pt-3 border-t border-white/5 z-10 flex flex-col gap-3">
-              <div className="flex items-center justify-between w-full min-h-[44px] text-right">
+            <div className="mt-5 pt-4 border-t border-white/5 z-10 flex flex-col gap-4">
+              <div className="flex items-center justify-between w-full min-h-[44px] text-right px-1">
                 {isAvailable ? (
                   <>
-                    <span className="text-[10px] text-slate-400 font-bold">قیمت کالا:</span>
+                    <span className="text-xs text-slate-400 font-bold">قیمت کالا:</span>
                     <div className="flex flex-col items-end">
                       {productData.oldPrice && <span className="text-[10px] text-slate-500 line-through font-medium">{productData.oldPrice}</span>}
-                      <div className="text-base md:text-xl font-black text-white flex items-center gap-0.5 mt-0.5">
+                      <div className="text-base md:text-xl font-black text-white flex items-center gap-1 mt-0.5">
                         <span>{productData.price}</span>
-                        <span className="text-[10px] font-normal text-slate-400 mr-0.5">تومان</span>
+                        <span className="text-xs font-normal text-slate-400 mr-1">تومان</span>
                       </div>
                     </div>
                   </>
                 ) : (
-                  <span className="text-xs md:text-sm font-black text-rose-500 bg-rose-500/10 border border-rose-500/20 px-3 py-1 rounded-xl w-full text-center">ناموجود در انبار</span>
+                  <span className="text-xs md:text-sm font-black text-rose-500 bg-rose-500/10 border border-rose-500/20 px-3 py-1.5 rounded-xl w-full text-center">ناموجود در انبار</span>
                 )}
               </div>
               
-              {/* 🛒 مدیریت افزودن و تعداد طبقاتی دسکتاپ */}
+              {/* 🛒 منطق و دکمه‌های خرید توسعه‌یافته مشابه پلتفرم‌های بزرگ */}
               {isAvailable ? (
-                existInCart ? (
-                  <div className="flex flex-col gap-2.5 w-full transition-all duration-300">
-                    <div className="w-full bg-slate-800 border border-slate-700 py-2.5 px-4 rounded-2xl flex items-center justify-between shadow-inner">
+                showSuccess ? (
+                  /* 🟢 حالت موقت: تایید افزودن موفقیت‌آمیز به سبد خرید (دیجی‌کالایی) */
+                  <div className="w-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-black py-3.5 rounded-2xl flex items-center justify-center gap-2 animate-scaleIn shadow-lg shadow-emerald-500/5">
+                    <Check className="w-4 h-4 text-emerald-400 animate-bounce" />
+                    <span>به سبد خرید اضافه شد</span>
+                  </div>
+                ) : existInCart ? (
+                  /* 🔢 حالت کنترل تعداد اقلام موجود در سبد خرید */
+                  <div className="flex flex-col gap-3 w-full transition-all duration-300 animate-fadeIn">
+                    <div className="w-full bg-slate-800 border border-slate-700/60 py-2.5 px-4 rounded-2xl flex items-center justify-between shadow-inner">
                       <button 
                         disabled={existInCart.quantity >= stockCount}
                         onClick={handleIncrement}
-                        className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${existInCart.quantity >= stockCount ? 'bg-slate-700/40 text-slate-600 cursor-not-allowed' : 'bg-rose-500 hover:bg-rose-600 text-white cursor-pointer'}`}
+                        className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all active:scale-95 ${existInCart.quantity >= stockCount ? 'bg-slate-700/40 text-slate-600 cursor-not-allowed' : 'bg-rose-500 hover:bg-rose-600 text-white cursor-pointer shadow-sm'}`}
                       >
                         <Plus className="w-4 h-4" />
                       </button>
                       
                       <div className="flex flex-col items-center select-none">
                         <span className="text-sm font-black text-white">{existInCart.quantity.toLocaleString('fa-IR')}</span>
-                        <span className="text-[9px] text-slate-400 font-bold">عدد در سبد</span>
+                        <span className="text-[9px] text-slate-400 font-bold mt-0.5">عدد در سبد</span>
                       </div>
 
                       <button 
                         onClick={handleDecrement}
-                        className="w-8 h-8 bg-slate-700 hover:bg-slate-600 text-white rounded-xl flex items-center justify-center cursor-pointer transition-all"
+                        className="w-8 h-8 bg-slate-700 hover:bg-slate-600 text-white rounded-xl flex items-center justify-center cursor-pointer transition-all active:scale-95 border border-slate-600/40"
                       >
                         <Minus className="w-4 h-4" />
                       </button>
                     </div>
 
-                    {/* ✨ اصلاح جدی دیزاین: دکمهٔ تایید با تم اختصاصی شیشه‌ای و درخشانِ رز (پایان رنگ سبز تداخل‌دار) */}
                     <Link 
                       href="/cart" 
-                      className="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-black py-3 rounded-2xl flex items-center justify-center gap-2 border border-rose-500/40 transition-all shadow-lg shadow-rose-500/5"
+                      className="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-black py-3.5 rounded-2xl flex items-center justify-center gap-2.5 border border-rose-500/30 transition-all shadow-md px-4"
                     >
-                      <ShoppingCart className="w-4 h-4 text-rose-400" />
+                      <ShoppingCart className="w-4 h-4 text-rose-400 shrink-0" />
                       <span>مشاهده و تایید سبد خرید</span>
-                      <ArrowLeft className="w-4 h-4 mr-auto ml-1 bg-rose-500/20 p-0.5 rounded-lg text-rose-300" />
+                      <ArrowLeft className="w-4 h-4 mr-auto bg-rose-500/20 p-0.5 rounded-lg text-rose-300 shrink-0" />
                     </Link>
                   </div>
                 ) : (
+                  /* 🛍️ حالت اولیه: افزودن به سبد خرید */
                   <button 
                     onClick={handleAddToCart}
-                    className="w-full bg-rose-500 hover:bg-rose-600 text-white font-black text-xs md:text-sm py-3.5 rounded-2xl shadow-lg transition duration-300 flex items-center justify-center gap-2 active:scale-98 cursor-pointer"
+                    className="w-full bg-rose-500 hover:bg-rose-600 text-white font-black text-xs md:text-sm py-3.5 px-4 rounded-2xl shadow-lg transition duration-300 flex items-center justify-center gap-2.5 active:scale-98 cursor-pointer"
                   >
-                    <ShoppingBag className="w-4 h-4" />
+                    <ShoppingBag className="w-4 h-4 shrink-0" />
                     <span>افزودن به سبد خرید</span>
                   </button>
                 )
@@ -283,8 +299,8 @@ export default function ProductDetailClient({ productData }) {
 
       </main>
 
-      {/* 📱 سیستم فیکس پایین صفحه موبایل هماهنگ با دیزاین لوکس جدید رز */}
-      <div className={`md:hidden fixed bottom-14 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/60 px-4 py-3 flex flex-col gap-2.5 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.04)] transition-all ${existInCart ? 'h-auto' : 'h-[72px]'}`}>
+      {/* 📱 سیستم فیکس پایین صفحه موبایل هوشمند با قابلیت فیدبک آنی زمان خرید */}
+      <div className={`md:hidden fixed bottom-14 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/60 px-4 py-3 flex flex-col gap-2.5 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.04)] transition-all ${((existInCart || showSuccess) && isAvailable) ? 'h-auto' : 'h-[72px]'}`}>
         
         <div className="flex items-center justify-between w-full">
           <div className="flex flex-col text-right justify-center">
@@ -303,7 +319,12 @@ export default function ProductDetailClient({ productData }) {
           
           <div className="flex items-center justify-end">
             {isAvailable ? (
-              existInCart ? (
+              showSuccess ? (
+                <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-xs font-black px-4 py-2 rounded-xl flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5" />
+                  <span>اضافه شد</span>
+                </div>
+              ) : existInCart ? (
                 <div className="bg-slate-900 text-white px-3 py-1.5 rounded-xl flex items-center gap-5 border border-slate-950 shadow-md">
                   <button 
                     disabled={existInCart.quantity >= stockCount}
@@ -325,9 +346,9 @@ export default function ProductDetailClient({ productData }) {
               ) : (
                 <button 
                   onClick={handleAddToCart}
-                  className="bg-rose-500 text-white font-black text-xs px-5 py-2.5 rounded-xl flex items-center gap-1.5 active:scale-95 transition-all"
+                  className="bg-rose-500 text-white font-black text-xs px-4 py-2.5 rounded-xl flex items-center gap-2 active:scale-95 transition-all"
                 >
-                  <ShoppingBag className="w-3.5 h-3.5" />
+                  <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
                   <span>افزودن به سبد</span>
                 </button>
               )
@@ -339,8 +360,8 @@ export default function ProductDetailClient({ productData }) {
           </div>
         </div>
 
-        {/* دکمهٔ موبایل هماهنگ با طیف رنگی اصلاح‌شدهٔ رز شیشه‌ای */}
-        {isAvailable && existInCart && (
+        {/* دکمه پایین موبایل برای رفتن به سبد خرید */}
+        {isAvailable && existInCart && !showSuccess && (
           <Link 
             href="/cart" 
             className="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-[11px] font-black py-2.5 rounded-xl flex items-center justify-center gap-2 border border-rose-500/30 shadow-sm"

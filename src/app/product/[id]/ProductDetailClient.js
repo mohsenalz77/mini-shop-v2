@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../../../components/Header'; 
 import Footer from '../../../components/Footer';
-import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2, Ban, Plus, Minus, ArrowLeft, ShoppingCart, Check, TrendingUp, X } from 'lucide-react';
+import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2, Ban, Plus, Minus, ArrowLeft, ShoppingCart, Check, TrendingUp, X, Scale } from 'lucide-react';
 import { useCart } from '../../../context/CartContext'; 
 import Link from 'next/link';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
@@ -40,6 +40,8 @@ export default function ProductDetailClient({ productData }) {
   const [selectedSize, setSelectedSize] = useState(0);
   
   const [isLiked, setIsLiked] = useState(false);
+  const [inCompare, setInCompare] = useState(false); // ⚖️ استیت سیستم مقایسه
+  const [isCopied, setIsCopied] = useState(false);   // 🔗 استیت کپی لینک اشتراک‌گذاری
   const [activeTab, setActiveTab] = useState('review');
   const [showSuccess, setShowSuccess] = useState(false);
   const [isChartOpen, setIsChartOpen] = useState(false);
@@ -63,6 +65,17 @@ export default function ProductDetailClient({ productData }) {
     id: 1, 
     phoneNumber: "09123456789"
   });
+
+  // 🔄 لود وضعیت اولیه لایک و مقایسه از LocalStorage مروگر
+  useEffect(() => {
+    if (productData?.id) {
+      const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+      setIsLiked(wishlist.includes(productData.id));
+
+      const compareList = JSON.parse(localStorage.getItem('compare_list') || '[]');
+      setInCompare(compareList.includes(productData.id));
+    }
+  }, [productData?.id]);
 
   useEffect(() => {
     if (productData?.variants && productData.variants.length > 0) {
@@ -101,6 +114,47 @@ export default function ProductDetailClient({ productData }) {
       setActiveImage(productData.imageUrl);
     }
   }, [productData]);
+
+  // ❤️ هندلر تعویض وضعیت لایک (Wishlist)
+  const handleLikeToggle = () => {
+    let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    if (wishlist.includes(productData.id)) {
+      wishlist = wishlist.filter(id => id !== productData.id);
+      setIsLiked(false);
+    } else {
+      wishlist.push(productData.id);
+      setIsLiked(true);
+    }
+    localStorage.setItem('wishlist', JSON.stringify(wishlist));
+  };
+
+  // 🔗 هندلر تعاملی سیستم اشتراک‌گذاری کالا
+  const handleShareLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2500);
+    } catch (err) {
+      console.error('خطا در کپی کدهای لینک:', err);
+    }
+  };
+
+  // ⚖️ هندلر تعاملی افزودن/حذف از لیست مقایسه
+  const handleCompareToggle = () => {
+    let compareList = JSON.parse(localStorage.getItem('compare_list') || '[]');
+    if (compareList.includes(productData.id)) {
+      compareList = compareList.filter(id => id !== productData.id);
+      setInCompare(false);
+    } else {
+      if (compareList.length >= 3) {
+        alert('حداکثر ۳ کالا را می‌توانید همزمان مقایسه کنید.');
+        return;
+      }
+      compareList.push(productData.id);
+      setInCompare(true);
+    }
+    localStorage.setItem('compare_list', JSON.stringify(compareList));
+  };
 
   const stockCount = currentStock !== undefined ? currentStock : 0;
   const isAvailable = stockCount > 0;
@@ -143,7 +197,6 @@ export default function ProductDetailClient({ productData }) {
     setTimeout(() => setShowSuccess(false), 2000);
   };
 
-  // 🚀 تابع ارسال نظر مجهز به کلید رابطه استاندارد کاربران استراپی
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     if (!newTitle || !newComment) {
@@ -166,7 +219,6 @@ export default function ProductDetailClient({ productData }) {
           disadvantages: newDisadv,
           is_approved: false, 
           product: productData.id,
-          // 🔗 اصلاح نهایی کلید فیلد ارتباطی بر اساس تنظیمات داخلی استراپی ۴
           users_permissions_user: mockUser ? mockUser.id : null 
         }
       };
@@ -227,20 +279,36 @@ export default function ProductDetailClient({ productData }) {
         {/* کادر اصلی محصول */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 items-start mb-8">
           
-          {/* 📱 ستون اول: گالری عکس فیکس شده */}
+          {/* 📱 ستون اول: گالری عکس فیکس شده و منوی ابزارها */}
           <div className="lg:col-span-5 bg-white border border-slate-100 rounded-3xl p-4 md:p-6 flex flex-col justify-between h-[420px] md:h-[520px] shadow-2xs relative overflow-hidden">
             <div className="absolute top-4 right-4 flex flex-col gap-2 z-20">
-              <button onClick={() => setIsLiked(!isLiked)} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-500 transition shadow-3xs cursor-pointer">
-                <Heart className={`w-4 h-4 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
+              
+              {/* دکمه لایک داینامیک */}
+              <button onClick={handleLikeToggle} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-500 transition shadow-3xs cursor-pointer" title="افزودن به علاقه‌مندی‌ها">
+                <Heart className={`w-4 h-4 ${isLiked ? 'fill-rose-500 text-rose-500' : 'text-slate-400'}`} />
               </button>
               
+              {/* دکمه مقایسه داینامیک */}
+              <button onClick={handleCompareToggle} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-amber-500 transition shadow-3xs cursor-pointer" title="مقایسه این کالا">
+                <Scale className={`w-4 h-4 ${inCompare ? 'text-amber-500 fill-amber-500/10' : 'text-slate-400'}`} />
+              </button>
+              
+              {/* دکمه نمودار نوسان قیمت */}
               <button onClick={() => setIsChartOpen(true)} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-600 transition shadow-3xs cursor-pointer" title="نمودار نوسان قیمت">
                 <TrendingUp className="w-4 h-4" />
               </button>
 
-              <button className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 transition shadow-3xs cursor-pointer">
-                <Share2 className="w-4 h-4" />
-              </button>
+              {/* دکمه اشتراک‌گذاری هوشمند */}
+              <div className="relative group">
+                <button onClick={handleShareLink} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 transition shadow-3xs cursor-pointer" title="کپی لینک محصول">
+                  <Share2 className="w-4 h-4" />
+                </button>
+                {isCopied && (
+                  <span className="absolute right-full top-1/2 -translate-y-1/2 ml-2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-md whitespace-nowrap z-50">
+                    لینک کپی شد! ✨
+                  </span>
+                )}
+              </div>
             </div>
             
             <div className="flex-1 flex items-center justify-center w-full h-[240px] md:h-[360px] relative p-2 bg-white rounded-2xl">

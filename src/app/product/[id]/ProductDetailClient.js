@@ -6,7 +6,6 @@ import Footer from '../../../components/Footer';
 import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2, Ban, Plus, Minus, ArrowLeft, ShoppingCart, Check, TrendingUp, X } from 'lucide-react';
 import { useCart } from '../../../context/CartContext'; 
 import Link from 'next/link';
-// 📈 ابزارهای نمودار ری‌چارتس
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 const colorMap = {
@@ -36,24 +35,29 @@ export default function ProductDetailClient({ productData }) {
   const incrementQuantity = context.incrementQuantity || (() => {});
   const removeFromCart = context.removeFromCart || (() => {});
 
-  // 🔘 استیت‌های انتخاب ویژگی‌ها
   const [selectedColor, setSelectedColor] = useState(0);
   const [selectedStorage, setSelectedStorage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(0);
   
   const [isLiked, setIsLiked] = useState(false);
-  const [activeTab, setActiveTab] = useState('review'); // review | comments
+  const [activeTab, setActiveTab] = useState('review');
   const [showSuccess, setShowSuccess] = useState(false);
-  const [isChartOpen, setIsChartOpen] = useState(false); // 📊 باز و بسته کردن مودال نمودار
+  const [isChartOpen, setIsChartOpen] = useState(false);
 
-  // 📸 استیت تصویر بزرگ گالری
+  // 📝 استیت‌های فرم ثبت نظر جدید
+  const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newComment, setNewComment] = useState('');
+  const [newRating, setNewRating] = useState(5);
+  const [newAdv, setNewAdv] = useState('');
+  const [newDisadv, setNewDisadv] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState(null);
+
   const [activeImage, setActiveImage] = useState(productData?.imageUrl);
-
-  // 💰 استیت‌های قیمت و انبار لحظه‌ای ترکیب انتخابی
   const [currentPrice, setCurrentPrice] = useState(productData?.price);
   const [currentStock, setCurrentStock] = useState(productData?.stock);
 
-  // 🔄 فیلتر و مچ کردن هوشمند ترکیب انتخاب‌شده با آرایه تنوع‌های استراپی
   useEffect(() => {
     if (productData?.variants && productData.variants.length > 0) {
       const activeColorName = productData.colors?.[selectedColor]?.name;
@@ -86,7 +90,6 @@ export default function ProductDetailClient({ productData }) {
     }
   }, [selectedColor, selectedStorage, selectedSize, productData]);
 
-  // هماهنگی تصویر اولیه با تغییر کالا
   useEffect(() => {
     if (productData?.imageUrl) {
       setActiveImage(productData.imageUrl);
@@ -96,7 +99,6 @@ export default function ProductDetailClient({ productData }) {
   const stockCount = currentStock !== undefined ? currentStock : 0;
   const isAvailable = stockCount > 0;
 
-  // 🛒 تولید کلید شناسه یکتا برای هر ترکیب ویژگی جهت تفکیک در سبد خرید
   const uniqueCartId = `${productData?.id}-${selectedColor}-${selectedStorage}-${selectedSize}`;
   const existInCart = cartItems.find(item => item.id === uniqueCartId);
 
@@ -135,11 +137,60 @@ export default function ProductDetailClient({ productData }) {
     setTimeout(() => setShowSuccess(false), 2000);
   };
 
+  // 🚀 تابع ارسال نظر جدید به استراپی ۴
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!newTitle || !newComment) {
+      setSubmitMessage({ type: 'error', text: 'لطفاً عنوان و متن نظر را وارد کنید.' });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitMessage(null);
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://b.dr-sib.xyz/api";
+      
+      const payload = {
+        data: {
+          title: newTitle,
+          comment: newComment,
+          rating: Number(newRating),
+          advantages: newAdv, 
+          disadvantages: newDisadv,
+          is_approved: false, // برای تایید اولیه توسط ادمین
+          product: productData.id // برقراری رابطه با آی‌دی کالا
+        }
+      };
+
+      const response = await fetch(`${apiUrl}/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        setSubmitMessage({ type: 'success', text: 'دیدگاه شما با موفقیت ثبت شد و پس از تایید نمایش داده می‌شود.' });
+        setNewTitle('');
+        setNewComment('');
+        setNewAdv('');
+        setNewDisadv('');
+        setNewRating(5);
+        setTimeout(() => setIsCommentModalOpen(false), 2500);
+      } else {
+        setSubmitMessage({ type: 'error', text: 'خطایی در ثبت نظر رخ داد. لطفاً دوباره تلاش کنید.' });
+      }
+    } catch (error) {
+      setSubmitMessage({ type: 'error', text: 'اتصال به سرور برقرار نشد.' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const allImages = productData?.imagesAlbum && productData.imagesAlbum.length > 0 
     ? [productData.imageUrl, ...productData.imagesAlbum]
     : [productData?.imageUrl].filter(Boolean);
 
-  // تول‌تیپ اختصاصی و فارسی نمودار ری‌چارتس
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       return (
@@ -175,7 +226,6 @@ export default function ProductDetailClient({ productData }) {
                 <Heart className={`w-4 h-4 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
               </button>
               
-              {/* 📈 دکمه پاپ‌آپ تاریخچه قیمت‌ها */}
               <button onClick={() => setIsChartOpen(true)} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-600 transition shadow-3xs cursor-pointer" title="نمودار نوسان قیمت">
                 <TrendingUp className="w-4 h-4" />
               </button>
@@ -220,10 +270,9 @@ export default function ProductDetailClient({ productData }) {
             )}
           </div>
 
-          {/* 📱 ستون دوم: مشخصات تفکیک‌شده و ویژگی‌ها به سبک دیجی‌کالا */}
+          {/* 📱 ستون دوم: مشخصات تفکیک‌شده و ویژگی‌ها */}
           <div className="lg:col-span-4 bg-white border border-slate-100 rounded-3xl p-6 flex flex-col justify-between h-fit lg:min-h-[520px] shadow-2xs text-right">
             <div className="h-full flex flex-col justify-start gap-5">
-              {/* بخش عنوان کالا */}
               <div>
                 <h1 className="text-lg md:text-xl lg:text-2xl font-extrabold text-slate-900 leading-8 tracking-tight mb-2">
                   {productData?.name}
@@ -234,7 +283,6 @@ export default function ProductDetailClient({ productData }) {
                 </div>
               </div>
 
-              {/* انتخاب ظرفیت حافظه */}
               {productData?.storages && productData.storages.length > 0 && (
                 <div className="border-t border-slate-100/80 pt-4">
                   <span className="text-xs font-black text-slate-800 block mb-3">انتخاب ظرفیت:</span>
@@ -244,9 +292,7 @@ export default function ProductDetailClient({ productData }) {
                         key={idx} 
                         onClick={() => setSelectedStorage(idx)} 
                         className={`px-4 py-2 rounded-xl text-xs font-extrabold border transition-all duration-200 cursor-pointer ${
-                          selectedStorage === idx 
-                            ? 'bg-slate-900 text-white border-slate-900 shadow-xs' 
-                            : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                          selectedStorage === idx ? 'bg-slate-900 text-white border-slate-900 shadow-xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
                         }`}
                       >
                         {storage}
@@ -256,7 +302,6 @@ export default function ProductDetailClient({ productData }) {
                 </div>
               )}
 
-              {/* انتخاب سایز قاب ساعت */}
               {productData?.sizes && productData.sizes.length > 0 && (
                 <div className="border-t border-slate-100/80 pt-4">
                   <span className="text-xs font-black text-slate-800 block mb-3">اندازه قاب ساعت:</span>
@@ -266,9 +311,7 @@ export default function ProductDetailClient({ productData }) {
                         key={idx} 
                         onClick={() => setSelectedSize(idx)} 
                         className={`px-4 py-2 rounded-xl text-xs font-extrabold border transition-all duration-200 cursor-pointer ${
-                          selectedSize === idx 
-                            ? 'bg-slate-900 text-white border-slate-900 shadow-xs' 
-                            : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                          selectedSize === idx ? 'bg-slate-900 text-white border-slate-900 shadow-xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
                         }`}
                       >
                         {size}
@@ -278,7 +321,6 @@ export default function ProductDetailClient({ productData }) {
                 </div>
               )}
 
-              {/* 🎨 انتخاب رنگ هوشمند متصل به نقشه رنگی */}
               {productData?.colors && productData.colors.length > 0 && (
                 <div className="border-t border-slate-100/80 pt-4">
                   <span className="text-xs font-black text-slate-800 block mb-3">
@@ -302,7 +344,6 @@ export default function ProductDetailClient({ productData }) {
                             selectedColor === index ? 'border-rose-500 scale-110 ring-4 ring-rose-500/15 shadow-md' : 'hover:border-slate-500'
                           }`} 
                           style={{ backgroundColor: calculatedBg }}
-                          title={cleanColorName}
                         />
                       );
                     })}
@@ -310,7 +351,6 @@ export default function ProductDetailClient({ productData }) {
                 </div>
               )}
 
-              {/* ⚡ بنر مینی‌مال تحویل اکسپرس سیب‌شاپ */}
               <div className="border-t border-slate-100/80 pt-4">
                 <div className="bg-blue-50/40 border border-blue-100/70 rounded-2xl p-3 flex items-center justify-between text-right select-none">
                   <div className="flex flex-col gap-0.5">
@@ -320,15 +360,8 @@ export default function ProductDetailClient({ productData }) {
                   <span className="text-xl">📦</span>
                 </div>
               </div>
-
-              {isAvailable && stockCount < 5 && (
-                <div className="mt-2 bg-amber-50 border border-amber-200/50 text-amber-800 px-4 py-2.5 rounded-xl text-xs font-bold">
-                  ⚠️ تنها {stockCount.toLocaleString('fa-IR')} عدد از این ترکیب در انبار باقی مانده!
-                </div>
-              )}
             </div>
 
-            {/* کادر ویژگی‌های کلیدی متصل به لنگر پایین صفحه (حداکثر ۳ ویژگی) */}
             {productData?.specs && productData.specs.length > 0 && (
               <div className="mt-8 pt-4 border-t border-slate-100">
                 <span className="text-xs font-black text-slate-800 block mb-3">ویژگی‌های کلیدی محصول:</span>
@@ -414,7 +447,7 @@ export default function ProductDetailClient({ productData }) {
           </div>
         </div>
 
-        {/* 📑 تب‌بندی پایین صفحه مجهز به بخش نظرات واقعی دیجی‌کالایی */}
+        {/* 📑 تب‌بندی پایین صفحه مجهز به بخش نظرات */}
         <div className="w-full bg-white border border-slate-100 rounded-3xl p-5 md:p-6 shadow-2xs mb-8 text-right">
           <div className="flex items-center gap-6 border-b border-slate-100 pb-3 mb-5">
             <button onClick={() => setActiveTab('review')} className={`text-xs md:text-sm font-black pb-2 transition relative cursor-pointer ${activeTab === 'review' ? 'text-rose-500' : 'text-slate-400'}`}>
@@ -433,7 +466,7 @@ export default function ProductDetailClient({ productData }) {
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* بخش جمع‌بندی امتیازها سمت راست */}
+              {/* بخش خلاصه امتیازها و دکمه ثبت نظر */}
               <div className="lg:col-span-4 bg-slate-50/70 border border-slate-100 p-5 rounded-2xl flex flex-col items-center justify-center text-center">
                 <span className="text-3xl font-black text-slate-800 mb-1">{productData.rating}</span>
                 <div className="flex gap-0.5 text-amber-400 mb-2">
@@ -443,10 +476,15 @@ export default function ProductDetailClient({ productData }) {
                   <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                   <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                 </div>
-                <p className="text-[10px] font-bold text-slate-400 leading-5">از مجموع امتیازات ثبت شده خریداران سیب‌شاپ</p>
+                <p className="text-[10px] font-bold text-slate-400 leading-5 mb-4">از مجموع امتیازات ثبت شده خریداران سیب‌شاپ</p>
+                
+                {/* 📝 دکمه باز کردن مودال فرم ثبت نظر جدید */}
+                <button onClick={() => setIsCommentModalOpen(true)} className="w-full bg-white border border-slate-200 hover:bg-slate-900 hover:text-white transition-all text-slate-800 text-xs font-black py-2.5 rounded-xl cursor-pointer shadow-3xs">
+                  نوشتن دیدگاه و امتیاز برای این کالا
+                </button>
               </div>
 
-              {/* رندر هوشمند لیست کامنت‌های تایید شده استراپی */}
+              {/* لیست کامنت‌ها */}
               <div className="lg:col-span-8 flex flex-col gap-5">
                 {productData.reviewsList && productData.reviewsList.length > 0 ? (
                   productData.reviewsList.map((rev) => (
@@ -459,7 +497,6 @@ export default function ProductDetailClient({ productData }) {
                       </div>
                       <p className="text-[11px] md:text-xs text-slate-600 font-medium leading-6 mb-3">{rev.comment}</p>
 
-                      {/* رندر نقاط قوت */}
                       {rev.advantages && rev.advantages.length > 0 && (
                         <div className="flex flex-col gap-1.5 mb-2">
                           {rev.advantages.map((adv, i) => (
@@ -470,7 +507,6 @@ export default function ProductDetailClient({ productData }) {
                         </div>
                       )}
 
-                      {/* رندر نقاط ضعف */}
                       {rev.disadvantages && rev.disadvantages.length > 0 && (
                         <div className="flex flex-col gap-1.5">
                           {rev.disadvantages.map((dis, i) => (
@@ -492,7 +528,69 @@ export default function ProductDetailClient({ productData }) {
 
       </main>
 
-      {/* 📊 مودال کشویی و شیک رندر نوسانات قیمت کالا */}
+      {/* 📝 مودال فرم ثبت نظر جدید */}
+      {isCommentModalOpen && (
+        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 antialiased">
+          <div className="bg-white rounded-3xl w-full max-w-lg p-5 md:p-6 shadow-2xl relative text-right animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
+              <h3 className="text-sm md:text-base font-black text-slate-900">ثبت دیدگاه و امتیاز</h3>
+              <button onClick={() => setIsCommentModalOpen(false)} className="w-7 h-7 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-800 transition cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleReviewSubmit} className="flex flex-col gap-3">
+              {/* امتیاز ستاره‌ای */}
+              <div>
+                <label className="text-xs font-black text-slate-700 block mb-1.5">امتیاز شما به این محصول:</label>
+                <div className="flex items-center gap-1.5 direction-ltr justify-end">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button key={star} type="button" onClick={() => setNewRating(star)} className="text-amber-400 transition transform active:scale-90 cursor-pointer">
+                      <Star className={`w-5 h-5 ${star <= newRating ? 'fill-amber-400' : 'text-slate-300'}`} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* عنوان دیدگاه */}
+              <div>
+                <label className="text-xs font-black text-slate-700 block mb-1">عنوان دیدگاه:</label>
+                <input type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="مثلاً: عالی و پرسرعت" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-rose-500" />
+              </div>
+
+              {/* متن اصلی نظر */}
+              <div>
+                <label className="text-xs font-black text-slate-700 block mb-1">متن دیدگاه شما:</label>
+                <textarea rows="3" value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="نقاط قوت، ضعف و تجربه کاربری خود را بنویسید..." className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-rose-500 resize-none" />
+              </div>
+
+              {/* نقاط قوت و ضعف */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-black text-emerald-600 block mb-1">نقاط قوت (با ویرگول جدا کنید):</label>
+                  <input type="text" value={newAdv} onChange={(e) => setNewAdv(e.target.value)} placeholder="سرعت بالا، صفحه نمایش خفن" className="w-full bg-emerald-50/30 border border-emerald-100 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-500" />
+                </div>
+                <div>
+                  <label className="text-xs font-black text-rose-500 block mb-1">نقاط ضعف (با ویرگول جدا کنید):</label>
+                  <input type="text" value={newDisadv} onChange={(e) => setNewDisadv(e.target.value)} placeholder="قیمت بالا، نداشتن شارژر" className="w-full bg-rose-50/30 border border-rose-100 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-rose-500" />
+                </div>
+              </div>
+
+              {submitMessage && (
+                <div className={`p-3 rounded-xl text-xs font-bold text-center mt-1 border ${submitMessage.type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700'}`}>
+                  {submitMessage.text}
+                </div>
+              )}
+
+              <button type="submit" disabled={isSubmitting} className="w-full bg-rose-500 hover:bg-rose-600 text-white text-xs font-black py-3 rounded-xl shadow-md transition-all mt-2 cursor-pointer disabled:bg-slate-300">
+                {isSubmitting ? 'در حال ارسال اطلاعات...' : 'ثبت و ارسال دیدگاه'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 📊 مودال نمودار قیمت */}
       {isChartOpen && (
         <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 antialiased">
           <div className="bg-white rounded-3xl w-full max-w-2xl p-5 md:p-6 shadow-2xl relative text-right flex flex-col justify-between animate-in fade-in zoom-in-95 duration-200">
@@ -506,7 +604,6 @@ export default function ProductDetailClient({ productData }) {
               </button>
             </div>
 
-            {/* بدنه رندر کتابخانه Recharts */}
             <div className="w-full h-[260px] md:h-[320px] direction-ltr pr-4">
               {productData.priceHistoryList && productData.priceHistoryList.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">

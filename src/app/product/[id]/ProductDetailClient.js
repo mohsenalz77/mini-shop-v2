@@ -58,10 +58,9 @@ export default function ProductDetailClient({ productData }) {
   const [currentPrice, setCurrentPrice] = useState(productData?.price);
   const [currentStock, setCurrentStock] = useState(productData?.stock);
 
-  // 📱 شبیه‌ساز اطلاعات کاربر لاگین شده (اینجا باید آیدی عددی یوزری که در استراپی ساخته شده را بگذاری)
-  // برای تست، مطمئن شو که کاربری با این ID در بخش User کانتنت‌منیجر استراپی وجود دارد.
+  // 📱 شبیه‌ساز اطلاعات کاربر لاگین شده 
   const [mockUser, setMockUser] = useState({
-    id: 1, // 👈 آیدی عددی واقعی یوزر تستی خودت در استراپی را اینجا بنویس (مثلاً 1 یا 2)
+    id: 1, 
     phoneNumber: "09123456789"
   });
 
@@ -144,7 +143,7 @@ export default function ProductDetailClient({ productData }) {
     setTimeout(() => setShowSuccess(false), 2000);
   };
 
-  // 🚀 تابع ارسال نظر مجهز به ساختار روابط داینامیک
+  // 🚀 تابع ارسال نظر مجهز به کلید رابطه استاندارد کاربران استراپی
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     if (!newTitle || !newComment) {
@@ -166,8 +165,9 @@ export default function ProductDetailClient({ productData }) {
           advantages: newAdv, 
           disadvantages: newDisadv,
           is_approved: false, 
-          product: productData.id,        // اتصال کامپوننت محصول
-          user: mockUser ? mockUser.id : null // 🔗 ارسال داینامیک آیدی عددی یوزر شبیه‌سازی‌شده
+          product: productData.id,
+          // 🔗 اصلاح نهایی کلید فیلد ارتباطی بر اساس تنظیمات داخلی استراپی ۴
+          users_permissions_user: mockUser ? mockUser.id : null 
         }
       };
 

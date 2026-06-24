@@ -3,11 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../../../components/Header'; 
 import Footer from '../../../components/Footer';
-import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2, Ban, Plus, Minus, ArrowLeft, ShoppingCart, Check } from 'lucide-react';
+import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2, Ban, Plus, Minus, ArrowLeft, ShoppingCart, Check, TrendingUp, X } from 'lucide-react';
 import { useCart } from '../../../context/CartContext'; 
 import Link from 'next/link';
+// 📈 ابزارهای نمودار ری‌چارتس
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
-// 🎨 دیکشنری هوشمند تبدیل نام‌های فارسی به کدهای رنگی وب
 const colorMap = {
   'مشکی': '#1a1a1a',
   'مشکی مات': '#111111',
@@ -29,7 +30,6 @@ const colorMap = {
 };
 
 export default function ProductDetailClient({ productData }) {
-  // 🛡️ کانتکست سبد خرید
   const context = useCart() || {};
   const cartItems = context.cartItems || [];
   const addToCart = context.addToCart || (() => {});
@@ -42,8 +42,9 @@ export default function ProductDetailClient({ productData }) {
   const [selectedSize, setSelectedSize] = useState(0);
   
   const [isLiked, setIsLiked] = useState(false);
-  const [activeTab, setActiveTab] = useState('review');
+  const [activeTab, setActiveTab] = useState('review'); // review | comments
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isChartOpen, setIsChartOpen] = useState(false); // 📊 باز و بسته کردن مودال نمودار
 
   // 📸 استیت تصویر بزرگ گالری
   const [activeImage, setActiveImage] = useState(productData?.imageUrl);
@@ -138,6 +139,19 @@ export default function ProductDetailClient({ productData }) {
     ? [productData.imageUrl, ...productData.imagesAlbum]
     : [productData?.imageUrl].filter(Boolean);
 
+  // تول‌تیپ اختصاصی و فارسی نمودار ری‌چارتس
+  const CustomTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-slate-900 border border-slate-800 text-white p-3 rounded-xl shadow-md text-xs font-black direction-rtl text-right">
+          <p className="mb-1 text-slate-400">تاریخ: {payload[0].payload.date}</p>
+          <p className="text-rose-400">قیمت: {Number(payload[0].value).toLocaleString('fa-IR')} تومان</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 overflow-x-hidden antialiased direction-rtl pb-32 md:pb-0">
       <Header />
@@ -157,10 +171,16 @@ export default function ProductDetailClient({ productData }) {
           {/* 📱 ستون اول: گالری عکس فیکس شده */}
           <div className="lg:col-span-5 bg-white border border-slate-100 rounded-3xl p-4 md:p-6 flex flex-col justify-between h-[420px] md:h-[520px] shadow-2xs relative overflow-hidden">
             <div className="absolute top-4 right-4 flex flex-col gap-2 z-20">
-              <button onClick={() => setIsLiked(!isLiked)} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-500 transition shadow-3xs">
+              <button onClick={() => setIsLiked(!isLiked)} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-500 transition shadow-3xs cursor-pointer">
                 <Heart className={`w-4 h-4 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}`} />
               </button>
-              <button className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 transition shadow-3xs">
+              
+              {/* 📈 دکمه پاپ‌آپ تاریخچه قیمت‌ها */}
+              <button onClick={() => setIsChartOpen(true)} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-600 transition shadow-3xs cursor-pointer" title="نمودار نوسان قیمت">
+                <TrendingUp className="w-4 h-4" />
+              </button>
+
+              <button className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 transition shadow-3xs cursor-pointer">
                 <Share2 className="w-4 h-4" />
               </button>
             </div>
@@ -189,7 +209,7 @@ export default function ProductDetailClient({ productData }) {
                   <button
                     key={index}
                     onClick={() => setActiveImage(imgUrl)}
-                    className={`w-12 h-12 md:w-14 md:h-14 bg-white border p-1 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200 overflow-hidden ${
+                    className={`w-12 h-12 md:w-14 md:h-14 bg-white border p-1 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200 overflow-hidden cursor-pointer ${
                       activeImage === imgUrl ? 'border-rose-500 ring-2 ring-rose-500/10 scale-105 shadow-xs' : 'border-slate-200/80'
                     }`}
                   >
@@ -200,7 +220,7 @@ export default function ProductDetailClient({ productData }) {
             )}
           </div>
 
-          {/* 📱 ستون دوم: مشخصات تفکیک‌شده و ویژگی‌ها (طراحی پرکننده و دلباز به سبک دیجی‌کالا) */}
+          {/* 📱 ستون دوم: مشخصات تفکیک‌شده و ویژگی‌ها به سبک دیجی‌کالا */}
           <div className="lg:col-span-4 bg-white border border-slate-100 rounded-3xl p-6 flex flex-col justify-between h-fit lg:min-h-[520px] shadow-2xs text-right">
             <div className="h-full flex flex-col justify-start gap-5">
               {/* بخش عنوان کالا */}
@@ -223,7 +243,7 @@ export default function ProductDetailClient({ productData }) {
                       <button 
                         key={idx} 
                         onClick={() => setSelectedStorage(idx)} 
-                        className={`px-4 py-2 rounded-xl text-xs font-extrabold border transition-all duration-200 ${
+                        className={`px-4 py-2 rounded-xl text-xs font-extrabold border transition-all duration-200 cursor-pointer ${
                           selectedStorage === idx 
                             ? 'bg-slate-900 text-white border-slate-900 shadow-xs' 
                             : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
@@ -236,7 +256,7 @@ export default function ProductDetailClient({ productData }) {
                 </div>
               )}
 
-              {/* انتخاب سایز ساعت هوشمند */}
+              {/* انتخاب سایز قاب ساعت */}
               {productData?.sizes && productData.sizes.length > 0 && (
                 <div className="border-t border-slate-100/80 pt-4">
                   <span className="text-xs font-black text-slate-800 block mb-3">اندازه قاب ساعت:</span>
@@ -245,7 +265,7 @@ export default function ProductDetailClient({ productData }) {
                       <button 
                         key={idx} 
                         onClick={() => setSelectedSize(idx)} 
-                        className={`px-4 py-2 rounded-xl text-xs font-extrabold border transition-all duration-200 ${
+                        className={`px-4 py-2 rounded-xl text-xs font-extrabold border transition-all duration-200 cursor-pointer ${
                           selectedSize === idx 
                             ? 'bg-slate-900 text-white border-slate-900 shadow-xs' 
                             : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
@@ -278,7 +298,7 @@ export default function ProductDetailClient({ productData }) {
                               setActiveImage(allImages[index]);
                             }
                           }} 
-                          className={`w-8 h-8 rounded-full border border-slate-300/60 transition-all duration-200 ${
+                          className={`w-8 h-8 rounded-full border border-slate-300/60 transition-all duration-200 cursor-pointer ${
                             selectedColor === index ? 'border-rose-500 scale-110 ring-4 ring-rose-500/15 shadow-md' : 'hover:border-slate-500'
                           }`} 
                           style={{ backgroundColor: calculatedBg }}
@@ -290,7 +310,7 @@ export default function ProductDetailClient({ productData }) {
                 </div>
               )}
 
-              {/* ⚡ بنر مینی‌مال پرکننده فضای میانی کارت */}
+              {/* ⚡ بنر مینی‌مال تحویل اکسپرس سیب‌شاپ */}
               <div className="border-t border-slate-100/80 pt-4">
                 <div className="bg-blue-50/40 border border-blue-100/70 rounded-2xl p-3 flex items-center justify-between text-right select-none">
                   <div className="flex flex-col gap-0.5">
@@ -308,7 +328,7 @@ export default function ProductDetailClient({ productData }) {
               )}
             </div>
 
-            {/* کادر ویژگی‌های کلیدی متصل به لنگر پایین صفحه (محدود شده به نمایش حداکثر ۳ ویژگی) */}
+            {/* کادر ویژگی‌های کلیدی متصل به لنگر پایین صفحه (حداکثر ۳ ویژگی) */}
             {productData?.specs && productData.specs.length > 0 && (
               <div className="mt-8 pt-4 border-t border-slate-100">
                 <span className="text-xs font-black text-slate-800 block mb-3">ویژگی‌های کلیدی محصول:</span>
@@ -394,20 +414,123 @@ export default function ProductDetailClient({ productData }) {
           </div>
         </div>
 
-        {/* توضیحات محصول */}
+        {/* 📑 تب‌بندی پایین صفحه مجهز به بخش نظرات واقعی دیجی‌کالایی */}
         <div className="w-full bg-white border border-slate-100 rounded-3xl p-5 md:p-6 shadow-2xs mb-8 text-right">
           <div className="flex items-center gap-6 border-b border-slate-100 pb-3 mb-5">
-            <button onClick={() => setActiveTab('review')} className={`text-xs md:text-sm font-black pb-2 transition relative ${activeTab === 'review' ? 'text-rose-500' : 'text-slate-400'}`}>
+            <button onClick={() => setActiveTab('review')} className={`text-xs md:text-sm font-black pb-2 transition relative cursor-pointer ${activeTab === 'review' ? 'text-rose-500' : 'text-slate-400'}`}>
               <span>توضیحات محصول</span>
               {activeTab === 'review' && <span className="absolute bottom-0 inset-x-0 h-0.5 bg-rose-500 rounded-full"></span>}
             </button>
+            <button onClick={() => setActiveTab('comments')} className={`text-xs md:text-sm font-black pb-2 transition relative cursor-pointer ${activeTab === 'comments' ? 'text-rose-500' : 'text-slate-400'}`}>
+              <span>دیدگاه کاربران ({productData.reviewCount})</span>
+              {activeTab === 'comments' && <span className="absolute bottom-0 inset-x-0 h-0.5 bg-rose-500 rounded-full"></span>}
+            </button>
           </div>
-          <div className="leading-6 md:leading-7 text-[11px] md:text-sm text-slate-600 font-medium max-w-4xl">
-            <p>{productData?.fullSpecs?.[0]?.value || 'توضیحاتی در دسترس نیست.'}</p>
-          </div>
+
+          {activeTab === 'review' ? (
+            <div className="leading-6 md:leading-7 text-[11px] md:text-sm text-slate-600 font-medium max-w-4xl whitespace-pre-line">
+              <p>{productData?.fullSpecs?.[0]?.value || 'توضیحاتی در دسترس نیست.'}</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* بخش جمع‌بندی امتیازها سمت راست */}
+              <div className="lg:col-span-4 bg-slate-50/70 border border-slate-100 p-5 rounded-2xl flex flex-col items-center justify-center text-center">
+                <span className="text-3xl font-black text-slate-800 mb-1">{productData.rating}</span>
+                <div className="flex gap-0.5 text-amber-400 mb-2">
+                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                </div>
+                <p className="text-[10px] font-bold text-slate-400 leading-5">از مجموع امتیازات ثبت شده خریداران سیب‌شاپ</p>
+              </div>
+
+              {/* رندر هوشمند لیست کامنت‌های تایید شده استراپی */}
+              <div className="lg:col-span-8 flex flex-col gap-5">
+                {productData.reviewsList && productData.reviewsList.length > 0 ? (
+                  productData.reviewsList.map((rev) => (
+                    <div key={rev.id} className="border-b border-slate-100/80 pb-5 text-right last:border-none">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="bg-emerald-50 text-emerald-600 text-[10px] font-black px-2 py-0.5 rounded-md flex items-center gap-1">
+                          {rev.rating} <Star className="w-2.5 h-2.5 fill-emerald-600 text-emerald-600" />
+                        </span>
+                        <h4 className="text-xs md:text-sm font-black text-slate-800">{rev.title}</h4>
+                      </div>
+                      <p className="text-[11px] md:text-xs text-slate-600 font-medium leading-6 mb-3">{rev.comment}</p>
+
+                      {/* رندر نقاط قوت */}
+                      {rev.advantages && rev.advantages.length > 0 && (
+                        <div className="flex flex-col gap-1.5 mb-2">
+                          {rev.advantages.map((adv, i) => (
+                            <span key={i} className="text-[10px] md:text-xs font-bold text-emerald-600 flex items-center gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> {adv}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* رندر نقاط ضعف */}
+                      {rev.disadvantages && rev.disadvantages.length > 0 && (
+                        <div className="flex flex-col gap-1.5">
+                          {rev.disadvantages.map((dis, i) => (
+                            <span key={i} className="text-[10px] md:text-xs font-bold text-rose-500 flex items-center gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> {dis}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs font-bold text-slate-400 py-6 text-center">هنوز هیچ دیدگاهی برای این محصول ثبت نشده است. اولین نظر را شما بنویسید!</p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
       </main>
+
+      {/* 📊 مودال کشویی و شیک رندر نوسانات قیمت کالا */}
+      {isChartOpen && (
+        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 antialiased">
+          <div className="bg-white rounded-3xl w-full max-w-2xl p-5 md:p-6 shadow-2xl relative text-right flex flex-col justify-between animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-5">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-blue-600" />
+                <h3 className="text-sm md:text-base font-black text-slate-900">نمودار نوسان قیمت {productData.name}</h3>
+              </div>
+              <button onClick={() => setIsChartOpen(false)} className="w-7 h-7 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-800 transition cursor-pointer">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* بدنه رندر کتابخانه Recharts */}
+            <div className="w-full h-[260px] md:h-[320px] direction-ltr pr-4">
+              {productData.priceHistoryList && productData.priceHistoryList.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={productData.priceHistoryList} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }} stroke="#cbd5e1" />
+                    <YAxis tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }} stroke="#cbd5e1" width={55} tickFormatter={(val) => `${(val / 1000000).toLocaleString('fa-IR')}M`} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Line type="monotone" dataKey="price" stroke="#f43f5e" strokeWidth={3} dot={{ r: 4, stroke: '#f43f5e', strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 6 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-center text-xs font-bold text-slate-400 direction-rtl">
+                  اطلاعات کافی برای رسم نمودار نوسان قیمت در دیتابیس یافت نشد.
+                </div>
+              )}
+            </div>
+
+            <p className="text-[10px] font-bold text-slate-400 text-center mt-4 border-t border-slate-50 pt-3 direction-rtl">
+              💡 قیمت‌ها بر اساس تغییرات دوره‌ای انبار سیب‌شاپ به‌روزرسانی شده‌اند.
+            </p>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

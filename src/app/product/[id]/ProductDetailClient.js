@@ -58,6 +58,13 @@ export default function ProductDetailClient({ productData }) {
   const [currentPrice, setCurrentPrice] = useState(productData?.price);
   const [currentStock, setCurrentStock] = useState(productData?.stock);
 
+  // 📱 شبیه‌ساز اطلاعات کاربر لاگین شده (اینجا باید آیدی عددی یوزری که در استراپی ساخته شده را بگذاری)
+  // برای تست، مطمئن شو که کاربری با این ID در بخش User کانتنت‌منیجر استراپی وجود دارد.
+  const [mockUser, setMockUser] = useState({
+    id: 1, // 👈 آیدی عددی واقعی یوزر تستی خودت در استراپی را اینجا بنویس (مثلاً 1 یا 2)
+    phoneNumber: "09123456789"
+  });
+
   useEffect(() => {
     if (productData?.variants && productData.variants.length > 0) {
       const activeColorName = productData.colors?.[selectedColor]?.name;
@@ -137,7 +144,7 @@ export default function ProductDetailClient({ productData }) {
     setTimeout(() => setShowSuccess(false), 2000);
   };
 
-  // 🚀 تابع ارسال نظر مجهز به ساختار روابط چندگانه استراپی ۴ (محصول + کاربر)
+  // 🚀 تابع ارسال نظر مجهز به ساختار روابط داینامیک
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     if (!newTitle || !newComment) {
@@ -159,8 +166,8 @@ export default function ProductDetailClient({ productData }) {
           advantages: newAdv, 
           disadvantages: newDisadv,
           is_approved: false, 
-          product: productData.id, // ✅ اتصال خودکار نظر به این کالا در استراپی ۴
-          user: 1                  // ✅ برقراری رابطه با آیدی یوزر (در حال حاضر ادمین یا کاربر شماره ۱ به عنوان پیش‌فرض)
+          product: productData.id,        // اتصال کامپوننت محصول
+          user: mockUser ? mockUser.id : null // 🔗 ارسال داینامیک آیدی عددی یوزر شبیه‌سازی‌شده
         }
       };
 
@@ -179,7 +186,7 @@ export default function ProductDetailClient({ productData }) {
         setNewRating(5);
         setTimeout(() => setIsCommentModalOpen(false), 2500);
       } else {
-        setSubmitMessage({ type: 'error', text: 'خطایی در ثبت نظر رخ داد. لطفاً دوباره تلاش کنید.' });
+        setSubmitMessage({ type: 'error', text: 'خطایی در ثبت نظر رخ داد. فیلد ارتباطی یوزر را در استراپی بررسی کنید.' });
       }
     } catch (error) {
       setSubmitMessage({ type: 'error', text: 'اتصال به سرور برقرار نشد.' });

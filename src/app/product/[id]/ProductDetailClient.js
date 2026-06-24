@@ -137,7 +137,7 @@ export default function ProductDetailClient({ productData }) {
     setTimeout(() => setShowSuccess(false), 2000);
   };
 
-  // 🚀 تابع ارسال نظر جدید به استراپی ۴
+  // 🚀 تابع ارسال نظر مجهز به ساختار روابط چندگانه استراپی ۴ (محصول + کاربر)
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     if (!newTitle || !newComment) {
@@ -158,8 +158,9 @@ export default function ProductDetailClient({ productData }) {
           rating: Number(newRating),
           advantages: newAdv, 
           disadvantages: newDisadv,
-          is_approved: false, // برای تایید اولیه توسط ادمین
-          product: productData.id // برقراری رابطه با آی‌دی کالا
+          is_approved: false, 
+          product: productData.id, // ✅ اتصال خودکار نظر به این کالا در استراپی ۴
+          user: 1                  // ✅ برقراری رابطه با آیدی یوزر (در حال حاضر ادمین یا کاربر شماره ۱ به عنوان پیش‌فرض)
         }
       };
 
@@ -466,7 +467,7 @@ export default function ProductDetailClient({ productData }) {
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* بخش خلاصه امتیازها و دکمه ثبت نظر */}
+              {/* خلاصه امتیازها و دکمه ثبت نظر */}
               <div className="lg:col-span-4 bg-slate-50/70 border border-slate-100 p-5 rounded-2xl flex flex-col items-center justify-center text-center">
                 <span className="text-3xl font-black text-slate-800 mb-1">{productData.rating}</span>
                 <div className="flex gap-0.5 text-amber-400 mb-2">
@@ -478,7 +479,6 @@ export default function ProductDetailClient({ productData }) {
                 </div>
                 <p className="text-[10px] font-bold text-slate-400 leading-5 mb-4">از مجموع امتیازات ثبت شده خریداران سیب‌شاپ</p>
                 
-                {/* 📝 دکمه باز کردن مودال فرم ثبت نظر جدید */}
                 <button onClick={() => setIsCommentModalOpen(true)} className="w-full bg-white border border-slate-200 hover:bg-slate-900 hover:text-white transition-all text-slate-800 text-xs font-black py-2.5 rounded-xl cursor-pointer shadow-3xs">
                   نوشتن دیدگاه و امتیاز برای این کالا
                 </button>
@@ -540,7 +540,6 @@ export default function ProductDetailClient({ productData }) {
             </div>
 
             <form onSubmit={handleReviewSubmit} className="flex flex-col gap-3">
-              {/* امتیاز ستاره‌ای */}
               <div>
                 <label className="text-xs font-black text-slate-700 block mb-1.5">امتیاز شما به این محصول:</label>
                 <div className="flex items-center gap-1.5 direction-ltr justify-end">
@@ -552,19 +551,16 @@ export default function ProductDetailClient({ productData }) {
                 </div>
               </div>
 
-              {/* عنوان دیدگاه */}
               <div>
                 <label className="text-xs font-black text-slate-700 block mb-1">عنوان دیدگاه:</label>
                 <input type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="مثلاً: عالی و پرسرعت" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-rose-500" />
               </div>
 
-              {/* متن اصلی نظر */}
               <div>
                 <label className="text-xs font-black text-slate-700 block mb-1">متن دیدگاه شما:</label>
                 <textarea rows="3" value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="نقاط قوت، ضعف و تجربه کاربری خود را بنویسید..." className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-rose-500 resize-none" />
               </div>
 
-              {/* نقاط قوت و ضعف */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-black text-emerald-600 block mb-1">نقاط قوت (با ویرگول جدا کنید):</label>

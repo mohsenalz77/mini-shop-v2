@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../../../components/Header'; 
 import Footer from '../../../components/Footer';
-import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2, Ban, Plus, Minus, ArrowLeft, ShoppingCart, Check, TrendingUp, X, Scale, Home, Copy } from 'lucide-react';
+import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2, Ban, Plus, Minus, ArrowLeft, ShoppingCart, Check, TrendingUp, X, Scale, Home, ChevronDown, Cpu, Database, Battery, HardDrive } from 'lucide-react';
 import { useCart } from '../../../context/CartContext'; 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -46,6 +46,7 @@ export default function ProductDetailClient({ productData }) {
   const [showSuccess, setShowSuccess] = useState(false);
   const [isChartOpen, setIsChartOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isSpecsOpen, setIsSpecsOpen] = useState(false); // ⚡️ استیت باز و بسته شدن کشوی مشخصات فنی
 
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
@@ -63,6 +64,12 @@ export default function ProductDetailClient({ productData }) {
   const [currentStock, setCurrentStock] = useState(productData?.stock || 0);
 
   const [mockUser, setMockUser] = useState({ id: 1, phoneNumber: "09123456789" });
+
+  // 📈 محاسبه داینامیک میانگین امتیاز خریداران
+  const reviewsCount = productData?.reviewsList?.length || 0;
+  const averageRating = reviewsCount > 0 
+    ? (productData.reviewsList.reduce((sum, r) => sum + r.rating, 0) / reviewsCount).toFixed(1)
+    : "۴.۹"; // امتیاز فرضی پیش‌فرض در صورت نبود نظر
 
   useEffect(() => {
     setIsMounted(true);
@@ -102,7 +109,7 @@ export default function ProductDetailClient({ productData }) {
         setCurrentStock(matchedVariant.stock !== undefined ? Number(matchedVariant.stock) : Number(productData.stock));
       } else {
         setCurrentPrice(Number(productData.rawPrice) || 0);
-        setCurrentOldPrice(productData.oldPrice);
+        setCurrentOldPrice(productData.oldOldPrice || productData.oldPrice);
         setCurrentStock(Number(productData.stock) || 0);
       }
     } else {
@@ -263,7 +270,7 @@ export default function ProductDetailClient({ productData }) {
 
       <main className="w-full px-4 md:px-8 mt-4 md:mt-6 pt-1 pb-16 relative z-10">
         
-        {/* 🗺️ اصلاح نهایی و شیک نقشه سایت (Breadcrumb) */}
+        {/* 🗺️ نقشه سایت */}
         <nav className="flex items-center gap-2 text-[11px] md:text-xs font-bold text-slate-400 mb-5 text-right bg-white p-3 rounded-2xl border border-slate-100 shadow-3xs">
           <Link href="/" className="hover:text-slate-900 transition flex items-center gap-1">
             <Home className="w-3.5 h-3.5" />
@@ -277,7 +284,7 @@ export default function ProductDetailClient({ productData }) {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 items-start mb-8">
           
-          {/* ستون اول: گالری عکس */}
+          {/* گالری عکس */}
           <div className="lg:col-span-5 bg-white border border-slate-100 rounded-3xl p-4 md:p-6 flex flex-col justify-between h-[420px] md:h-[520px] shadow-2xs relative overflow-hidden">
             <div className="absolute top-4 right-4 flex flex-col gap-2 z-20">
               <button onClick={handleLikeToggle} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-500 transition shadow-3xs cursor-pointer">
@@ -290,7 +297,6 @@ export default function ProductDetailClient({ productData }) {
                 <TrendingUp className="w-4 h-4" />
               </button>
               
-              {/* ✨ بازطراحی دکمه و جعبه کپی لینک اشتراک گذاری */}
               <div className="relative">
                 <button onClick={handleShareLink} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 transition shadow-3xs cursor-pointer">
                   <Share2 className="w-4 h-4" />
@@ -345,7 +351,7 @@ export default function ProductDetailClient({ productData }) {
             )}
           </div>
 
-          {/* ستون دوم: مشخصات تفکیک‌شده */}
+          {/* ستون دوم: مشخصات کالا + ⚡️ باکس مشخصات پیشرفته جدید */}
           <div className="lg:col-span-4 bg-white border border-slate-100 rounded-3xl p-6 flex flex-col justify-between h-fit lg:min-h-[520px] shadow-2xs text-right">
             <div className="h-full flex flex-col justify-start gap-5">
               <div>
@@ -353,7 +359,6 @@ export default function ProductDetailClient({ productData }) {
                   {productData?.name}
                 </h1>
                 <div className="flex items-center gap-2">
-                  {/* ✨ اصلاح متن اصالت به تضمین اصالت با یوآی رسمی اپل استور */}
                   <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100/60 shadow-3xs">تضمین اصالت</span>
                   <p className="text-xs font-bold text-slate-400">سیب‌شاپ | گارانتی رسمی تعویض</p>
                 </div>
@@ -400,19 +405,39 @@ export default function ProductDetailClient({ productData }) {
               </div>
             </div>
 
-            {productData?.specs && productData.specs.length > 0 && (
-              <div className="mt-8 pt-4 border-t border-slate-100">
-                <span className="text-xs font-black text-slate-800 block mb-3">ویژگی‌های کلیدی محصول:</span>
-                <div className="grid grid-cols-1 gap-2.5">
-                  {productData.specs.slice(0, 3).map((spec, index) => (
-                    <div key={index} className="flex justify-between bg-slate-50/60 px-4 py-3 rounded-xl border border-slate-100/50 transition-all hover:bg-slate-100/80">
-                      <span className="text-xs font-bold text-slate-400">{spec.title}</span>
-                      <span className="text-xs font-black text-slate-700">{spec.value}</span>
+            {/* 🛠️ آکاردئون پیشرفته مشخصات فنی کامل کالا */}
+            <div className="mt-6 pt-4 border-t border-slate-100">
+              <span className="text-xs font-black text-slate-800 block mb-3">ویژگی‌های کلیدی محصول:</span>
+              <div className="grid grid-cols-1 gap-2">
+                {productData?.specs && productData.specs.slice(0, 3).map((spec, index) => (
+                  <div key={index} className="flex justify-between bg-slate-50/60 px-4 py-2.5 rounded-xl border border-slate-100/50">
+                    <span className="text-xs font-bold text-slate-400">{spec.title}</span>
+                    <span className="text-xs font-black text-slate-700">{spec.value}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* دکمه بازکننده کشوی مشخصات فنی */}
+              <button 
+                onClick={() => setIsSpecsOpen(!isSpecsOpen)} 
+                className="w-full mt-3 bg-slate-50 border border-slate-200 hover:bg-slate-100 transition text-slate-700 text-xs font-extrabold py-2.5 px-4 rounded-xl flex items-center justify-between cursor-pointer shadow-3xs"
+              >
+                <span>مشاهده تمام مشخصات فنی کالا</span>
+                <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform duration-300 ${isSpecsOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* منوی تاشو کشویی با افکت انیمیشن شیک */}
+              <div className={`grid transition-all duration-300 ease-in-out overflow-hidden ${isSpecsOpen ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0'}`}>
+                <div className="overflow-hidden flex flex-col gap-2 bg-slate-50/50 border border-slate-100 p-3 rounded-2xl">
+                  {productData?.specs && productData.specs.map((spec, idx) => (
+                    <div key={idx} className="flex justify-between items-center bg-white px-3 py-2 rounded-xl border border-slate-100">
+                      <span className="text-[11px] font-bold text-slate-400">{spec.title}</span>
+                      <span className="text-[11px] font-black text-slate-700">{spec.value}</span>
                     </div>
                   ))}
                 </div>
               </div>
-            )}
+            </div>
           </div>
 
           {/* ستون سوم: باکس خرید */}
@@ -433,7 +458,6 @@ export default function ProductDetailClient({ productData }) {
               <div className="flex items-center justify-between w-full min-h-[44px] text-right px-1">
                 {isAvailable ? (
                   <>
-                    {/* ✨ اصلاح ظاهر و متن فیلد قیمت کالا */}
                     <span className="text-xs text-slate-400 font-bold">قیمت کالا:</span>
                     <div className="flex flex-col items-end">
                       {currentOldPrice && <span className="text-[10px] text-slate-500 line-through font-medium">{currentOldPrice}</span>}
@@ -485,7 +509,7 @@ export default function ProductDetailClient({ productData }) {
           </div>
         </div>
 
-        {/* بخش نظرات */}
+        {/* 📑 تب‌بندی پایین صفحه مجهز به امتیازدهی داینامیک */}
         <div className="w-full bg-white border border-slate-100 rounded-3xl p-5 md:p-6 shadow-2xs mb-8 text-right">
           <div className="flex items-center gap-6 border-b border-slate-100 pb-3 mb-5">
             <button onClick={() => setActiveTab('review')} className={`text-xs md:text-sm font-black pb-2 transition relative cursor-pointer ${activeTab === 'review' ? 'text-rose-500' : 'text-slate-400'}`}>
@@ -493,7 +517,8 @@ export default function ProductDetailClient({ productData }) {
               {activeTab === 'review' && <span className="absolute bottom-0 inset-x-0 h-0.5 bg-rose-500 rounded-full"></span>}
             </button>
             <button onClick={() => setActiveTab('comments')} className={`text-xs md:text-sm font-black pb-2 transition relative cursor-pointer ${activeTab === 'comments' ? 'text-rose-500' : 'text-slate-400'}`}>
-              <span>دیدگاه کاربران ({productData?.reviewCount || 0})</span>
+              {/* نشان دادن موجودی کل نظرات */}
+              <span>دیدگاه کاربران ({reviewsCount.toLocaleString('fa-IR')})</span>
               {activeTab === 'comments' && <span className="absolute bottom-0 inset-x-0 h-0.5 bg-rose-500 rounded-full"></span>}
             </button>
           </div>
@@ -504,13 +529,25 @@ export default function ProductDetailClient({ productData }) {
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              
+              {/* ✨ بخش خلاصه امتیاز خریداران کاملاً داینامیک و متصل به میانگین فرمول */}
               <div className="lg:col-span-4 bg-slate-50/70 border border-slate-100 p-5 rounded-2xl flex flex-col items-center justify-center text-center">
-                <span className="text-3xl font-black text-slate-800 mb-1">{productData?.rating || 0}</span>
+                <span className="text-3xl font-black text-slate-800 mb-1">{Number(averageRating).toLocaleString('fa-IR')}</span>
+                
+                {/* روشن کردن داینامیک ستاره‌ها بر اساس رند کردن امتیاز میانگین */}
                 <div className="flex gap-0.5 text-amber-400 mb-2">
-                  {[...Array(5)].map((_, idx) => (
-                    <Star key={idx} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  ))}
+                  {[...Array(5)].map((_, idx) => {
+                    const starValue = idx + 1;
+                    return (
+                      <Star 
+                        key={idx} 
+                        className={`w-4 h-4 text-amber-400 ${starValue <= Math.round(Number(averageRating)) ? 'fill-amber-400' : 'text-slate-300'}`} 
+                      />
+                    );
+                  })}
                 </div>
+                <p className="text-[10px] font-bold text-slate-400 leading-5 mb-4">بر اساس {reviewsCount.toLocaleString('fa-IR')} دیدگاه تایید شده در انبار سیب‌شاپ</p>
+                
                 <button onClick={() => setIsCommentModalOpen(true)} className="w-full bg-white border border-slate-200 hover:bg-slate-900 hover:text-white transition-all text-slate-800 text-xs font-black py-2.5 rounded-xl cursor-pointer shadow-3xs">
                   نوشتن دیدگاه برای این کالا
                 </button>
@@ -520,13 +557,13 @@ export default function ProductDetailClient({ productData }) {
                 {productData?.reviewsList && productData.reviewsList.length > 0 ? (
                   productData.reviewsList.map((rev) => {
                     const advList = typeof rev.advantages === 'string' ? rev.advantages.split(/[،,]/).filter(Boolean) : [];
-                    const disadvList = typeof rev.disadvantages === 'string' ? rev.disadvantages.split(/[،,]/).filter(Boolean) : [];
+                    const disadvList = typeof rev.disadvantages === 'string' ? rev.disadvantages.split(/[(/[،,]/).filter(Boolean) : [];
 
                     return (
                       <div key={rev.id} className="border-b border-slate-100/80 pb-5 text-right last:border-none">
                         <div className="flex items-center gap-3 mb-2">
                           <span className="bg-emerald-50 text-emerald-600 text-[10px] font-black px-2 py-0.5 rounded-md flex items-center gap-1">
-                            {rev.rating} <Star className="w-2.5 h-2.5 fill-emerald-600 text-emerald-600" />
+                            {Number(rev.rating).toLocaleString('fa-IR')} <Star className="w-2.5 h-2.5 fill-emerald-600 text-emerald-600" />
                           </span>
                           <h4 className="text-xs md:text-sm font-black text-slate-800">{rev.title}</h4>
                         </div>
@@ -621,7 +658,7 @@ export default function ProductDetailClient({ productData }) {
         </div>
       )}
 
-      {/* ✨ بازطراحی کامل و رسمی کردن منوی تغییرات قیمت (نمودار) */}
+      {/* مودال نمودار قیمت */}
       {isChartOpen && (
         <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[28px] w-full max-w-2xl p-6 md:p-8 shadow-2xl relative text-right flex flex-col justify-between animate-in fade-in zoom-in-95 duration-200 border border-slate-100">

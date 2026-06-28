@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../../../components/Header'; 
 import Footer from '../../../components/Footer';
-import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2, Ban, Plus, Minus, ArrowLeft, ShoppingCart, Check, TrendingUp, X, Scale } from 'lucide-react';
+import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2, Ban, Plus, Minus, ArrowLeft, ShoppingCart, Check, TrendingUp, X, Scale, Home, Copy } from 'lucide-react';
 import { useCart } from '../../../context/CartContext'; 
 import Link from 'next/link';
 import Image from 'next/image';
@@ -58,7 +58,6 @@ export default function ProductDetailClient({ productData }) {
 
   const [activeImage, setActiveImage] = useState(productData?.imageUrl || '/placeholder.png');
   
-  // ⚡️ لود مطمئن قیمت و موجودی از ریشه به عنوان لایه پشتیبان (Fallback)
   const [currentPrice, setCurrentPrice] = useState(productData?.rawPrice || 0);
   const [currentOldPrice, setCurrentOldPrice] = useState(productData?.oldPrice || null);
   const [currentStock, setCurrentStock] = useState(productData?.stock || 0);
@@ -76,7 +75,6 @@ export default function ProductDetailClient({ productData }) {
     }
   }, [productData?.id]);
 
-  // 🔄 فیکس نهایی منطق تغییر رنگ بر اساس فیلد discountPrice و راه‌حل Fallback قیمت ریشه
   useEffect(() => {
     if (productData?.variants && productData.variants.length > 0) {
       const activeColorName = productData.colors?.[selectedColor]?.name;
@@ -251,8 +249,8 @@ export default function ProductDetailClient({ productData }) {
     if (active && payload && payload.length) {
       return (
         <div className="bg-slate-900 border border-slate-800 text-white p-3 rounded-xl shadow-md text-xs font-black direction-rtl text-right">
-          <p className="mb-1 text-slate-400">تاریخ: {payload[0].payload.date}</p>
-          <p className="text-rose-400">قیمت: {Number(payload[0].value).toLocaleString('fa-IR')} تومان</p>
+          <p className="mb-1 text-slate-400">تاریخ ثبت تغییرات: {payload[0].payload.date}</p>
+          <p className="text-emerald-400">قیمت پایه: {Number(payload[0].value).toLocaleString('fa-IR')} تومان</p>
         </div>
       );
     }
@@ -260,16 +258,22 @@ export default function ProductDetailClient({ productData }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 overflow-x-hidden antialiased direction-rtl pb-32 md:pb-0">
+    <div className="min-h-screen bg-slate-50 overflow-x-hidden antialiased direction-rtl pb-32 md:pb-0 font-sans">
       <Header />
 
       <main className="w-full px-4 md:px-8 mt-4 md:mt-6 pt-1 pb-16 relative z-10">
         
-        <div className="flex items-center gap-2 text-[11px] md:text-xs font-bold text-slate-400 mb-4 text-right">
-          <span className="hover:text-slate-600 cursor-pointer">سیب‌شاپ</span>
-          <ChevronRight className="w-3 h-3 text-slate-300" />
-          <span className="text-slate-800 truncate max-w-[220px] md:max-w-none">{productData?.name}</span>
-        </div>
+        {/* 🗺️ اصلاح نهایی و شیک نقشه سایت (Breadcrumb) */}
+        <nav className="flex items-center gap-2 text-[11px] md:text-xs font-bold text-slate-400 mb-5 text-right bg-white p-3 rounded-2xl border border-slate-100 shadow-3xs">
+          <Link href="/" className="hover:text-slate-900 transition flex items-center gap-1">
+            <Home className="w-3.5 h-3.5" />
+            <span>خانه</span>
+          </Link>
+          <ChevronRight className="w-3 h-3 text-slate-300 shrink-0" />
+          <span className="hover:text-slate-900 transition cursor-pointer">فروشگاه محصولات اپل</span>
+          <ChevronRight className="w-3 h-3 text-slate-300 shrink-0" />
+          <span className="text-slate-800 font-extrabold truncate max-w-[180px] md:max-w-none">{productData?.name}</span>
+        </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 items-start mb-8">
           
@@ -285,14 +289,17 @@ export default function ProductDetailClient({ productData }) {
               <button onClick={() => setIsChartOpen(true)} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-600 transition shadow-3xs cursor-pointer">
                 <TrendingUp className="w-4 h-4" />
               </button>
-              <div className="relative group">
+              
+              {/* ✨ بازطراحی دکمه و جعبه کپی لینک اشتراک گذاری */}
+              <div className="relative">
                 <button onClick={handleShareLink} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 transition shadow-3xs cursor-pointer">
                   <Share2 className="w-4 h-4" />
                 </button>
                 {isCopied && (
-                  <span className="absolute right-full top-1/2 -translate-y-1/2 ml-2 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-md whitespace-nowrap z-50">
-                    لینک کپی شد! ✨
-                  </span>
+                  <div className="absolute right-10 top-0 bg-slate-900/95 text-white text-[11px] font-black px-3 py-1.5 rounded-xl shadow-lg border border-slate-800 flex items-center gap-1.5 whitespace-nowrap z-50 animate-in fade-in slide-in-from-left-2 duration-200">
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>لینک کالا کپی شد</span>
+                  </div>
                 )}
               </div>
             </div>
@@ -346,8 +353,9 @@ export default function ProductDetailClient({ productData }) {
                   {productData?.name}
                 </h1>
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">اصالت تضمینی</span>
-                  <p className="text-xs font-bold text-slate-400">سیب‌شاپ | مشخصات و گارانتی رسمی</p>
+                  {/* ✨ اصلاح متن اصالت به تضمین اصالت با یوآی رسمی اپل استور */}
+                  <span className="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100/60 shadow-3xs">تضمین اصالت</span>
+                  <p className="text-xs font-bold text-slate-400">سیب‌شاپ | گارانتی رسمی تعویض</p>
                 </div>
               </div>
 
@@ -425,7 +433,8 @@ export default function ProductDetailClient({ productData }) {
               <div className="flex items-center justify-between w-full min-h-[44px] text-right px-1">
                 {isAvailable ? (
                   <>
-                    <span className="text-xs text-slate-400 font-bold">قیمت ترکیب انتخابی:</span>
+                    {/* ✨ اصلاح ظاهر و متن فیلد قیمت کالا */}
+                    <span className="text-xs text-slate-400 font-bold">قیمت کالا:</span>
                     <div className="flex flex-col items-end">
                       {currentOldPrice && <span className="text-[10px] text-slate-500 line-through font-medium">{currentOldPrice}</span>}
                       <div className="text-base md:text-xl font-black text-white flex items-center gap-1 mt-0.5">
@@ -612,36 +621,49 @@ export default function ProductDetailClient({ productData }) {
         </div>
       )}
 
-      {/* مودال نمودار قیمت */}
+      {/* ✨ بازطراحی کامل و رسمی کردن منوی تغییرات قیمت (نمودار) */}
       {isChartOpen && (
-        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-2xl p-5 md:p-6 shadow-2xl relative text-right flex flex-col justify-between animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-5">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-blue-600" />
-                <h3 className="text-sm md:text-base font-black text-slate-900">نمودار نوسان قیمت {productData?.name}</h3>
+        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-[28px] w-full max-w-2xl p-6 md:p-8 shadow-2xl relative text-right flex flex-col justify-between animate-in fade-in zoom-in-95 duration-200 border border-slate-100">
+            
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center text-rose-500 shadow-3xs">
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900">گزارش هوشمند نوسان قیمت</h3>
+                  <p className="text-[11px] text-slate-400 font-bold mt-0.5">{productData?.name}</p>
+                </div>
               </div>
-              <button onClick={() => setIsChartOpen(false)} className="w-7 h-7 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-800 transition cursor-pointer">
+              <button onClick={() => setIsChartOpen(false)} className="w-8 h-8 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-800 transition cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="w-full h-[260px] md:h-[320px] direction-ltr pr-4">
+            <div className="w-full h-[280px] md:h-[340px] direction-ltr pr-4">
               {isMounted && productData?.priceHistoryList && productData.priceHistoryList.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={productData.priceHistoryList} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }} stroke="#cbd5e1" />
-                    <YAxis tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }} stroke="#cbd5e1" width={55} tickFormatter={(val) => `${(val / 1000000).toLocaleString('fa-IR')}M`} />
+                  <LineChart data={productData.priceHistoryList} margin={{ top: 10, right: 10, left: -10, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="4 4" stroke="#f1f5f9" vertical={false} />
+                    <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }} stroke="#e2e8f0" />
+                    <YAxis tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 'bold' }} stroke="#e2e8f0" width={60} tickFormatter={(val) => `${(val / 1000000).toLocaleString('fa-IR')}M`} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Line type="monotone" dataKey="price" stroke="#f43f5e" strokeWidth={3} dot={{ r: 4, stroke: '#f43f5e', strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 6 }} />
+                    <Line type="monotone" dataKey="price" stroke="#f43f5e" strokeWidth={3.5} dot={{ r: 5, stroke: '#f43f5e', strokeWidth: 2.5, fill: '#fff' }} activeDot={{ r: 7, strokeWidth: 0, fill: '#f43f5e' }} />
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-center text-xs font-bold text-slate-400 direction-rtl">
+                <div className="w-full h-full flex items-center justify-center text-center text-xs font-bold text-slate-400 direction-rtl bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
                   اطلاعات کافی برای رسم نمودار نوسان قیمت در دیتابیس یافت نشد.
                 </div>
               )}
+            </div>
+
+            <div className="flex items-center gap-2 bg-slate-50 p-3.5 rounded-2xl border border-slate-100 text-right mt-5 direction-rtl">
+              <span className="text-base select-none">💡</span>
+              <p className="text-[11px] font-bold text-slate-500 leading-5">
+                شفافیت قیمت در سیب‌شاپ: نمودار فوق تغییرات کفِ قیمت پایه این محصول را در بازه‌های دوره‌ای انبار مانیتور و ثبت کرده است.
+              </p>
             </div>
           </div>
         </div>

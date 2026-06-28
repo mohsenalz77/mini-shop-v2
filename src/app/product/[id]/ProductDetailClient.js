@@ -37,7 +37,6 @@ export default function ProductDetailClient({ productData }) {
   const removeFromCart = context.removeFromCart || (() => {});
 
   const [selectedColor, setSelectedColor] = useState(0);
-  const [selectedStorage, setSelectedStorage] = useState(0);
   const [selectedSize, setSelectedSize] = useState(0);
   
   const [isLiked, setIsLiked] = useState(false);
@@ -48,7 +47,6 @@ export default function ProductDetailClient({ productData }) {
   const [isChartOpen, setIsChartOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
-  // 📝 استیت‌های فرم ثبت نظر جدید
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newComment, setNewComment] = useState('');
@@ -58,19 +56,14 @@ export default function ProductDetailClient({ productData }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState(null);
 
-  // 📸 تنظیم ایمن استیت تصویر اولیه
   const [activeImage, setActiveImage] = useState(productData?.imageUrl || '/placeholder.png');
   
-  // 💰 تنظیم استیت‌های عددی قیمت برای جلوگیری از باگ قیمت صفر
+  // ⚡️ لود مطمئن قیمت و موجودی از ریشه به عنوان لایه پشتیبان (Fallback)
   const [currentPrice, setCurrentPrice] = useState(productData?.rawPrice || 0);
   const [currentOldPrice, setCurrentOldPrice] = useState(productData?.oldPrice || null);
   const [currentStock, setCurrentStock] = useState(productData?.stock || 0);
 
-  // 📱 شبیه‌ساز اطلاعات کاربر
-  const [mockUser, setMockUser] = useState({
-    id: 1, 
-    phoneNumber: "09123456789"
-  });
+  const [mockUser, setMockUser] = useState({ id: 1, phoneNumber: "09123456789" });
 
   useEffect(() => {
     setIsMounted(true);
@@ -83,42 +76,44 @@ export default function ProductDetailClient({ productData }) {
     }
   }, [productData?.id]);
 
-  // 🔄 هوک مانیتورینگ تغییر ویژگی‌ها و اعمال قیمت زنده تنوع رنگی بدون تداخل دیتابیس
+  // 🔄 فیکس نهایی منطق تغییر رنگ بر اساس فیلد discountPrice و راه‌حل Fallback قیمت ریشه
   useEffect(() => {
     if (productData?.variants && productData.variants.length > 0) {
       const activeColorName = productData.colors?.[selectedColor]?.name;
-      const activeStorageName = productData.storages?.[selectedStorage];
       const activeSizeName = productData.sizes?.[selectedSize];
 
       const matchedVariant = productData.variants.find(v => {
         const matchColor = activeColorName 
           ? v.options.some(o => (o.type?.toLowerCase() === 'color' || o.type === 'رنگ') && o.value === activeColorName) 
           : true;
-          
-        const matchStorage = activeStorageName 
-          ? v.options.some(o => (o.type?.toLowerCase() === 'storage' || o.type === 'حافظه') && o.value === activeStorageName) 
-          : true;
-          
         const matchSize = activeSizeName 
           ? v.options.some(o => (o.type?.toLowerCase() === 'size' || o.type === 'سایز') && o.value === activeSizeName) 
           : true;
-
-        return matchColor && matchStorage && matchSize;
+        return matchColor && matchSize;
       });
 
       if (matchedVariant) {
-        setCurrentPrice(Number(matchedVariant.price));
-        setCurrentOldPrice(matchedVariant.oldPrice ? Number(matchedVariant.oldPrice).toLocaleString('fa-IR') : null);
-        setCurrentStock(Number(matchedVariant.stock));
+        const vPrice = Number(matchedVariant.price);
+        setCurrentPrice(vPrice > 0 ? vPrice : (Number(productData.rawPrice) || 0));
+        
+        if (matchedVariant.discountPrice && Number(matchedVariant.discountPrice) > 0) {
+          setCurrentOldPrice(Number(matchedVariant.discountPrice).toLocaleString('fa-IR'));
+        } else {
+          setCurrentOldPrice(productData.oldPrice);
+        }
+        setCurrentStock(matchedVariant.stock !== undefined ? Number(matchedVariant.stock) : Number(productData.stock));
       } else {
-        setCurrentPrice(productData.rawPrice);
+        setCurrentPrice(Number(productData.rawPrice) || 0);
         setCurrentOldPrice(productData.oldPrice);
-        setCurrentStock(productData.stock);
+        setCurrentStock(Number(productData.stock) || 0);
       }
+    } else {
+      setCurrentPrice(Number(productData.rawPrice) || 0);
+      setCurrentOldPrice(productData.oldPrice);
+      setCurrentStock(Number(productData.stock) || 0);
     }
-  }, [selectedColor, selectedStorage, selectedSize, productData]);
+  }, [selectedColor, selectedSize, productData]);
 
-  // فیکس خودکار اگر تصویر اصلی تغییر کرد
   useEffect(() => {
     if (productData?.imageUrl) {
       setActiveImage(productData.imageUrl);
@@ -145,7 +140,7 @@ export default function ProductDetailClient({ productData }) {
         setTimeout(() => setIsCopied(false), 2500);
       }
     } catch (err) {
-      console.error('خطا در کپی کدهای لینک:', err);
+      console.error('خطا در کپی لینک:', err);
     }
   };
 
@@ -168,7 +163,7 @@ export default function ProductDetailClient({ productData }) {
   const stockCount = currentStock !== undefined ? currentStock : 0;
   const isAvailable = stockCount > 0;
 
-  const uniqueCartId = `${productData?.id}-${selectedColor}-${selectedStorage}-${selectedSize}`;
+  const uniqueCartId = `${productData?.id}-${selectedColor}`;
   const existInCart = cartItems.find(item => item.id === uniqueCartId);
 
   const handleIncrement = () => {
@@ -185,12 +180,12 @@ export default function ProductDetailClient({ productData }) {
 
   const handleAddToCart = () => {
     if (!isAvailable || !productData) return;
-    const finalName = `${productData.name} (${productData.colors?.[selectedColor]?.name || ''})`;
+    const finalName = `${productData.name} (رنگ ${productData.colors?.[selectedColor]?.name || ''})`;
 
     addToCart({
       id: uniqueCartId,
       name: finalName,
-      price: currentPrice, // استفاده مستقیم از مقدار عددی اصلاح شده
+      price: currentPrice, 
       imageUrl: activeImage || productData.imageUrl,
       stock: stockCount 
     });
@@ -211,7 +206,6 @@ export default function ProductDetailClient({ productData }) {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://b.dr-sib.xyz/api";
-      
       const payload = {
         data: {
           title: newTitle,
@@ -271,14 +265,12 @@ export default function ProductDetailClient({ productData }) {
 
       <main className="w-full px-4 md:px-8 mt-4 md:mt-6 pt-1 pb-16 relative z-10">
         
-        {/* بردکرامب */}
         <div className="flex items-center gap-2 text-[11px] md:text-xs font-bold text-slate-400 mb-4 text-right">
           <span className="hover:text-slate-600 cursor-pointer">سیب‌شاپ</span>
           <ChevronRight className="w-3 h-3 text-slate-300" />
           <span className="text-slate-800 truncate max-w-[220px] md:max-w-none">{productData?.name}</span>
         </div>
 
-        {/* کادر اصلی محصول */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 items-start mb-8">
           
           {/* ستون اول: گالری عکس */}
@@ -320,7 +312,7 @@ export default function ProductDetailClient({ productData }) {
                     fill
                     sizes="(max-width: 768px) 100vw, 400px"
                     priority
-                    unoptimized={true} // ⚡️ اضافه شدن برای لود مستقیم عکس‌های خارج از دامنه بدون خطای بیلد
+                    unoptimized={true}
                     className={`object-contain mix-blend-multiply select-none transition-all duration-300 ${
                       !isAvailable ? 'grayscale opacity-40' : 'hover:scale-[1.01]'
                     }`}
@@ -329,7 +321,6 @@ export default function ProductDetailClient({ productData }) {
               )}
             </div>
 
-            {/* ریزعکس‌های آلبوم گالری */}
             {allImages.length > 1 && (
               <div className="flex items-center justify-start md:justify-center gap-2 mt-4 pt-4 border-t border-slate-100/70 overflow-x-auto scrollbar-none w-full px-1 py-0.5">
                 {allImages.map((imgUrl, index) => (
@@ -359,25 +350,6 @@ export default function ProductDetailClient({ productData }) {
                   <p className="text-xs font-bold text-slate-400">سیب‌شاپ | مشخصات و گارانتی رسمی</p>
                 </div>
               </div>
-
-              {productData?.storages && productData.storages.length > 0 && (
-                <div className="border-t border-slate-100/80 pt-4">
-                  <span className="text-xs font-black text-slate-800 block mb-3">انتخاب ظرفیت:</span>
-                  <div className="flex flex-wrap gap-2.5">
-                    {productData.storages.map((storage, idx) => (
-                      <button 
-                        key={idx} 
-                        onClick={() => setSelectedStorage(idx)} 
-                        className={`px-4 py-2 rounded-xl text-xs font-extrabold border transition-all duration-200 cursor-pointer ${
-                          selectedStorage === idx ? 'bg-slate-900 text-white border-slate-900 shadow-xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                        }`}
-                      >
-                        {storage}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               {productData?.colors && productData.colors.length > 0 && (
                 <div className="border-t border-slate-100/80 pt-4">
@@ -413,7 +385,7 @@ export default function ProductDetailClient({ productData }) {
                 <div className="bg-blue-50/40 border border-blue-100/70 rounded-2xl p-3 flex items-center justify-between text-right select-none">
                   <div className="flex flex-col gap-0.5">
                     <span className="text-[11px] font-black text-blue-900">🚀 تحویل اکسپرس سیب‌شاپ</span>
-                    <span className="text-[10px] text-blue-700/80 font-bold">{productData?.deliveryTime || 'ارسال فوری'}</span>
+                    <span className="text-[10px] text-blue-700/80 font-bold">{productData?.deliveryTime}</span>
                   </div>
                   <span className="text-xl">📦</span>
                 </div>
@@ -504,7 +476,7 @@ export default function ProductDetailClient({ productData }) {
           </div>
         </div>
 
-        {/* بخش نظرات و تب بندی */}
+        {/* بخش نظرات */}
         <div className="w-full bg-white border border-slate-100 rounded-3xl p-5 md:p-6 shadow-2xs mb-8 text-right">
           <div className="flex items-center gap-6 border-b border-slate-100 pb-3 mb-5">
             <button onClick={() => setActiveTab('review')} className={`text-xs md:text-sm font-black pb-2 transition relative cursor-pointer ${activeTab === 'review' ? 'text-rose-500' : 'text-slate-400'}`}>
@@ -538,8 +510,8 @@ export default function ProductDetailClient({ productData }) {
               <div className="lg:col-span-8 flex flex-col gap-5">
                 {productData?.reviewsList && productData.reviewsList.length > 0 ? (
                   productData.reviewsList.map((rev) => {
-                    const advList = typeof rev.advantages === 'string' ? rev.advantages.split(/[،,]/) : rev.advantages;
-                    const disadvList = typeof rev.disadvantages === 'string' ? rev.disadvantages.split(/[،,]/) : rev.disadvantages;
+                    const advList = typeof rev.advantages === 'string' ? rev.advantages.split(/[،,]/).filter(Boolean) : [];
+                    const disadvList = typeof rev.disadvantages === 'string' ? rev.disadvantages.split(/[،,]/).filter(Boolean) : [];
 
                     return (
                       <div key={rev.id} className="border-b border-slate-100/80 pb-5 text-right last:border-none">
@@ -551,7 +523,7 @@ export default function ProductDetailClient({ productData }) {
                         </div>
                         <p className="text-[11px] md:text-xs text-slate-600 font-medium leading-6 mb-3">{rev.comment}</p>
 
-                        {advList && advList.length > 0 && advList[0] !== "" && (
+                        {advList.length > 0 && (
                           <div className="flex flex-col gap-1.5 mb-2">
                             {advList.map((adv, i) => (
                               <span key={i} className="text-[10px] md:text-xs font-bold text-emerald-600 flex items-center gap-2">
@@ -561,7 +533,7 @@ export default function ProductDetailClient({ productData }) {
                           </div>
                         )}
 
-                        {disadvList && disadvList.length > 0 && disadvList[0] !== "" && (
+                        {disadvList.length > 0 && (
                           <div className="flex flex-col gap-1.5">
                             {disadvList.map((dis, i) => (
                               <span key={i} className="text-[10px] md:text-xs font-bold text-rose-500 flex items-center gap-2">

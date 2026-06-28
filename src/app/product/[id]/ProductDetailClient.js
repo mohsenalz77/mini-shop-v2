@@ -58,17 +58,20 @@ export default function ProductDetailClient({ productData }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState(null);
 
-  const [activeImage, setActiveImage] = useState(productData?.imageUrl);
-  const [currentPrice, setCurrentPrice] = useState(productData?.price);
-  const [currentStock, setCurrentStock] = useState(productData?.stock);
+  // 📸 تنظیم ایمن استیت تصویر اولیه
+  const [activeImage, setActiveImage] = useState(productData?.imageUrl || '/placeholder.png');
+  
+  // 💰 تنظیم استیت‌های عددی قیمت برای جلوگیری از باگ قیمت صفر
+  const [currentPrice, setCurrentPrice] = useState(productData?.rawPrice || 0);
+  const [currentOldPrice, setCurrentOldPrice] = useState(productData?.oldPrice || null);
+  const [currentStock, setCurrentStock] = useState(productData?.stock || 0);
 
-  // 📱 شبیه‌ساز اطلاعات کاربر لاگین شده 
+  // 📱 شبیه‌ساز اطلاعات کاربر
   const [mockUser, setMockUser] = useState({
     id: 1, 
     phoneNumber: "09123456789"
   });
 
-  // 🔄 لود وضعیت اولیه لایک و مقایسه از LocalStorage مروگر
   useEffect(() => {
     setIsMounted(true);
     if (productData?.id) {
@@ -80,6 +83,7 @@ export default function ProductDetailClient({ productData }) {
     }
   }, [productData?.id]);
 
+  // 🔄 هوک مانیتورینگ تغییر ویژگی‌ها و اعمال قیمت زنده تنوع رنگی بدون تداخل دیتابیس
   useEffect(() => {
     if (productData?.variants && productData.variants.length > 0) {
       const activeColorName = productData.colors?.[selectedColor]?.name;
@@ -103,22 +107,24 @@ export default function ProductDetailClient({ productData }) {
       });
 
       if (matchedVariant) {
-        setCurrentPrice(Number(matchedVariant.price).toLocaleString('fa-IR'));
+        setCurrentPrice(Number(matchedVariant.price));
+        setCurrentOldPrice(matchedVariant.oldPrice ? Number(matchedVariant.oldPrice).toLocaleString('fa-IR') : null);
         setCurrentStock(Number(matchedVariant.stock));
       } else {
-        setCurrentPrice(productData.price);
+        setCurrentPrice(productData.rawPrice);
+        setCurrentOldPrice(productData.oldPrice);
         setCurrentStock(productData.stock);
       }
     }
   }, [selectedColor, selectedStorage, selectedSize, productData]);
 
+  // فیکس خودکار اگر تصویر اصلی تغییر کرد
   useEffect(() => {
     if (productData?.imageUrl) {
       setActiveImage(productData.imageUrl);
     }
   }, [productData]);
 
-  // ❤️ هندلر تعویض وضعیت لایک (Wishlist)
   const handleLikeToggle = () => {
     let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
     if (wishlist.includes(productData.id)) {
@@ -131,7 +137,6 @@ export default function ProductDetailClient({ productData }) {
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
   };
 
-  // 🔗 هندلر تعاملی سیستم اشتراک‌گذاری کالا
   const handleShareLink = async () => {
     try {
       if (typeof window !== 'undefined') {
@@ -144,7 +149,6 @@ export default function ProductDetailClient({ productData }) {
     }
   };
 
-  // ⚖️ هندلر تعاملی افزودن/حذف از لیست مقایسه
   const handleCompareToggle = () => {
     let compareList = JSON.parse(localStorage.getItem('compare_list') || '[]');
     if (compareList.includes(productData.id)) {
@@ -181,19 +185,12 @@ export default function ProductDetailClient({ productData }) {
 
   const handleAddToCart = () => {
     if (!isAvailable || !productData) return;
-
-    const p2e = s => s.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
-    const cleanPriceString = currentPrice 
-      ? p2e(currentPrice.toString()).replace(/[^\d]/g, '') 
-      : '0';
-
-    const rawPrice = Number(cleanPriceString);
-    const finalName = `${productData.name} (${productData.colors?.[selectedColor]?.name || ''} - ${productData.storages?.[selectedStorage] || ''})`.trim();
+    const finalName = `${productData.name} (${productData.colors?.[selectedColor]?.name || ''})`;
 
     addToCart({
       id: uniqueCartId,
       name: finalName,
-      price: rawPrice,
+      price: currentPrice, // استفاده مستقیم از مقدار عددی اصلاح شده
       imageUrl: activeImage || productData.imageUrl,
       stock: stockCount 
     });
@@ -243,7 +240,7 @@ export default function ProductDetailClient({ productData }) {
         setNewRating(5);
         setTimeout(() => setIsCommentModalOpen(false), 2500);
       } else {
-        setSubmitMessage({ type: 'error', text: 'خطایی در ثبت نظر رخ داد. فیلد ارتباطی یوزر را در استراپی بررسی کنید.' });
+        setSubmitMessage({ type: 'error', text: 'خطایی در ثبت نظر رخ داد.' });
       }
     } catch (error) {
       setSubmitMessage({ type: 'error', text: 'اتصال به سرور برقرار نشد.' });
@@ -284,28 +281,20 @@ export default function ProductDetailClient({ productData }) {
         {/* کادر اصلی محصول */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 items-start mb-8">
           
-          {/* 📱 ستون اول: گالری عکس فیکس شده و منوی ابزارها */}
+          {/* ستون اول: گالری عکس */}
           <div className="lg:col-span-5 bg-white border border-slate-100 rounded-3xl p-4 md:p-6 flex flex-col justify-between h-[420px] md:h-[520px] shadow-2xs relative overflow-hidden">
             <div className="absolute top-4 right-4 flex flex-col gap-2 z-20">
-              
-              {/* دکمه لایک داینامیک */}
-              <button onClick={handleLikeToggle} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-500 transition shadow-3xs cursor-pointer" title="افزودن به علاقه‌مندی‌ها">
+              <button onClick={handleLikeToggle} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-500 transition shadow-3xs cursor-pointer">
                 <Heart className={`w-4 h-4 ${isLiked ? 'fill-rose-500 text-rose-500' : 'text-slate-400'}`} />
               </button>
-              
-              {/* دکمه مقایسه داینامیک */}
-              <button onClick={handleCompareToggle} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-amber-500 transition shadow-3xs cursor-pointer" title="مقایسه این کالا">
+              <button onClick={handleCompareToggle} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-amber-500 transition shadow-3xs cursor-pointer">
                 <Scale className={`w-4 h-4 ${inCompare ? 'text-amber-500 fill-amber-500/10' : 'text-slate-400'}`} />
               </button>
-              
-              {/* دکمه نمودار نوسان قیمت */}
-              <button onClick={() => setIsChartOpen(true)} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-600 transition shadow-3xs cursor-pointer" title="نمودار نوسان قیمت">
+              <button onClick={() => setIsChartOpen(true)} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-600 transition shadow-3xs cursor-pointer">
                 <TrendingUp className="w-4 h-4" />
               </button>
-
-              {/* دکمه اشتراک‌گذاری هوشمند */}
               <div className="relative group">
-                <button onClick={handleShareLink} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 transition shadow-3xs cursor-pointer" title="کپی لینک محصول">
+                <button onClick={handleShareLink} className="w-8 h-8 md:w-9 md:h-9 bg-slate-50/90 backdrop-blur-xs border border-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700 transition shadow-3xs cursor-pointer">
                   <Share2 className="w-4 h-4" />
                 </button>
                 {isCopied && (
@@ -318,21 +307,25 @@ export default function ProductDetailClient({ productData }) {
             
             <div className="flex-1 flex items-center justify-center w-full h-[240px] md:h-[360px] relative p-2 bg-white rounded-2xl">
               {!isAvailable && (
-                <div className="absolute top-2 right-2 bg-slate-500 text-white text-[10px] font-black px-3 py-1 rounded-xl z-30 shadow-xs select-none">
+                <div className="absolute top-2 right-2 bg-slate-500 text-white text-[10px] font-black px-3 py-1 rounded-xl z-30 shadow-xs">
                   اتمام موجودی
                 </div>
               )}
               
               {activeImage && (
-                <Image 
-                  src={activeImage} 
-                  alt={productData?.name || "تصویر محصول"}
-                  width={400}
-                  height={400}
-                  className={`max-h-full max-w-full object-contain mix-blend-multiply select-none transition-all duration-300 ${
-                    !isAvailable ? 'grayscale opacity-40' : 'hover:scale-[1.01]'
-                  }`}
-                />
+                <div className="w-full h-full relative flex items-center justify-center">
+                  <Image 
+                    src={activeImage} 
+                    alt={productData?.name || "تصویر کالا"}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 400px"
+                    priority
+                    unoptimized={true} // ⚡️ اضافه شدن برای لود مستقیم عکس‌های خارج از دامنه بدون خطای بیلد
+                    className={`object-contain mix-blend-multiply select-none transition-all duration-300 ${
+                      !isAvailable ? 'grayscale opacity-40' : 'hover:scale-[1.01]'
+                    }`}
+                  />
+                </div>
               )}
             </div>
 
@@ -343,18 +336,18 @@ export default function ProductDetailClient({ productData }) {
                   <button
                     key={index}
                     onClick={() => setActiveImage(imgUrl)}
-                    className={`w-12 h-12 md:w-14 md:h-14 bg-white border p-1 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200 overflow-hidden cursor-pointer ${
+                    className={`w-12 h-12 md:w-14 md:h-14 bg-white border p-1 rounded-xl flex items-center justify-center shrink-0 transition-all duration-200 overflow-hidden cursor-pointer relative ${
                       activeImage === imgUrl ? 'border-rose-500 ring-2 ring-rose-500/10 scale-105 shadow-xs' : 'border-slate-200/80'
                     }`}
                   >
-                    <Image src={imgUrl} alt={`زاویه ${index + 1}`} width={60} height={60} className="max-h-full max-w-full object-contain mix-blend-multiply" />
+                    <Image src={imgUrl} alt={`زاویه ${index + 1}`} fill unoptimized={true} className="object-contain p-1 mix-blend-multiply" />
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          {/* 📱 ستون دوم: مشخصات تفکیک‌شده و ویژگی‌ها */}
+          {/* ستون دوم: مشخصات تفکیک‌شده */}
           <div className="lg:col-span-4 bg-white border border-slate-100 rounded-3xl p-6 flex flex-col justify-between h-fit lg:min-h-[520px] shadow-2xs text-right">
             <div className="h-full flex flex-col justify-start gap-5">
               <div>
@@ -380,25 +373,6 @@ export default function ProductDetailClient({ productData }) {
                         }`}
                       >
                         {storage}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {productData?.sizes && productData.sizes.length > 0 && (
-                <div className="border-t border-slate-100/80 pt-4">
-                  <span className="text-xs font-black text-slate-800 block mb-3">اندازه قاب ساعت:</span>
-                  <div className="flex flex-wrap gap-2.5">
-                    {productData.sizes.map((size, idx) => (
-                      <button 
-                        key={idx} 
-                        onClick={() => setSelectedSize(idx)} 
-                        className={`px-4 py-2 rounded-xl text-xs font-extrabold border transition-all duration-200 cursor-pointer ${
-                          selectedSize === idx ? 'bg-slate-900 text-white border-slate-900 shadow-xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-                        }`}
-                      >
-                        {size}
                       </button>
                     ))}
                   </div>
@@ -439,7 +413,7 @@ export default function ProductDetailClient({ productData }) {
                 <div className="bg-blue-50/40 border border-blue-100/70 rounded-2xl p-3 flex items-center justify-between text-right select-none">
                   <div className="flex flex-col gap-0.5">
                     <span className="text-[11px] font-black text-blue-900">🚀 تحویل اکسپرس سیب‌شاپ</span>
-                    <span className="text-[10px] text-blue-700/80 font-bold">ارسال فوری به سراسر کشور</span>
+                    <span className="text-[10px] text-blue-700/80 font-bold">{productData?.deliveryTime || 'ارسال فوری'}</span>
                   </div>
                   <span className="text-xl">📦</span>
                 </div>
@@ -481,9 +455,9 @@ export default function ProductDetailClient({ productData }) {
                   <>
                     <span className="text-xs text-slate-400 font-bold">قیمت ترکیب انتخابی:</span>
                     <div className="flex flex-col items-end">
-                      {productData?.oldPrice && <span className="text-[10px] text-slate-500 line-through font-medium">{productData.oldPrice}</span>}
+                      {currentOldPrice && <span className="text-[10px] text-slate-500 line-through font-medium">{currentOldPrice}</span>}
                       <div className="text-base md:text-xl font-black text-white flex items-center gap-1 mt-0.5">
-                        <span>{currentPrice}</span>
+                        <span>{Number(currentPrice).toLocaleString('fa-IR')}</span>
                         <span className="text-xs font-normal text-slate-400 mr-1">تومان</span>
                       </div>
                     </div>
@@ -512,7 +486,6 @@ export default function ProductDetailClient({ productData }) {
                     <Link href="/cart" className="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-black py-3.5 rounded-2xl flex items-center justify-center gap-2.5 border border-rose-500/30 shadow-md px-4">
                       <ShoppingCart className="w-4 h-4 text-rose-400 shrink-0" />
                       <span>مشاهده و تایید سبد خرید</span>
-                      <ArrowLeft className="w-4 h-4 mr-auto bg-rose-500/20 p-0.5 rounded-lg text-rose-300 shrink-0" />
                     </Link>
                   </div>
                 ) : (
@@ -531,7 +504,7 @@ export default function ProductDetailClient({ productData }) {
           </div>
         </div>
 
-        {/* 📑 تب‌بندی پایین صفحه مجهز به بخش نظرات */}
+        {/* بخش نظرات و تب بندی */}
         <div className="w-full bg-white border border-slate-100 rounded-3xl p-5 md:p-6 shadow-2xs mb-8 text-right">
           <div className="flex items-center gap-6 border-b border-slate-100 pb-3 mb-5">
             <button onClick={() => setActiveTab('review')} className={`text-xs md:text-sm font-black pb-2 transition relative cursor-pointer ${activeTab === 'review' ? 'text-rose-500' : 'text-slate-400'}`}>
@@ -539,7 +512,7 @@ export default function ProductDetailClient({ productData }) {
               {activeTab === 'review' && <span className="absolute bottom-0 inset-x-0 h-0.5 bg-rose-500 rounded-full"></span>}
             </button>
             <button onClick={() => setActiveTab('comments')} className={`text-xs md:text-sm font-black pb-2 transition relative cursor-pointer ${activeTab === 'comments' ? 'text-rose-500' : 'text-slate-400'}`}>
-              <span>دیدگاه کاربران ({productData.reviewCount || 0})</span>
+              <span>دیدگاه کاربران ({productData?.reviewCount || 0})</span>
               {activeTab === 'comments' && <span className="absolute bottom-0 inset-x-0 h-0.5 bg-rose-500 rounded-full"></span>}
             </button>
           </div>
@@ -550,24 +523,20 @@ export default function ProductDetailClient({ productData }) {
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* خلاصه امتیازها و دکمه ثبت نظر */}
               <div className="lg:col-span-4 bg-slate-50/70 border border-slate-100 p-5 rounded-2xl flex flex-col items-center justify-center text-center">
-                <span className="text-3xl font-black text-slate-800 mb-1">{productData.rating || 0}</span>
+                <span className="text-3xl font-black text-slate-800 mb-1">{productData?.rating || 0}</span>
                 <div className="flex gap-0.5 text-amber-400 mb-2">
                   {[...Array(5)].map((_, idx) => (
                     <Star key={idx} className="w-4 h-4 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
-                <p className="text-[10px] font-bold text-slate-400 leading-5 mb-4">از مجموع امتیازات ثبت شده خریداران سیب‌شاپ</p>
-                
                 <button onClick={() => setIsCommentModalOpen(true)} className="w-full bg-white border border-slate-200 hover:bg-slate-900 hover:text-white transition-all text-slate-800 text-xs font-black py-2.5 rounded-xl cursor-pointer shadow-3xs">
-                  نوشتن دیدگاه و امتیاز برای این کالا
+                  نوشتن دیدگاه برای این کالا
                 </button>
               </div>
 
-              {/* لیست کامنت‌ها */}
               <div className="lg:col-span-8 flex flex-col gap-5">
-                {productData.reviewsList && productData.reviewsList.length > 0 ? (
+                {productData?.reviewsList && productData.reviewsList.length > 0 ? (
                   productData.reviewsList.map((rev) => {
                     const advList = typeof rev.advantages === 'string' ? rev.advantages.split(/[،,]/) : rev.advantages;
                     const disadvList = typeof rev.disadvantages === 'string' ? rev.disadvantages.split(/[،,]/) : rev.disadvantages;
@@ -605,21 +574,20 @@ export default function ProductDetailClient({ productData }) {
                     );
                   })
                 ) : (
-                  <p className="text-xs font-bold text-slate-400 py-6 text-center">هنوز هیچ دیدگاهی برای این محصول ثبت نشده است. اولین نظر را شما بنویسید!</p>
+                  <p className="text-xs font-bold text-slate-400 py-6 text-center">هنوز هیچ دیدگاهی ثبت نشده است.</p>
                 )}
               </div>
             </div>
           )}
         </div>
-
       </main>
 
-      {/* 📝 مودال فرم ثبت نظر جدید */}
+      {/* مودال ثبت نظر */}
       {isCommentModalOpen && (
-        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 antialiased">
+        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-lg p-5 md:p-6 shadow-2xl relative text-right animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-              <h3 className="text-sm md:text-base font-black text-slate-900">ثبت دیدگاه و امتیاز</h3>
+              <h3 className="text-sm md:text-base font-black text-slate-900">ثبت دیدگاه</h3>
               <button onClick={() => setIsCommentModalOpen(false)} className="w-7 h-7 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-800 transition cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
@@ -627,7 +595,7 @@ export default function ProductDetailClient({ productData }) {
 
             <form onSubmit={handleReviewSubmit} className="flex flex-col gap-3">
               <div>
-                <label className="text-xs font-black text-slate-700 block mb-1.5">امتیاز شما به این محصول:</label>
+                <label className="text-xs font-black text-slate-700 block mb-1.5">امتیاز شما:</label>
                 <div className="flex items-center gap-1.5 direction-ltr justify-end">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button key={star} type="button" onClick={() => setNewRating(star)} className="text-amber-400 transition transform active:scale-90 cursor-pointer">
@@ -644,17 +612,17 @@ export default function ProductDetailClient({ productData }) {
 
               <div>
                 <label className="text-xs font-black text-slate-700 block mb-1">متن دیدگاه شما:</label>
-                <textarea rows="3" value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="نقاط قوت، ضعف و تجربه کاربری خود را بنویسید..." className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-rose-500 resize-none" />
+                <textarea rows="3" value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="تجربه کاربری خود را بنویسید..." className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-rose-500 resize-none" />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-black text-emerald-600 block mb-1">نقاط قوت (با ویرگول جدا کنید):</label>
-                  <input type="text" value={newAdv} onChange={(e) => setNewAdv(e.target.value)} placeholder="سرعت بالا، صفحه نمایش خفن" className="w-full bg-emerald-50/30 border border-emerald-100 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-500" />
+                  <label className="text-xs font-black text-emerald-600 block mb-1">نقاط قوت:</label>
+                  <input type="text" value={newAdv} onChange={(e) => setNewAdv(e.target.value)} placeholder="سرعت بالا" className="w-full bg-emerald-50/30 border border-emerald-100 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-emerald-500" />
                 </div>
                 <div>
-                  <label className="text-xs font-black text-rose-500 block mb-1">نقاط ضعف (با ویرگول جدا کنید):</label>
-                  <input type="text" value={newDisadv} onChange={(e) => setNewDisadv(e.target.value)} placeholder="قیمت بالا، نداشتن شارژر" className="w-full bg-rose-50/30 border border-rose-100 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-rose-500" />
+                  <label className="text-xs font-black text-rose-500 block mb-1">نقاط ضعف:</label>
+                  <input type="text" value={newDisadv} onChange={(e) => setNewDisadv(e.target.value)} placeholder="قیمت بالا" className="w-full bg-rose-50/30 border border-rose-100 rounded-xl p-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-rose-500" />
                 </div>
               </div>
 
@@ -665,16 +633,16 @@ export default function ProductDetailClient({ productData }) {
               )}
 
               <button type="submit" disabled={isSubmitting} className="w-full bg-rose-500 hover:bg-rose-600 text-white text-xs font-black py-3 rounded-xl shadow-md transition-all mt-2 cursor-pointer disabled:bg-slate-300">
-                {isSubmitting ? 'در حال ارسال اطلاعات...' : 'ثبت و ارسال دیدگاه'}
+                {isSubmitting ? 'در حال ارسال اطلاعات...' : 'ثبت دیدگاه'}
               </button>
             </form>
           </div>
         </div>
       )}
 
-      {/* 📊 مودال نمودار قیمت */}
+      {/* مودال نمودار قیمت */}
       {isChartOpen && (
-        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4 antialiased">
+        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-2xl p-5 md:p-6 shadow-2xl relative text-right flex flex-col justify-between animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-5">
               <div className="flex items-center gap-2">
@@ -703,10 +671,6 @@ export default function ProductDetailClient({ productData }) {
                 </div>
               )}
             </div>
-
-            <p className="text-[10px] font-bold text-slate-400 text-center mt-4 border-t border-slate-50 pt-3 direction-rtl">
-              💡 قیمت‌ها بر اساس تغییرات دوره‌ای انبار سیب‌شاپ به‌روزرسانی شده‌اند.
-            </p>
           </div>
         </div>
       )}

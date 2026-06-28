@@ -6,6 +6,7 @@ import Footer from '../../../components/Footer';
 import { Star, ShieldCheck, Truck, ShoppingBag, ChevronRight, Heart, Share2, Ban, Plus, Minus, ArrowLeft, ShoppingCart, Check, TrendingUp, X, Scale } from 'lucide-react';
 import { useCart } from '../../../context/CartContext'; 
 import Link from 'next/link';
+import Image from 'next/image';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 const colorMap = {
@@ -40,11 +41,12 @@ export default function ProductDetailClient({ productData }) {
   const [selectedSize, setSelectedSize] = useState(0);
   
   const [isLiked, setIsLiked] = useState(false);
-  const [inCompare, setInCompare] = useState(false); // ⚖️ استیت سیستم مقایسه
-  const [isCopied, setIsCopied] = useState(false);   // 🔗 استیت کپی لینک اشتراک‌گذاری
+  const [inCompare, setInCompare] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);   
   const [activeTab, setActiveTab] = useState('review');
   const [showSuccess, setShowSuccess] = useState(false);
   const [isChartOpen, setIsChartOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   // 📝 استیت‌های فرم ثبت نظر جدید
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
@@ -68,6 +70,7 @@ export default function ProductDetailClient({ productData }) {
 
   // 🔄 لود وضعیت اولیه لایک و مقایسه از LocalStorage مروگر
   useEffect(() => {
+    setIsMounted(true);
     if (productData?.id) {
       const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
       setIsLiked(wishlist.includes(productData.id));
@@ -131,9 +134,11 @@ export default function ProductDetailClient({ productData }) {
   // 🔗 هندلر تعاملی سیستم اشتراک‌گذاری کالا
   const handleShareLink = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href);
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2500);
+      if (typeof window !== 'undefined') {
+        await navigator.clipboard.writeText(window.location.href);
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2500);
+      }
     } catch (err) {
       console.error('خطا در کپی کدهای لینک:', err);
     }
@@ -318,14 +323,17 @@ export default function ProductDetailClient({ productData }) {
                 </div>
               )}
               
-              <img 
-                src={activeImage || productData?.imageUrl} 
-                alt={productData?.name}
-                referrerPolicy="no-referrer-when-downgrade"
-                className={`max-h-full max-w-full object-contain mix-blend-multiply select-none transition-all duration-300 ${
-                  !isAvailable ? 'grayscale opacity-40' : 'hover:scale-[1.01]'
-                }`}
-              />
+              {activeImage && (
+                <Image 
+                  src={activeImage} 
+                  alt={productData?.name || "تصویر محصول"}
+                  width={400}
+                  height={400}
+                  className={`max-h-full max-w-full object-contain mix-blend-multiply select-none transition-all duration-300 ${
+                    !isAvailable ? 'grayscale opacity-40' : 'hover:scale-[1.01]'
+                  }`}
+                />
+              )}
             </div>
 
             {/* ریزعکس‌های آلبوم گالری */}
@@ -339,7 +347,7 @@ export default function ProductDetailClient({ productData }) {
                       activeImage === imgUrl ? 'border-rose-500 ring-2 ring-rose-500/10 scale-105 shadow-xs' : 'border-slate-200/80'
                     }`}
                   >
-                    <img src={imgUrl} alt={`زاویه ${index + 1}`} className="max-h-full max-w-full object-contain mix-blend-multiply" />
+                    <Image src={imgUrl} alt={`زاویه ${index + 1}`} width={60} height={60} className="max-h-full max-w-full object-contain mix-blend-multiply" />
                   </button>
                 ))}
               </div>
@@ -531,7 +539,7 @@ export default function ProductDetailClient({ productData }) {
               {activeTab === 'review' && <span className="absolute bottom-0 inset-x-0 h-0.5 bg-rose-500 rounded-full"></span>}
             </button>
             <button onClick={() => setActiveTab('comments')} className={`text-xs md:text-sm font-black pb-2 transition relative cursor-pointer ${activeTab === 'comments' ? 'text-rose-500' : 'text-slate-400'}`}>
-              <span>دیدگاه کاربران ({productData.reviewCount})</span>
+              <span>دیدگاه کاربران ({productData.reviewCount || 0})</span>
               {activeTab === 'comments' && <span className="absolute bottom-0 inset-x-0 h-0.5 bg-rose-500 rounded-full"></span>}
             </button>
           </div>
@@ -544,13 +552,11 @@ export default function ProductDetailClient({ productData }) {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               {/* خلاصه امتیازها و دکمه ثبت نظر */}
               <div className="lg:col-span-4 bg-slate-50/70 border border-slate-100 p-5 rounded-2xl flex flex-col items-center justify-center text-center">
-                <span className="text-3xl font-black text-slate-800 mb-1">{productData.rating}</span>
+                <span className="text-3xl font-black text-slate-800 mb-1">{productData.rating || 0}</span>
                 <div className="flex gap-0.5 text-amber-400 mb-2">
-                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                  <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  {[...Array(5)].map((_, idx) => (
+                    <Star key={idx} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  ))}
                 </div>
                 <p className="text-[10px] font-bold text-slate-400 leading-5 mb-4">از مجموع امتیازات ثبت شده خریداران سیب‌شاپ</p>
                 
@@ -562,37 +568,42 @@ export default function ProductDetailClient({ productData }) {
               {/* لیست کامنت‌ها */}
               <div className="lg:col-span-8 flex flex-col gap-5">
                 {productData.reviewsList && productData.reviewsList.length > 0 ? (
-                  productData.reviewsList.map((rev) => (
-                    <div key={rev.id} className="border-b border-slate-100/80 pb-5 text-right last:border-none">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="bg-emerald-50 text-emerald-600 text-[10px] font-black px-2 py-0.5 rounded-md flex items-center gap-1">
-                          {rev.rating} <Star className="w-2.5 h-2.5 fill-emerald-600 text-emerald-600" />
-                        </span>
-                        <h4 className="text-xs md:text-sm font-black text-slate-800">{rev.title}</h4>
+                  productData.reviewsList.map((rev) => {
+                    const advList = typeof rev.advantages === 'string' ? rev.advantages.split(/[،,]/) : rev.advantages;
+                    const disadvList = typeof rev.disadvantages === 'string' ? rev.disadvantages.split(/[،,]/) : rev.disadvantages;
+
+                    return (
+                      <div key={rev.id} className="border-b border-slate-100/80 pb-5 text-right last:border-none">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="bg-emerald-50 text-emerald-600 text-[10px] font-black px-2 py-0.5 rounded-md flex items-center gap-1">
+                            {rev.rating} <Star className="w-2.5 h-2.5 fill-emerald-600 text-emerald-600" />
+                          </span>
+                          <h4 className="text-xs md:text-sm font-black text-slate-800">{rev.title}</h4>
+                        </div>
+                        <p className="text-[11px] md:text-xs text-slate-600 font-medium leading-6 mb-3">{rev.comment}</p>
+
+                        {advList && advList.length > 0 && advList[0] !== "" && (
+                          <div className="flex flex-col gap-1.5 mb-2">
+                            {advList.map((adv, i) => (
+                              <span key={i} className="text-[10px] md:text-xs font-bold text-emerald-600 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> {adv.trim()}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {disadvList && disadvList.length > 0 && disadvList[0] !== "" && (
+                          <div className="flex flex-col gap-1.5">
+                            {disadvList.map((dis, i) => (
+                              <span key={i} className="text-[10px] md:text-xs font-bold text-rose-500 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> {dis.trim()}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <p className="text-[11px] md:text-xs text-slate-600 font-medium leading-6 mb-3">{rev.comment}</p>
-
-                      {rev.advantages && rev.advantages.length > 0 && (
-                        <div className="flex flex-col gap-1.5 mb-2">
-                          {rev.advantages.map((adv, i) => (
-                            <span key={i} className="text-[10px] md:text-xs font-bold text-emerald-600 flex items-center gap-2">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> {adv}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      {rev.disadvantages && rev.disadvantages.length > 0 && (
-                        <div className="flex flex-col gap-1.5">
-                          {rev.disadvantages.map((dis, i) => (
-                            <span key={i} className="text-[10px] md:text-xs font-bold text-rose-500 flex items-center gap-2">
-                              <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> {dis}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <p className="text-xs font-bold text-slate-400 py-6 text-center">هنوز هیچ دیدگاهی برای این محصول ثبت نشده است. اولین نظر را شما بنویسید!</p>
                 )}
@@ -668,7 +679,7 @@ export default function ProductDetailClient({ productData }) {
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-5">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-blue-600" />
-                <h3 className="text-sm md:text-base font-black text-slate-900">نمودار نوسان قیمت {productData.name}</h3>
+                <h3 className="text-sm md:text-base font-black text-slate-900">نمودار نوسان قیمت {productData?.name}</h3>
               </div>
               <button onClick={() => setIsChartOpen(false)} className="w-7 h-7 bg-slate-50 border border-slate-100 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-800 transition cursor-pointer">
                 <X className="w-4 h-4" />
@@ -676,7 +687,7 @@ export default function ProductDetailClient({ productData }) {
             </div>
 
             <div className="w-full h-[260px] md:h-[320px] direction-ltr pr-4">
-              {productData.priceHistoryList && productData.priceHistoryList.length > 0 ? (
+              {isMounted && productData?.priceHistoryList && productData.priceHistoryList.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={productData.priceHistoryList} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />

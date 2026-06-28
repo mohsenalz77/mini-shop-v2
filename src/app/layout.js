@@ -1,11 +1,13 @@
 import { Vazirmatn } from 'next/font/google';
 import "./globals.css";
-// 🚀 ایمپورت پرووایدر سبد خرید که در مرحله قبل ساختیم
+// 🚀 ایمپورت پرووایدر سبد خرید
 import { CartProvider } from "../context/CartContext";
-// لود کردن فونت بهینه‌شده‌ی وزیرمتن از گوگل فونت
+
+// لود کردن استاندارد و همه‌جانبه‌ی فونت وزیرمتن با تعریف متغیر CSS
 const vazirmatn = Vazirmatn({ 
   subsets: ['arabic'],
   display: 'swap',
+  variable: '--font-vazir', // ساخت متغیر اختصاصی برای تداخل پیدا نکردن در فرانت
 });
 
 export const metadata = {
@@ -15,9 +17,10 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="fa" dir="rtl" className={vazirmatn.className}>
-      <body className="bg-gray-50/50 text-gray-900 antialiased">
-        {/* تزریق طلایی: تمام صفحات سایت حالا به استیت سبد خرید متصل هستند */}
+    // ⚡️ اضافه شدن متغیر فونت به کلاس ریشه سایت
+    <html lang="fa" dir="rtl" className={`${vazirmatn.variable}`}>
+      {/* 🎨 اعمال قطعی فونت روی کلاس اصلی تگ بادی */}
+      <body className="bg-gray-50/50 text-gray-900 antialiased font-sans">
         <CartProvider>
           {children}
         </CartProvider>
